@@ -68,6 +68,7 @@ spack:
     - chai
     - care
     - caliper
+    - quandary
   - dependencies: []
   #[--definitions]
 
