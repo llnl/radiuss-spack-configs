@@ -254,6 +254,7 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
     depends_on("cxx", type="build")
     depends_on("fortran", type="build", when="+fortran")
 
+    depends_on("cmake@3.25:", when="@develop", type="build")
     depends_on("cmake@3.25:", when="@2026:", type="build")
     depends_on("cmake@3.23:", when="@2024.07.0:", type="build")
     depends_on("cmake@3.23:", when="@2022.10.0: +rocm", type="build")
