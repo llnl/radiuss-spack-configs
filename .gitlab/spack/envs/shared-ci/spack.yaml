@@ -10,8 +10,8 @@ spack:
   #[general--]
   repos:
     builtin:
-      commit: 38874c5d9c
-      git: https://github.com/davidbeckingsale/spack-packages.git
+      branch: woptim/radiuss-2025-12-releases
+      git: https://github.com/adrienbernede/spack-packages.git
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
