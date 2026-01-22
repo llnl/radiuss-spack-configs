@@ -52,6 +52,15 @@
         flags: {}
         environment: {}
         extra_rpaths: [/opt/cray/pe/mpich/8.1.31/gtl/lib]
+    - spec: cce@20.0.2
+      prefix: /usr/tce/packages/cce-tce/cce-20.0.2
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/cce-tce/cce-20.0.2/bin/craycc
+          cxx: /usr/tce/packages/cce-tce/cce-20.0.2/bin/crayCC
+          fortran: /usr/tce/packages/cce-tce/cce-20.0.2/bin/crayftn
+        flags: {}
+        environment: {}
   gcc:
     externals:
     - spec: gcc@12.2.1 languages='c,c++,fortran'
