@@ -5,9 +5,9 @@
 # SPDX-License-Identifier: (MIT)
 ##############################################################################
 
-oneapi_2025_2_0_gcc_10_3_1:
+oneapi_2025_2_0_gcc_13_3_1:
   variables:
-    SPEC: "${PROJECT_DANE_VARIANTS} %oneapi-2025-gcc-10 ${PROJECT_DANE_DEPS}"
+    SPEC: "${PROJECT_DANE_VARIANTS} %oneapi-2025-gcc-13 ${PROJECT_DANE_DEPS}"
   extends: .job_on_dane
 
 clang_19_1_3_gcc_13_3_1:

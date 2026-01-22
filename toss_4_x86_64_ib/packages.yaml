@@ -621,3 +621,12 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]intel-oneapi-compilers@2025.2.0'
       when: '%fortran'
+  oneapi-2025-gcc-13:
+    - spec: cflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-13.3.1'
+    - spec: cxxflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-13.3.1'
+    - spec: fflags='-gcc-name=/usr/tce/packages/gcc/gcc-13.3.1/bin/gcc'
+    - spec: '%[virtuals=c]intel-oneapi-compilers@2025.2.0'
+      when: '%c'
+    - spec: '%[virtuals=cxx]intel-oneapi-compilers@2025.2.0'
+      when: '%cxx'
+    - spec: '%[virtuals=fortran]intel-oneapi-compilers@2025.2.0'
