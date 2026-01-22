@@ -294,9 +294,10 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
     depends_on("sqlite", when="+sqlite_experimental")
     depends_on("mpi", when="+mpi")
 
-    depends_on("fmt@9.1:12.1.0", when="@2024.02.0:")
+    depends_on("fmt@12.1.0", when="@2026:")
+    depends_on("fmt@9.1:11.1.0", when="@2024.02.0:")
     # For some reason, we need c++ 17 only with intel
-    depends_on("fmt@9.1:12.1.0 cxxstd=17", when="@2024.02.0: %intel@19.1")
+    depends_on("fmt@9.1:11.1.0 cxxstd=17", when="@2024.02.0: %intel@19.1")
 
     with when("@5.0.0:"):
         with when("+cuda"):
