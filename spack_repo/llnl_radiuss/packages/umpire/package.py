@@ -296,7 +296,7 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
 
     depends_on("fmt@12.1.0", when="@2026:")
     depends_on("fmt@9.1:11.0", when="@2024.02.0:2025")
-    # For some reason, we need c++ 17 only with intel
+    # We need c++ 17 only with intel
     depends_on("fmt@9.1:11.0 cxxstd=17", when="@2024.02.0: %intel@19.1")
 
     with when("@5.0.0:"):
