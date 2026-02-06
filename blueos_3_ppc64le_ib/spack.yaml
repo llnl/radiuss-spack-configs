@@ -1,7 +1,7 @@
 spack:
   repos:
     builtin::
-      branch: woptim/radiuss-2025-12-releases
+      branch: woptim/umpire-c++20-needs-fmt-12
       git: https://github.com/adrienbernede/spack-packages.git
   include:
     - config.yaml
