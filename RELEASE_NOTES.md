@@ -1,4 +1,22 @@
-# v2025.11.0
+# v2026.02.0
+
+Recommended Spack version: v1.1.0,
+Required spack-packages commit: 3f482a6fca
+
+## Packages
+- BREAKING: moved local packages to upstream spack/spack-packages Updates of
+  the radiuss packages should not be pushed directly to spack/spack-packages.
+  Reference to spack-packages was updated accordingly.  We kept the structure
+  for a local repository for temporary testing purpose only.
+
+- With the update of the spack-packages reference, some changes happened in
+  radiuss packages (latest releases, updated dependencies...). Please refer to
+  spack-packages history for more details.
+
+## Configs Update
+- Added rocprofiler external for Caliper
+
+# v2025.11.1
 
 Recommended Spack version: v1.0.2,
 Vetted spack-packages commit: a229f54670

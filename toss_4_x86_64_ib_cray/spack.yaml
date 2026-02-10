@@ -1,8 +1,8 @@
 spack:
   repos:
     builtin::
-      branch: woptim/umpire-c++20-needs-fmt-12
-      git: https://github.com/adrienbernede/spack-packages.git
+      git: https://github.com/spack/spack-packages.git
+      commit: 3f482a6fca
   include:
     - config.yaml
     - packages.yaml
