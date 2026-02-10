@@ -9,6 +9,8 @@
 spack:
   #[general--]
   repos:
+    ## Use for temporary testing purpose, comment out before merging to main branch:
+    #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
       git: https://github.com/spack/spack-packages.git
       commit: 3f482a6fca
