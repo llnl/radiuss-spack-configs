@@ -290,6 +290,12 @@
       prefix: /opt/rocm-6.0.2/
     - spec: rocprim@6.4.2%llvm-amdgpu@6.4.2
       prefix: /opt/rocm-6.4.2/
+  rocprofiler-sdk:
+    version: [6.4.2]
+    buildable: false
+    externals:
+    - spec: rocprofiler-sdk@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2
 
   cuda:
     version: [12.9.1, 12.6.0, 12.2.2, 11.8.0, 11.7.0, 11.5.0, 11.2.0, 11.1.0, 10.2.89, 10.1.168]
