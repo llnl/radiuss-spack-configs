@@ -32,7 +32,10 @@ class Quandary(CachedCMakePackage, CudaPackage, ROCmPackage):
     variant("slepc", default=False, description="Build with SLEPc library")
     variant("int64", default=False, description="Use 64 bit ints for PetscInts")
     variant("test", default=False, description="Add dependencies needed for testing")
+    variant("python", default=False, description="Build Python bindings")
     variant("werror", default=False, description="Enable warnings as errors")
+
+    extends("python", when="+python")
 
     depends_on("cxx", type="build")
     depends_on("c", type="build")
@@ -48,6 +51,7 @@ class Quandary(CachedCMakePackage, CudaPackage, ROCmPackage):
     depends_on("mpi", type=("build", "link", "run"))
 
     depends_on("blt@0.6.0:", type="build")
+    depends_on("tomlplusplus", type="build")
 
     with when("+rocm"):
         for arch_ in ROCmPackage.amdgpu_targets:
@@ -57,12 +61,20 @@ class Quandary(CachedCMakePackage, CudaPackage, ROCmPackage):
         for sm_ in CudaPackage.cuda_arch_values:
             depends_on(f"petsc+cuda cuda_arch={sm_}", when=f"cuda_arch={sm_}")
 
+    with when("+python"):
+        depends_on("python@3.9:", type=("build", "run"))
+        depends_on("py-nanobind@2.1:", type="build")
+
     with when("+test"):
         depends_on("python", type="run")
         depends_on("py-pip", type="run")
 
     build_targets = ["all"]
     install_targets = ["install"]
+
+    def setup_run_environment(self, env):
+        if self.spec.satisfies("+python"):
+            env.prepend_path("PYTHONPATH", join_path(self.prefix, python_platlib))
 
     def initconfig_package_entries(self):
         spec = self.spec
@@ -71,5 +83,16 @@ class Quandary(CachedCMakePackage, CudaPackage, ROCmPackage):
         entries.append(cmake_cache_path("BLT_SOURCE_DIR", spec["blt"].prefix))
         entries.append(cmake_cache_option("WITH_SLEPC", spec.satisfies("+slepc")))
         entries.append(cmake_cache_option("ENABLE_WARNINGS_AS_ERRORS", spec.satisfies("+werror")))
+
+        if spec.satisfies("+python"):
+            entries.append(cmake_cache_option("BUILD_PYTHON_BINDINGS", True))
+            entries.append(cmake_cache_option("BUILD_PYTHON_STUBS", False))
+            platlib = spec["python"].package.platlib
+            entries.append(cmake_cache_path(
+                "QUANDARY_PYTHON_INSTALL_DIR",
+                join_path(platlib, "quandary"),
+            ))
+        else:
+            entries.append(cmake_cache_option("BUILD_PYTHON_BINDINGS", False))
 
         return entries
