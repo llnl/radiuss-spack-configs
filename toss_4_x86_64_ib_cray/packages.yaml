@@ -443,6 +443,11 @@
     externals:
     - spec: ghostscript@9.27
       prefix: /usr
+  git:
+    buildable: false
+    externals:
+    - spec: git@2.29.1
+      prefix: /usr/tce/
   graphviz:
     buildable: false
     externals:
@@ -479,6 +484,11 @@
     externals:
     - spec: libx11@1.6.8
       prefix: /usr
+  libxcrypt:
+    buildable: false
+    externals:
+    - spec: libxcrypt@4.1.1
+      prefix: /usr
   libyogrt:
     externals:
     - spec: libyogrt@1.35 scheduler=flux
@@ -500,6 +510,16 @@
     buildable: false
     externals:
     - spec: m4@1.4.18
+      prefix: /usr
+  ncurses:
+    buildable: false
+    externals:
+    - spec: ncurses@6.1
+      prefix: /usr
+  openssl:
+    buildable: false
+    externals:
+    - spec: openssl@1.1.1k
       prefix: /usr
   perl:
     buildable: false
