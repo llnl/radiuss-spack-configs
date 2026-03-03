@@ -21,7 +21,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-17.0.1/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.31/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
     - spec: cce@18.0.1
       prefix: /usr/tce/packages/cce-tce/cce-18.0.1
       extra_attributes:
@@ -31,7 +31,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-18.0.1/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.31/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
     - spec: cce@19.0.0
       prefix: /usr/tce/packages/cce-tce/cce-19.0.0
       extra_attributes:
@@ -41,7 +41,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-19.0.0/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.31/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
     - spec: cce@20.0.0
       prefix: /usr/tce/packages/cce-tce/cce-20.0.0
       extra_attributes:
@@ -51,7 +51,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-20.0.0/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.31/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
   gcc:
     externals:
     - spec: gcc@12.2.1 languages='c,c++,fortran'
@@ -95,7 +95,7 @@
           fortran: /opt/rocm-6.1.2/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.1.2/lib, /opt/rocm-6.1.2/llvm/lib, /opt/cray/pe/mpich/8.1.32/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.1.2/lib, /opt/rocm-6.1.2/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
     - spec: llvm-amdgpu@6.2.4
       prefix: /opt/rocm-6.2.4
       extra_attributes:
@@ -105,7 +105,7 @@
           fortran: /opt/rocm-6.2.4/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.2.4/lib, /opt/rocm-6.2.4/llvm/lib, /opt/cray/pe/mpich/8.1.32/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.2.4/lib, /opt/rocm-6.2.4/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
     - spec: llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
       extra_attributes:
@@ -115,17 +115,27 @@
           fortran: /opt/rocm-6.3.1/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.3.1/lib, /opt/rocm-6.3.1/llvm/lib, /opt/cray/pe/mpich/8.1.32/gtl/lib]
-    - spec: llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+        extra_rpaths: [/opt/rocm-6.3.1/lib, /opt/rocm-6.3.1/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
+    - spec: llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
       extra_attributes:
         compilers:
-          c: /opt/rocm-6.4.1/llvm/bin/amdclang
-          cxx: /opt/rocm-6.4.1/llvm/bin/amdclang++
-          fortran: /opt/rocm-6.4.1/llvm/bin/amdflang
+          c: /opt/rocm-6.4.3/llvm/bin/amdclang
+          cxx: /opt/rocm-6.4.3/llvm/bin/amdclang++
+          fortran: /opt/rocm-6.4.3/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.4.1/lib, /opt/rocm-6.4.1/llvm/lib, /opt/cray/pe/mpich/8.1.32/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.4.3/lib, /opt/rocm-6.4.3/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
+#    - spec: llvm-amdgpu@7.2.0
+#      prefix: /opt/rocm-7.2.0
+#      extra_attributes:
+#        compilers:
+#          c: /opt/rocm-7.2.0/llvm/bin/amdclang
+#          cxx: /opt/rocm-7.2.0/llvm/bin/amdclang++
+#          fortran: /opt/rocm-7.2.0/llvm/bin/amdflang
+#        flags: {}
+#        environment: {}
+#        extra_rpaths: [/opt/rocm-7.2.0/lib, /opt/rocm-7.2.0/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
 
   cmake:
     version: [3.24.2, 3.23.1, 3.22.4, 3.21.1, 3.19.2, 3.14.5]
@@ -152,7 +162,7 @@
     - spec: cuda@11.8.0
       prefix: /usr/tce/packages/cuda/cuda-11.8.0
   hip:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: hip@5.7.1%llvm-amdgpu@5.7.1
@@ -163,10 +173,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: hip@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hip@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: hip@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   hipsparse:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: hipsparse@5.7.1%llvm-amdgpu@5.7.1
@@ -177,10 +187,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: hipsparse@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipsparse@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: hipsparse@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   hipblas:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: hipblas@5.7.1%llvm-amdgpu@5.7.1
@@ -191,18 +201,18 @@
       prefix: /opt/rocm-6.2.4
     - spec: hipblas@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipblas@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: hipblas@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   hipblas-common:
-    version: [6.3.1, 6.4.1]
+    version: [6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: hipblas-common@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipblas-common@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: hipblas-common@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   hipsolver:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: hipsolver@5.7.1%llvm-amdgpu@5.7.1
@@ -213,10 +223,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: hipsolver@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipsolver@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: hipsolver@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   hsa-rocr-dev:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: hsa-rocr-dev@5.7.1%llvm-amdgpu@5.7.1
@@ -227,8 +237,8 @@
       prefix: /opt/rocm-6.2.4
     - spec: hsa-rocr-dev@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hsa-rocr-dev@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: hsa-rocr-dev@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   papi:
     buildable: false
     version: [7.2.0.1]
@@ -242,7 +252,7 @@
     - spec: python@3.9.12
       prefix: /usr/tce/packages/python/python-3.9.12
   rocminfo:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocminfo@5.7.1%llvm-amdgpu@5.7.1
@@ -253,10 +263,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocminfo@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocminfo@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocminfo@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocm-device-libs:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocm-device-libs@5.7.1%llvm-amdgpu@5.7.1
@@ -267,10 +277,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocm-device-libs@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocm-device-libs@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocm-device-libs@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocprim:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocprim@5.7.1%llvm-amdgpu@5.7.1
@@ -281,20 +291,20 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocprim@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocprim@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocprim@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocprofiler-sdk:
-    version: [6.2.4, 6.3.1, 6.4.1]
+    version: [6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocprofiler-sdk@6.2.4%llvm-amdgpu@6.2.4
       prefix: /opt/rocm-6.2.4
     - spec: rocprofiler-sdk@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocprofiler-sdk@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocprofiler-sdk@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocthrust:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocthrust@5.7.1%llvm-amdgpu@5.7.1
@@ -305,10 +315,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocthrust@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocthrust@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocthrust@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocsparse:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocsparse@5.7.1%llvm-amdgpu@5.7.1
@@ -319,10 +329,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocsparse@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocsparse@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocsparse@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocrand:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocrand@5.7.1%llvm-amdgpu@5.7.1
@@ -333,10 +343,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocrand@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocrand@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocrand@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocblas:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocblas@5.7.1%llvm-amdgpu@5.7.1
@@ -347,10 +357,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocblas@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocblas@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocblas@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocsolver:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocsolver@5.7.1%llvm-amdgpu@5.7.1
@@ -361,10 +371,10 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocsolver@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocsolver@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocsolver@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   rocm-core:
-    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.1]
+    version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3]
     buildable: false
     externals:
     - spec: rocm-core@5.7.1%llvm-amdgpu@5.7.1
@@ -375,33 +385,33 @@
       prefix: /opt/rocm-6.2.4
     - spec: rocm-core@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: rocm-core@6.4.1%llvm-amdgpu@6.4.1
-      prefix: /opt/rocm-6.4.1
+    - spec: rocm-core@6.4.3%llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
   cray-mpich:
     buildable: false
     externals:
-    - spec: cray-mpich@8.1.32%cce@17.0.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-cce-17.0.1-magic
-    - spec: cray-mpich@8.1.32%cce@18.0.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-cce-18.0.1-magic
-    - spec: cray-mpich@8.1.32%cce@19.0.0
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-cce-19.0.0-magic
-    - spec: cray-mpich@8.1.32%cce@20.0.0
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-cce-20.0.0-magic
-    - spec: cray-mpich@8.1.32%gcc@12.2.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-gcc-12.2.1-magic
-    - spec: cray-mpich@8.1.32%gcc@13.3.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-gcc-13.3.1-magic
+    - spec: cray-mpich@8.1.33%cce@17.0.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-17.0.1-magic
+    - spec: cray-mpich@8.1.33%cce@18.0.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-18.0.1-magic
+    - spec: cray-mpich@8.1.33%cce@19.0.0
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-19.0.0-magic
+    - spec: cray-mpich@8.1.33%cce@20.0.0
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-20.0.0-magic
+    - spec: cray-mpich@8.1.33%gcc@12.2.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-gcc-12.2.1-magic
+    - spec: cray-mpich@8.1.33%gcc@13.3.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-gcc-13.3.1-magic
     - spec: cray-mpich@8.1.28%llvm-amdgpu@5.7.1
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.28-rocmcc-5.7.1-magic
-    - spec: cray-mpich@8.1.32%llvm-amdgpu@6.1.2
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-rocmcc-6.1.2-magic
-    - spec: cray-mpich@8.1.32%llvm-amdgpu@6.2.4
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-rocmcc-6.2.4-magic
-    - spec: cray-mpich@8.1.32%llvm-amdgpu@6.3.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-rocmcc-6.3.1-magic
-    - spec: cray-mpich@8.1.32%llvm-amdgpu@6.4.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.32-rocmcc-6.4.1-magic
+    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.1.2
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.1.2-magic
+    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.2.4
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.2.4-magic
+    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.3.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.3.1-magic
+    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.4.3
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.4.3-magic
   # System level packages to not build
   autoconf:
     buildable: false
