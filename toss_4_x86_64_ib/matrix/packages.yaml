@@ -413,14 +413,14 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]gcc@11.2.1'
       when: '%fortran'
-  clang-14-gcc-11:
-    - spec: cflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-11.2.1'
-    - spec: cxxflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-11.2.1'
+  clang-14-gcc-13:
+    - spec: cflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-13.3.1'
+    - spec: cxxflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-13.3.1'
     - spec: '%[virtuals=c]llvm@14.0.6+clang~flang~lld~lldb'
       when: '%c'
     - spec: '%[virtuals=cxx]llvm@14.0.6+clang~flang~lld~lldb'
       when: '%cxx'
-    - spec: '%[virtuals=fortran]gcc@11.2.1'
+    - spec: '%[virtuals=fortran]gcc@13.3.1'
       when: '%fortran'
   clang-18-gcc-13:
     - spec: cflags='--gcc-install-dir=/usr/tce/packages/gcc/gcc-13.3.1/lib/gcc/x86_64-redhat-linux/13'
