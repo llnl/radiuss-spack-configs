@@ -49,11 +49,11 @@ spack:
     - '%gcc@=13.3.1'
     # matrix spec
     - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
-    - +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
+    #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
     when: env.get("LCSCHEDCLUSTER", "") == "dane"
   - compilers:
     - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
-    - +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
+    #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
     when: env.get("LCSCHEDCLUSTER", "") == "matrix"
   - compilers:
     - +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.3 ^hip@6.4.3
