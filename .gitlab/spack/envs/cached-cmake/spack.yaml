@@ -41,7 +41,7 @@ spack:
   #[definitions--]
   definitions:
   - compilers:
-    - +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1
+    - +rocm amdgpu_target=gfx906 %llvm-amdgpu@=6.4.3 ^hip@6.4.3
     when: env.get("LCSCHEDCLUSTER", "") == "corona"
   - compilers:
     - '%oneapi-2025-gcc-10'
