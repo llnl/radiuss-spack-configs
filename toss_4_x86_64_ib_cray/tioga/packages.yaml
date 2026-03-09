@@ -21,7 +21,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-17.0.1/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: cce@18.0.1
       prefix: /usr/tce/packages/cce-tce/cce-18.0.1
       extra_attributes:
@@ -31,7 +31,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-18.0.1/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: cce@19.0.0
       prefix: /usr/tce/packages/cce-tce/cce-19.0.0
       extra_attributes:
@@ -41,7 +41,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-19.0.0/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: cce@20.0.0
       prefix: /usr/tce/packages/cce-tce/cce-20.0.0
       extra_attributes:
@@ -51,7 +51,7 @@
           fortran: /usr/tce/packages/cce-tce/cce-20.0.0/bin/crayftn
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: cce@21.0.0
       prefix: /usr/tce/packages/cce-tce/cce-21.0.0
       extra_attributes:
@@ -105,7 +105,7 @@
           fortran: /opt/rocm-6.1.2/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.1.2/lib, /opt/rocm-6.1.2/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.1.2/lib, /opt/rocm-6.1.2/llvm/lib, /opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: llvm-amdgpu@6.2.4
       prefix: /opt/rocm-6.2.4
       extra_attributes:
@@ -115,7 +115,7 @@
           fortran: /opt/rocm-6.2.4/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.2.4/lib, /opt/rocm-6.2.4/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.2.4/lib, /opt/rocm-6.2.4/llvm/lib, /opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
       extra_attributes:
@@ -125,7 +125,7 @@
           fortran: /opt/rocm-6.3.1/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.3.1/lib, /opt/rocm-6.3.1/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.3.1/lib, /opt/rocm-6.3.1/llvm/lib, /opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3
       extra_attributes:
@@ -135,7 +135,7 @@
           fortran: /opt/rocm-6.4.3/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.4.3/lib, /opt/rocm-6.4.3/llvm/lib, /opt/cray/pe/mpich/8.1.33/gtl/lib]
+        extra_rpaths: [/opt/rocm-6.4.3/lib, /opt/rocm-6.4.3/llvm/lib, /opt/cray/pe/mpich/9.0.1/gtl/lib]
     - spec: llvm-amdgpu@7.2.0
       prefix: /opt/rocm-7.2.0
       extra_attributes:
@@ -430,30 +430,30 @@
   cray-mpich:
     buildable: false
     externals:
-    - spec: cray-mpich@8.1.33%cce@17.0.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-17.0.1-magic
-    - spec: cray-mpich@8.1.33%cce@18.0.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-18.0.1-magic
-    - spec: cray-mpich@8.1.33%cce@19.0.0
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-19.0.0-magic
-    - spec: cray-mpich@8.1.33%cce@20.0.0
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-cce-20.0.0-magic
+    - spec: cray-mpich@9.0.1%cce@17.0.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-cce-17.0.1-magic
+    - spec: cray-mpich@9.0.1%cce@18.0.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-cce-18.0.1-magic
+    - spec: cray-mpich@9.0.1%cce@19.0.0
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-cce-19.0.0-magic
+    - spec: cray-mpich@9.0.1%cce@20.0.0
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-cce-20.0.0-magic
     - spec: cray-mpich@9.1.0%cce@21.0.0
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.1.0-cce-21.0.0-magic
-    - spec: cray-mpich@8.1.33%gcc@12.2.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-gcc-12.2.1-magic
-    - spec: cray-mpich@8.1.33%gcc@13.3.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-gcc-13.3.1-magic
+    - spec: cray-mpich@9.0.1%gcc@12.2.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-gcc-12.2.1-magic
+    - spec: cray-mpich@9.0.1%gcc@13.3.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-gcc-13.3.1-magic
     - spec: cray-mpich@8.1.28%llvm-amdgpu@5.7.1
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.28-rocmcc-5.7.1-magic
-    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.1.2
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.1.2-magic
-    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.2.4
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.2.4-magic
-    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.3.1
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.3.1-magic
-    - spec: cray-mpich@8.1.33%llvm-amdgpu@6.4.3
-      prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.33-rocmcc-6.4.3-magic
+    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.1.2
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.1.2-magic
+    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.2.4
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.2.4-magic
+    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.3.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.3.1-magic
+    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.4.3
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.4.3-magic
     - spec: cray-mpich@9.1.0%llvm-amdgpu@7.2.0
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.1.0-rocmcc-7.2.0-magic
   # System level packages to not build
