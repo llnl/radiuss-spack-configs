@@ -7,8 +7,8 @@
 
 rocmcc_6_4_3_hip:
   variables:
-    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx942 %llvm-amdgpu@=6.4.3 ^hip@6.4.3 ${PROJECT_TIOGA_DEPS}"
-  extends: .job_on_tioga
+    SPEC: "${PROJECT_TUOLUMNE_VARIANTS} +rocm amdgpu_target=gfx942 %llvm-amdgpu@=6.4.3 ^hip@6.4.3 ${PROJECT_TUOLUMNE_DEPS}"
+  extends: .job_on_tuolumne
 
 rocmcc_7_2_0_hip:
   variables:
