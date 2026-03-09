@@ -82,7 +82,10 @@ spack:
   - matrix:
     - [$radiuss-projects]
     - [$compilers]
-    #exclude:
+    exclude:
+    # in spack package, raja-perf@2025.03 asks for c++14, but rocprim 7.2.0 requires c++17.
+    - 'raja-perf@2025.03 +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.0 ^hip@7.2.0'
+    - 'raja-perf@2025.03 +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.0 ^hip@7.2.0'
     ## caliper + rocmcc 6.4.3 needs fixed handling of libunwind in callback and sampler services
     #- 'caliper +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.3 ^hip@6.4.3'
     #- 'caliper +rocm amdgpu_target=gfx942 %llvm-amdgpu@=6.4.3 ^hip@6.4.3'
