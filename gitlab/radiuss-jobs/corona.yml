@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: (MIT)
 ##############################################################################
 
-rocmcc_6_4_3_hip:
+rocmcc_5_7_1_hip:
   variables:
-    SPEC: "${PROJECT_CORONA_VARIANTS} +rocm amdgpu_target=gfx906 %llvm-amdgpu@=6.4.3 ^hip@6.4.3 ${PROJECT_CORONA_DEPS}"
+    SPEC: "${PROJECT_CORONA_VARIANTS} +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1 ${PROJECT_CORONA_DEPS}"
   extends: .job_on_corona
