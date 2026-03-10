@@ -89,6 +89,9 @@ spack:
     - [$cached-cmake-projects]
     - [$compilers]
     exclude:
+    # in spack package, raja-perf@2025.03 asks for c++14, but rocprim 7.2.0 requires c++17.
+    - 'raja-perf +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.0 ^hip@7.2.0'
+    - 'raja-perf +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.0 ^hip@7.2.0'
     # No +rocm or +cuda variants for sina
     - 'sina +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.3 ^hip@6.4.3'
     - 'sina +cuda %clang-14 ^cuda@11.7.0+allow-unsupported-compilers'
