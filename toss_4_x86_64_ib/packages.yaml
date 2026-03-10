@@ -154,14 +154,14 @@
         environment: {}
         extra_rpaths: []
     - spec: llvm@22.0.0git+clang~flang~lld~lldb
-      prefix: /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.3
+      prefix: /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.2
       extra_attributes:
         compilers:
-          c: /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.3/bin/clang
-          cxx: /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.3/bin/clang++
+          c: /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.2/bin/clang
+          cxx: /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.2/bin/clang++
         flags: {}
         environment: {}
-        extra_rpaths: [/usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.3/lib, /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.3/lib64]
+        extra_rpaths: [/usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.2/lib, /usr/workspace/raja-dev/clang_sycl_16b7bcb09915_hip_gcc10.3.1_rocm6.4.2/lib64]
   llvm-amdgpu:
     externals:
     - spec: llvm-amdgpu@5.7.1
@@ -184,16 +184,16 @@
         flags: {}
         environment: {}
         extra_rpaths: [/opt/rocm-6.0.2/lib, /opt/rocm-6.0.2/llvm/lib]
-    - spec: llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3/llvm
+    - spec: llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2/llvm
       extra_attributes:
         compilers:
-          cc: /opt/rocm-6.4.3/llvm/bin/amdclang
-          cxx: /opt/rocm-6.4.3/llvm/bin/amdclang++
-          fortran: /opt/rocm-6.4.3/llvm/bin/amdflang
+          cc: /opt/rocm-6.4.2/llvm/bin/amdclang
+          cxx: /opt/rocm-6.4.2/llvm/bin/amdclang++
+          fortran: /opt/rocm-6.4.2/llvm/bin/amdflang
         flags: {}
         environment: {}
-        extra_rpaths: [/opt/rocm-6.4.3/lib, /opt/rocm-6.4.3/llvm/lib]
+        extra_rpaths: [/opt/rocm-6.4.2/lib, /opt/rocm-6.4.2/llvm/lib]
 
   # external packages (module)
   cmake:
@@ -213,35 +213,35 @@
     - spec: cmake@3.25.2
       prefix: /usr/tce/packages/cmake/cmake-3.25.2
   hip:
-    version: [5.7.1, 6.0.2, 6.4.3]
+    version: [5.7.1, 6.0.2, 6.4.2]
     buildable: false
     externals:
     - spec: hip@5.7.1%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1/hip
     - spec: hip@6.0.2%llvm-amdgpu@6.0.2
       prefix: /opt/rocm-6.0.2
-    - spec: hip@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3
+    - spec: hip@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2
   hipsparse:
-    version: [5.7.1, 6.0.2, 6.4.3]
+    version: [5.7.1, 6.0.2, 6.4.2]
     buildable: false
     externals:
     - spec: hipsparse@5.7.1%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
     - spec: hipsparse@6.0.2%llvm-amdgpu@6.0.2
       prefix: /opt/rocm-6.0.2
-    - spec: hipsparse@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3
+    - spec: hipsparse@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2
   hsa-rocr-dev:
-    version: [5.7.1, 6.0.2, 6.4.3]
+    version: [5.7.1, 6.0.2, 6.4.2]
     buildable: false
     externals:
     - spec: hsa-rocr-dev@5.7.1%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
     - spec: hsa-rocr-dev@6.0.2%llvm-amdgpu@6.0.2
       prefix: /opt/rocm-6.0.2
-    - spec: hsa-rocr-dev@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3
+    - spec: hsa-rocr-dev@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2
   ninja:
     version: [1.11.1]
     buildable: false
@@ -261,41 +261,41 @@
     - spec: python@3.9.12
       prefix: /usr/tce/packages/python/python-3.9.12
   rocminfo:
-    version: [5.7.1, 6.0.2, 6.4.3]
+    version: [5.7.1, 6.0.2, 6.4.2]
     buildable: false
     externals:
     - spec: rocminfo@5.7.1%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
     - spec: rocminfo@6.0.2%llvm-amdgpu@6.0.2
       prefix: /opt/rocm-6.0.2
-    - spec: rocminfo@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3
+    - spec: rocminfo@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2
   rocm-device-libs:
-    version: [5.7.1, 6.0.2, 6.4.3]
+    version: [5.7.1, 6.0.2, 6.4.2]
     buildable: false
     externals:
     - spec: rocm-device-libs@5.7.1%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1/
     - spec: rocm-device-libs@6.0.2%llvm-amdgpu@6.0.2
       prefix: /opt/rocm-6.0.2/
-    - spec: rocm-device-libs@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3/
+    - spec: rocm-device-libs@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2/
   rocprim:
-    version: [5.7.1, 6.0.2, 6.4.3]
+    version: [5.7.1, 6.0.2, 6.4.2]
     buildable: false
     externals:
     - spec: rocprim@5.7.1%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1/
     - spec: rocprim@6.0.2%llvm-amdgpu@6.0.2
       prefix: /opt/rocm-6.0.2/
-    - spec: rocprim@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3/
+    - spec: rocprim@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2/
   rocprofiler-sdk:
-    version: [6.4.3]
+    version: [6.4.2]
     buildable: false
     externals:
-    - spec: rocprofiler-sdk@6.4.3%llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3
+    - spec: rocprofiler-sdk@6.4.2%llvm-amdgpu@6.4.2
+      prefix: /opt/rocm-6.4.2
 
   cuda:
     version: [13.1.1, 12.9.1, 12.6.0, 12.2.2, 11.8.0, 11.7.0, 11.5.0, 11.2.0, 11.1.0, 10.2.89, 10.1.168]
