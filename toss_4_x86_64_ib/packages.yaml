@@ -298,9 +298,11 @@
       prefix: /opt/rocm-6.4.2
 
   cuda:
-    version: [12.9.1, 12.6.0, 12.2.2, 11.8.0, 11.7.0, 11.5.0, 11.2.0, 11.1.0, 10.2.89, 10.1.168]
+    version: [13.1.1, 12.9.1, 12.6.0, 12.2.2, 11.8.0, 11.7.0, 11.5.0, 11.2.0, 11.1.0, 10.2.89, 10.1.168]
     buildable: false
     externals:
+    - spec: cuda@13.1.1+allow-unsupported-compilers
+      prefix: /usr/tce/packages/cuda/cuda-13.1.1
     - spec: cuda@12.9.1+allow-unsupported-compilers
       prefix: /usr/tce/packages/cuda/cuda-12.9.1
     - spec: cuda@12.6.0+allow-unsupported-compilers
