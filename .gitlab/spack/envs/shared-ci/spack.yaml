@@ -12,8 +12,8 @@ spack:
     ## Use for temporary testing purpose, comment out before merging to main branch:
     #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
-      git: https://github.com/spack/spack-packages.git
-      commit: 19195fc11b3b44a6ae3ac96233de1ab97b4892aa
+      git: https://github.com/gberg617/spack-packages
+      branch: bergel/raja-updates
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
