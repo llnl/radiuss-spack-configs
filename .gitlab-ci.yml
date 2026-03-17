@@ -25,7 +25,7 @@ include:
   - local: .gitlab/variables.yml
     rules:
       - if: $MY_ENV_NAME != null
-  - local: .gitlab/spack/envs/${MY_ENV_NAME}/pipeline.yml
+  - local: .gitlab/spack/envs/cached-cmake/pipeline.yml
     rules:
       - if: $MY_ENV_NAME != null
 
