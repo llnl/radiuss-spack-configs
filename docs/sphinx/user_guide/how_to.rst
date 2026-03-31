@@ -104,6 +104,12 @@ RADIUSS Spack Configs shared jobs in return assume that the job command is
 parametrized by the ``SPEC`` variable, that spec being the one passed to
 Uberenv and then to Spack.
 
+On the Flux machines (``corona``, ``tioga``, and ``tuolumne``), those shared
+jobs now run as standalone ``flux batch`` allocations instead of sub-jobs in a
+large parent allocation. In this repository, the default job allocations for
+those machines target the ``pci`` queue through the corresponding
+``<MACHINE>_JOB_ALLOC`` variable.
+
 .. note::
    ``PROJECT_<MACHINE>_VARIANTS/DEPS`` variables are present in all the shared
    specs. It allows projects to define a default value that will apply to all

@@ -13,9 +13,6 @@ rebuild-index-tioga:
   tags: [tioga, shell]
   when: always
   script:
-    - export ALLOC_ID=$(flux jobs --name="${TIOGA_ALLOC_NAME}" -n -o "{id}")
-    - echo -e "[Information] Shared allocation ID = ${ALLOC_ID}"
-    - export PROXY="$( [[ -n "${ALLOC_ID}" ]] && echo "flux proxy ${ALLOC_ID}" || echo "" )"
-    - ${PROXY} flux watch $( ${PROXY} flux batch -o output.stdout.type=kvs ${TIOGA_JOB_ALLOC} .gitlab/spack/reindex-script.sh)
+    - flux watch $( flux batch -o output.stdout.type=kvs ${TIOGA_JOB_ALLOC} .gitlab/spack/reindex-script.sh)
   dependencies: []
   retry: 2

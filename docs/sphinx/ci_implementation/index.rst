@@ -66,9 +66,11 @@ list of machines.
 Machine pipelines
 =================
 
-In each ``<machine>.yml`` file, we describe a pipeline that will allocate
-resource for the CI on the machine, and then generate and trigger a CI pipeline
-to build each required spec as a separate job.
+In each ``<machine>.yml`` file, we describe the setup, pipeline generation,
+child-pipeline trigger, and cleanup steps for one machine. The Flux-backed
+machines (``corona``, ``tioga``, and ``tuolumne``) submit each of those steps
+and each generated build job as a standalone ``flux batch`` allocation in the
+``pci`` queue. The SLURM-backed machines keep their shared-allocation model.
 
 Pipeline generation is handle by spack (see `Spack documentation`_ for more
 about the CI feature) and is configured in ``.gitlab/spack/ci.yaml`` and

@@ -1,3 +1,14 @@
+# v2026.XX.X
+
+Recommended Spack version: v1.1.0,
+Required spack-packages commit: 3f482a6fca
+
+## CI
+- Remove shared Flux allocations for Corona, Tioga, and Tuolumne.
+- Run setup, generation, build, cleanup, and reindex jobs as standalone
+  allocations in the ``pci`` queue through ``CORONA_JOB_ALLOC``,
+  ``TIOGA_JOB_ALLOC``, and ``TUOLUMNE_JOB_ALLOC``.
+
 # v2026.02.0
 
 Recommended Spack version: v1.1.0,

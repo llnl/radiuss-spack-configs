@@ -20,10 +20,7 @@ ci:
       build-job:
         tags: [corona, shell]
         script::
-        - export ALLOC_ID=$(flux jobs --name="${CORONA_ALLOC_NAME}" -n -o "{id}")
-        - echo -e "[Information] Shared allocation ID = ${ALLOC_ID}"
-        - export PROXY="$( [[ -n "${ALLOC_ID}" ]] && echo "flux proxy ${ALLOC_ID}" || echo "" )"
-        - ${PROXY} flux watch $( ${PROXY} flux batch -o output.stdout.type=kvs ${CORONA_JOB_ALLOC} .gitlab/spack/ci-script.sh)
+        - flux watch $( flux batch -o output.stdout.type=kvs ${CORONA_JOB_ALLOC} .gitlab/spack/ci-script.sh)
     - match:
       - 'target=sapphirerapids'
       build-job:
@@ -49,19 +46,13 @@ ci:
       build-job:
         tags: [tioga, shell]
         script::
-        - export ALLOC_ID=$(flux jobs --name="${TIOGA_ALLOC_NAME}" -n -o "{id}")
-        - echo -e "[Information] Shared allocation ID = ${ALLOC_ID}"
-        - export PROXY="$( [[ -n "${ALLOC_ID}" ]] && echo "flux proxy ${ALLOC_ID}" || echo "" )"
-        - ${PROXY} flux watch $( ${PROXY} flux batch -o output.stdout.type=kvs ${TIOGA_JOB_ALLOC} .gitlab/spack/ci-script.sh)
+        - flux watch $( flux batch -o output.stdout.type=kvs ${TIOGA_JOB_ALLOC} .gitlab/spack/ci-script.sh)
     - match:
       - 'target=zen4'
       build-job:
         tags: [tuolumne, shell]
         script::
-        - export ALLOC_ID=$(flux jobs --name="${TUOLUMNE_ALLOC_NAME}" -n -o "{id}")
-        - echo -e "[Information] Shared allocation ID = ${ALLOC_ID}"
-        - export PROXY="$( [[ -n "${ALLOC_ID}" ]] && echo "flux proxy ${ALLOC_ID}" || echo "" )"
-        - ${PROXY} flux watch $( ${PROXY} flux batch -o output.stdout.type=kvs ${TUOLUMNE_JOB_ALLOC} .gitlab/spack/ci-script.sh)
+        - flux watch $( flux batch -o output.stdout.type=kvs ${TUOLUMNE_JOB_ALLOC} .gitlab/spack/ci-script.sh)
     match_behavior: first
 
   - reindex-job:
