@@ -4,6 +4,48 @@
     require:
     - spec: ^cray-mpich
       when: '^mpi'
+    - spec: ^hipblas@5.7.1
+      when: '%llvm-amdgpu@5.7.1 ^hipblas'
+    - spec: ^hipblas@6.1.2
+      when: '%llvm-amdgpu@6.1.2 ^hipblas'
+    - spec: ^hipblas@6.2.4
+      when: '%llvm-amdgpu@6.2.4 ^hipblas'
+    - spec: ^hipblas@6.3.1
+      when: '%llvm-amdgpu@6.3.1 ^hipblas'
+    - spec: ^hipblas@6.4.3
+      when: '%llvm-amdgpu@6.4.3 ^hipblas'
+    - spec: ^hipblas@7.2.0
+      when: '%llvm-amdgpu@7.2.0 ^hipblas'
+    - spec: ^hipsolver@5.7.1
+      when: '%llvm-amdgpu@5.7.1 ^hipsolver'
+    - spec: ^hipsolver@6.1.2
+      when: '%llvm-amdgpu@6.1.2 ^hipsolver'
+    - spec: ^hipsolver@6.2.4
+      when: '%llvm-amdgpu@6.2.4 ^hipsolver'
+    - spec: ^hipsolver@6.3.1
+      when: '%llvm-amdgpu@6.3.1 ^hipsolver'
+    - spec: ^hipsolver@6.4.3
+      when: '%llvm-amdgpu@6.4.3 ^hipsolver'
+    - spec: ^hipsolver@7.2.0
+      when: '%llvm-amdgpu@7.2.0 ^hipsolver'
+    - spec: ^hipsparse@5.7.1
+      when: '%llvm-amdgpu@5.7.1 ^hipsparse'
+    - spec: ^hipsparse@6.1.2
+      when: '%llvm-amdgpu@6.1.2 ^hipsparse'
+    - spec: ^hipsparse@6.2.4
+      when: '%llvm-amdgpu@6.2.4 ^hipsparse'
+    - spec: ^hipsparse@6.3.1
+      when: '%llvm-amdgpu@6.3.1 ^hipsparse'
+    - spec: ^hipsparse@6.4.3
+      when: '%llvm-amdgpu@6.4.3 ^hipsparse'
+    - spec: ^hipsparse@7.2.0
+      when: '%llvm-amdgpu@7.2.0 ^hipsparse'
+    - spec: ^hipblas-common@6.3.1
+      when: '^hipblas@6.3.1 ^hipblas-common'
+    - spec: ^hipblas-common@6.4.3
+      when: '^hipblas@6.4.3 ^hipblas-common'
+    - spec: ^hipblas-common@7.2.0
+      when: '^hipblas@7.2.0 ^hipblas-common'
     providers:
       blas: [netlib-lapack]
       lapack: [netlib-lapack]
@@ -190,19 +232,6 @@
   hipsparse:
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
     buildable: false
-    require:
-    - spec: ^hip@5.7.1
-      when: '@5.7.1'
-    - spec: ^hip@6.1.2
-      when: '@6.1.2'
-    - spec: ^hip@6.2.4
-      when: '@6.2.4'
-    - spec: ^hip@6.3.1
-      when: '@6.3.1'
-    - spec: ^hip@6.4.3
-      when: '@6.4.3'
-    - spec: ^hip@7.2.0
-      when: '@7.2.0'
     externals:
     - spec: hipsparse@5.7.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
@@ -219,19 +248,6 @@
   hipblas:
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
     buildable: false
-    require:
-    - spec: ^hip@5.7.1
-      when: '@5.7.1'
-    - spec: ^hip@6.1.2
-      when: '@6.1.2'
-    - spec: ^hip@6.2.4
-      when: '@6.2.4'
-    - spec: ^hip@6.3.1
-      when: '@6.3.1'
-    - spec: ^hip@6.4.3
-      when: '@6.4.3'
-    - spec: ^hip@7.2.0
-      when: '@7.2.0'
     externals:
     - spec: hipblas@5.7.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
@@ -248,13 +264,6 @@
   hipblas-common:
     version: [6.3.1, 6.4.3, 7.2.0]
     buildable: false
-    require:
-    - spec: ^hip@6.3.1
-      when: '@6.3.1'
-    - spec: ^hip@6.4.3
-      when: '@6.4.3'
-    - spec: ^hip@7.2.0
-      when: '@7.2.0'
     externals:
     - spec: hipblas-common@6.3.1
       prefix: /opt/rocm-6.3.1
@@ -265,19 +274,6 @@
   hipsolver:
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
     buildable: false
-    require:
-    - spec: ^hip@5.7.1
-      when: '@5.7.1'
-    - spec: ^hip@6.1.2
-      when: '@6.1.2'
-    - spec: ^hip@6.2.4
-      when: '@6.2.4'
-    - spec: ^hip@6.3.1
-      when: '@6.3.1'
-    - spec: ^hip@6.4.3
-      when: '@6.4.3'
-    - spec: ^hip@7.2.0
-      when: '@7.2.0'
     externals:
     - spec: hipsolver@5.7.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
