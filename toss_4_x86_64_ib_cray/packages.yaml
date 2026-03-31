@@ -222,6 +222,13 @@
   hipblas-common:
     version: [6.3.1, 6.4.3, 7.2.0]
     buildable: false
+    require:
+    - spec: ^hip@6.3.1
+      when: '@6.3.1'
+    - spec: ^hip@6.4.3
+      when: '@6.4.3'
+    - spec: ^hip@7.2.0
+      when: '@7.2.0'
     externals:
     - spec: hipblas-common@6.3.1%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
