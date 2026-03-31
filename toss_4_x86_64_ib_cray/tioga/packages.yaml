@@ -191,33 +191,33 @@
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
     buildable: false
     externals:
-    - spec: hipsparse@5.7.1%llvm-amdgpu@5.7.1
+    - spec: hipsparse@5.7.1+rocm%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
-    - spec: hipsparse@6.1.2%llvm-amdgpu@6.1.2
+    - spec: hipsparse@6.1.2+rocm%llvm-amdgpu@6.1.2
       prefix: /opt/rocm-6.1.2
-    - spec: hipsparse@6.2.4%llvm-amdgpu@6.2.4
+    - spec: hipsparse@6.2.4+rocm%llvm-amdgpu@6.2.4
       prefix: /opt/rocm-6.2.4
-    - spec: hipsparse@6.3.1%llvm-amdgpu@6.3.1
+    - spec: hipsparse@6.3.1+rocm%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipsparse@6.4.3%llvm-amdgpu@6.4.3
+    - spec: hipsparse@6.4.3+rocm%llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3
-    - spec: hipsparse@7.2.0%llvm-amdgpu@7.2.0
+    - spec: hipsparse@7.2.0+rocm%llvm-amdgpu@7.2.0
       prefix: /opt/rocm-7.2.0
   hipblas:
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
     buildable: false
     externals:
-    - spec: hipblas@5.7.1%llvm-amdgpu@5.7.1
+    - spec: hipblas@5.7.1+rocm%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
-    - spec: hipblas@6.1.2%llvm-amdgpu@6.1.2
+    - spec: hipblas@6.1.2+rocm%llvm-amdgpu@6.1.2
       prefix: /opt/rocm-6.1.2
-    - spec: hipblas@6.2.4%llvm-amdgpu@6.2.4
+    - spec: hipblas@6.2.4+rocm%llvm-amdgpu@6.2.4
       prefix: /opt/rocm-6.2.4
-    - spec: hipblas@6.3.1%llvm-amdgpu@6.3.1
+    - spec: hipblas@6.3.1+rocm%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipblas@6.4.3%llvm-amdgpu@6.4.3
+    - spec: hipblas@6.4.3+rocm%llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3
-    - spec: hipblas@7.2.0%llvm-amdgpu@7.2.0
+    - spec: hipblas@7.2.0+rocm%llvm-amdgpu@7.2.0
       prefix: /opt/rocm-7.2.0
   hipblas-common:
     version: [6.3.1, 6.4.3, 7.2.0]
@@ -233,17 +233,17 @@
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
     buildable: false
     externals:
-    - spec: hipsolver@5.7.1%llvm-amdgpu@5.7.1
+    - spec: hipsolver@5.7.1+rocm%llvm-amdgpu@5.7.1
       prefix: /opt/rocm-5.7.1
-    - spec: hipsolver@6.1.2%llvm-amdgpu@6.1.2
+    - spec: hipsolver@6.1.2+rocm%llvm-amdgpu@6.1.2
       prefix: /opt/rocm-6.1.2
-    - spec: hipsolver@6.2.4%llvm-amdgpu@6.2.4
+    - spec: hipsolver@6.2.4+rocm%llvm-amdgpu@6.2.4
       prefix: /opt/rocm-6.2.4
-    - spec: hipsolver@6.3.1%llvm-amdgpu@6.3.1
+    - spec: hipsolver@6.3.1+rocm%llvm-amdgpu@6.3.1
       prefix: /opt/rocm-6.3.1
-    - spec: hipsolver@6.4.3%llvm-amdgpu@6.4.3
+    - spec: hipsolver@6.4.3+rocm%llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3
-    - spec: hipsolver@7.2.0%llvm-amdgpu@7.2.0
+    - spec: hipsolver@7.2.0+rocm%llvm-amdgpu@7.2.0
       prefix: /opt/rocm-7.2.0
   hsa-rocr-dev:
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.0]
