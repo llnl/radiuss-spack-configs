@@ -451,17 +451,17 @@
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-gcc-12.2.1-magic
     - spec: cray-mpich@9.0.1%gcc@13.3.1
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-gcc-13.3.1-magic
-    - spec: cray-mpich@8.1.28%llvm-amdgpu@5.7.1
+    - spec: cray-mpich@8.1.28+rocm amdgpu_target=gfx90a %llvm-amdgpu@5.7.1
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-8.1.28-rocmcc-5.7.1-magic
-    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.1.2
+    - spec: cray-mpich@9.0.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@6.1.2
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.1.2-magic
-    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.2.4
+    - spec: cray-mpich@9.0.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@6.2.4
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.2.4-magic
-    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.3.1
+    - spec: cray-mpich@9.0.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@6.3.1
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.3.1-magic
-    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.4.3
+    - spec: cray-mpich@9.0.1+rocm amdgpu_target=gfx90a %llvm-amdgpu@6.4.3
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.4.3-magic
-    - spec: cray-mpich@9.1.0%llvm-amdgpu@7.2.0
+    - spec: cray-mpich@9.1.0+rocm amdgpu_target=gfx90a %llvm-amdgpu@7.2.0
       prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.1.0-rocmcc-7.2.0-magic
   # System level packages to not build
   autoconf:
