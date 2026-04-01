@@ -538,10 +538,8 @@
   cray-libsci:
     buildable: false
     externals:
-    - spec: cray-libsci@23.02.1.1%llvm-amdgpu
+    - spec: cray-libsci@23.02.1.1
       prefix: /opt/cray/pe/libsci/23.02.1.1/AMD/4.0/x86_64
-    - spec: cray-libsci@25.09.0%llvm-amdgpu
-      prefix: /opt/cray/pe/libsci/25.09.0/AMD
   libepoxy:
     buildable: false
     externals:
