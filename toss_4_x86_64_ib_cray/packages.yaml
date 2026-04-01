@@ -13,8 +13,8 @@
     - spec: ^hipblas-common@7.2.0
       when: '^hipblas@7.2.0 ^hipblas-common'
     providers:
-      blas: [netlib-lapack]
-      lapack: [netlib-lapack]
+      blas: [cray-libsci, netlib-lapack]
+      lapack: [cray-libsci, netlib-lapack]
       mpi: [cray-mpich]
       zlib-api: [zlib]
       pkgconfig: [pkgconf]
@@ -536,6 +536,11 @@
     externals:
     - spec: netlib-lapack@3.8.0
       prefix: /usr
+  cray-libsci:
+    buildable: false
+    externals:
+    - spec: cray-libsci@23.02.1.1
+      prefix: /opt/cray/pe/libsci/23.02.1.1/CRAY/9.0/x86_64
   libepoxy:
     buildable: false
     externals:
