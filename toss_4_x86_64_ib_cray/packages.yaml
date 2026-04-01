@@ -4,8 +4,6 @@
     require:
     - spec: ^cray-mpich
       when: '^mpi'
-    - spec: ^cray-libsci
-      when: '^lapack'
     # hipblas-common requirements needed since it does not depend on a compiler
     - spec: ^hipblas-common@6.3.1
       when: '^hipblas@6.3.1 ^hipblas-common'
@@ -14,8 +12,8 @@
     - spec: ^hipblas-common@7.2.0
       when: '^hipblas@7.2.0 ^hipblas-common'
     providers:
-      blas: [cray-libsci, netlib-lapack]
-      lapack: [cray-libsci, netlib-lapack]
+      blas: [netlib-lapack, cray-libsci]
+      lapack: [netlib-lapack, cray-libsci]
       mpi: [cray-mpich]
       zlib-api: [zlib]
       pkgconfig: [pkgconf]
@@ -540,8 +538,10 @@
   cray-libsci:
     buildable: false
     externals:
-    - spec: cray-libsci@23.02.1.1
-      prefix: /opt/cray/pe/libsci/23.02.1.1/CRAY/9.0/x86_64
+    - spec: cray-libsci@23.02.1.1%llvm-amdgpu
+      prefix: /opt/cray/pe/libsci/23.02.1.1/AMD/4.0/x86_64
+    - spec: cray-libsci@25.09.0%llvm-amdgpu
+      prefix: /opt/cray/pe/libsci/25.09.0/AMD
   libepoxy:
     buildable: false
     externals:
