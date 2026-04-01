@@ -4,6 +4,7 @@
     require:
     - spec: ^cray-mpich
       when: '^mpi'
+    # hipblas-common requirements needed since it does not depend on a compiler
     - spec: ^hipblas-common@6.3.1
       when: '^hipblas@6.3.1 ^hipblas-common'
     - spec: ^hipblas-common@6.4.3
