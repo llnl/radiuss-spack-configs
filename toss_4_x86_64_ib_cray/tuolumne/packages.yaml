@@ -2,8 +2,6 @@
   all:
     require:
     - 'target=zen4'
-    - spec: ^cray-mpich+rocm
-      when: '+rocm ^mpi'
     - spec: ^cray-mpich
       when: '^mpi'
     - spec: ^hipblas-common@6.3.1
