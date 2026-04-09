@@ -12,8 +12,8 @@ spack:
     ## Use for temporary testing purpose, comment out before merging to main branch:
     #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
-      git: https://github.com/johnbowen42/spack-packages.git
-      commit: 06054237c1794732481b1057edbde6ab48ba0343
+      git: https://github.com/spack/spack-packages.git
+      commit: e5e602f2f20d029a41d0b2d7605f34f797da1d55
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
