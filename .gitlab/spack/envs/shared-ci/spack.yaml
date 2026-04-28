@@ -25,6 +25,7 @@ spack:
 
   #[config-override--]
   config:
+    connect_timeout: 120
     install_tree:
       root: /usr/workspace/radiuss/install/bradiuss-spack-install-dbv8
       padded_length: 128
