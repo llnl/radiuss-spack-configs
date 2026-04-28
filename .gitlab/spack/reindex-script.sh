@@ -8,9 +8,11 @@
 
 hostname
 
+project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+
 # If the job is not running in a shared alloc (alloc expired or job manually triggered),
 # then we need to get-spack again
-[[ ! ${JOBID} ]] && .gitlab/scripts/get-spack
+[[ -z "${JOBID:-}" ]] && "${project_dir}/.gitlab/scripts/get-spack"
 
 . ${MY_SPACK_PARENT_DIR}/spack/share/spack/setup-env.sh
 export SPACK_DISABLE_LOCAL_CONFIG=""
