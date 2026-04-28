@@ -81,9 +81,10 @@ current_checkout_matches_commit() {
     return 1
   fi
 
-  local current_commit
+  local current_commit resolved_commit
   current_commit=$(git -C "${SPACK_DIR}" rev-parse --verify HEAD 2>/dev/null) || return 1
-  [[ "${current_commit}" == "${MY_SPACK_COMMIT}" || "${current_commit}" == "${MY_SPACK_COMMIT}"* ]]
+  resolved_commit=$(git -C "${SPACK_DIR}" rev-parse --verify "${MY_SPACK_COMMIT}^{commit}" 2>/dev/null) || return 1
+  [[ "${current_commit}" == "${resolved_commit}" ]]
 }
 
 ensure_existing_spack_dir_is_git_repo

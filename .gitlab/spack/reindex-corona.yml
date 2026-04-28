@@ -19,4 +19,3 @@ rebuild-index-corona:
     - export PROXY="$( [[ -n "${ALLOC_ID}" ]] && echo "flux proxy ${ALLOC_ID}" || echo "" )"
     - ${PROXY} flux watch $( ${PROXY} flux batch -o output.stdout.type=kvs ${CORONA_JOB_ALLOC} .gitlab/spack/reindex-script.sh)
   dependencies: []
-  retry: 2
