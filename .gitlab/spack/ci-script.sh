@@ -6,6 +6,8 @@
 # SPDX-License-Identifier: (MIT)
 ##############################################################################
 
+#set -eo pipefail
+
 hostname
 
 . ${MY_SPACK_PARENT_DIR}/spack/share/spack/setup-env.sh
