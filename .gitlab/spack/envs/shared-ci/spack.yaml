@@ -71,6 +71,7 @@ spack:
     when: env.get("LCSCHEDCLUSTER", "") == "tuolumne"
 
   - radiuss-projects:
+    - camp
     - umpire
     - raja
     - raja-perf
