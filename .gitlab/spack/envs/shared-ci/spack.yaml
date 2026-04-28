@@ -17,6 +17,7 @@ spack:
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
+  - ci.yaml
   concretizer:
     reuse: false
     unify: false
