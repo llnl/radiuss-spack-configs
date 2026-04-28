@@ -12,6 +12,7 @@ rebuild-index-matrix:
   stage: .post
   tags: [matrix, shell]
   when: always
+  retry: 2
   script:
     - export JOBID=$(squeue -h --name=${MATRIX_ALLOC_NAME} --format=%A)
     - srun $( [[ -n "${JOBID}" ]] && echo "--jobid=${JOBID}" ) ${MATRIX_JOB_ALLOC} .gitlab/spack/reindex-script.sh

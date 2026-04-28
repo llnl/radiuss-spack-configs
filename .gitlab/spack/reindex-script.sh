@@ -8,6 +8,10 @@
 
 hostname
 
+# If the job is not running in a shared alloc (alloc expired or job manually triggered),
+# then we need to get-spack again
+[[ ! ${JOBID} ]] && .gitlab/scripts/get-spack
+
 . ${MY_SPACK_PARENT_DIR}/spack/share/spack/setup-env.sh
 export SPACK_DISABLE_LOCAL_CONFIG=""
 export SPACK_USER_CACHE_PATH="${MY_SPACK_USER_CACHE}"
