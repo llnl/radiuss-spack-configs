@@ -8,7 +8,6 @@
 ##############################################################################
 
 set -euo pipefail
-set -x
 
 # Fetch or reuse the Spack checkout used by CI.
 #
@@ -95,6 +94,12 @@ then
   tagged_commit=$(git -C "${SPACK_DIR}" rev-list -n 1 "${CI_PIPELINE_ID}")
   echo "Info: Reusing existing Spack checkout for CI pipeline ${CI_PIPELINE_ID}."
   echo "Info: Current Spack HEAD is ${current_commit}; pipeline tag points to ${tagged_commit}."
+  if [[ "${current_commit}" != "${tagged_commit}" ]]
+  then
+    echo "Warning: Checkout wasn't pointing at pipeline tag, fixing..."
+    git -C "${SPACK_DIR}" checkout --detach "${tagget_commit}"
+    echo "Warning: Fixed!"
+  fi
   exit 0
 fi
 
