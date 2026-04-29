@@ -9,10 +9,11 @@
 spack:
   #[general--]
   repos:
-    llnl_radiuss: ./spack_repo/llnl_radiuss/
+    ## Use for temporary testing purpose, comment out before merging to main branch:
+    #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
-      commit: a229f54670
       git: https://github.com/spack/spack-packages.git
+      commit: e5e602f2f20d029a41d0b2d7605f34f797da1d55
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
@@ -43,22 +44,28 @@ spack:
     - +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1
     when: env.get("LCSCHEDCLUSTER", "") == "corona"
   - compilers:
-    - '%oneapi-2023-gcc-10'
-    - '%clang-14-gcc-13'
+    - '%oneapi-2025-gcc-10'
+    - '%clang-19-gcc-13'
     - '%gcc@=13.3.1'
     # matrix spec
-    - +cuda cuda_arch=90 %llvm@=18.1.8 ^cuda@12.6.0+allow-unsupported-compilers
+    - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
+    #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
     when: env.get("LCSCHEDCLUSTER", "") == "dane"
   - compilers:
-    - +cuda cuda_arch=90 %llvm@=18.1.8 ^cuda@12.6.0+allow-unsupported-compilers
+    - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
+    #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
     when: env.get("LCSCHEDCLUSTER", "") == "matrix"
   - compilers:
-    - +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.1 ^hip@6.4.1
+    - +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.3 ^hip@6.4.3
+    - +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.0 ^hip@7.2.0
     - '%cce@=20.0.0'
+    - '%cce@=21.0.0'
     when: env.get("LCSCHEDCLUSTER", "") == "tioga"
   - compilers:
-    - +rocm amdgpu_target=gfx942 %llvm-amdgpu@=6.4.1 ^hip@6.4.1
+    - +rocm amdgpu_target=gfx942 %llvm-amdgpu@=6.4.3 ^hip@6.4.3
+    - +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.0 ^hip@7.2.0
     - '%cce@=20.0.0'
+    - '%cce@=21.0.0'
     when: env.get("LCSCHEDCLUSTER", "") == "tuolumne"
 
   - radiuss-projects:
@@ -76,7 +83,6 @@ spack:
     - [$radiuss-projects]
     - [$compilers]
     exclude:
-    # caliper + rocmcc 6.4.1 needs fixed handling of libunwind in callback and sampler services
-    - 'caliper +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.1 ^hip@6.4.1'
-    - 'caliper +rocm amdgpu_target=gfx942 %llvm-amdgpu@=6.4.1 ^hip@6.4.1'
-    - 'caliper +cuda cuda_arch=90 %llvm@=18.1.8 ^cuda@12.6.0+allow-unsupported-compilers'
+    # in spack package, raja-perf@2025.03 asks for c++14, but rocprim 7.2.0 requires c++17.
+    - 'raja-perf +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.0 ^hip@7.2.0'
+    - 'raja-perf +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.0 ^hip@7.2.0'

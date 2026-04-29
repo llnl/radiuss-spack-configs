@@ -1,4 +1,63 @@
-# v2025.11.0
+# v2026.03.0
+
+  Recommended Spack version: v1.1.1
+  Required spack-packages commit: 19195fc11b
+
+  ## Configs Update
+
+  ### ROCm Updates
+  - Update to ROCm 6.4.3 on Corona, Tioga, and Tuolumne
+  - Add ROCm 7.2.0 support on Cray machines (Tioga, Tuolumne)
+  - Update MPICH to 8.1.33 for ROCm 6.4.3 stack
+  - Add MPICH 9.0.1 for ROCm 6.4.3 shared jobs
+  - Add MPICH 9.1 for ROCm 7.2 stack
+
+  ### External Packages
+  - Add git external specifications
+  - Add libxcrypt external specifications
+  - Add ncurses external specifications
+  - Add openssl external specifications
+  - Update mvapich2 externals: replace clang 18 with clang 19 and add prefix
+  - Fix mvapich2 external spec formatting
+
+  ### CUDA Updates
+  - Add CUDA 13.1.1 support with clang 19.1.3 using toolchain in CI
+  - Temporarily disable CUDA 13 builds (codes not ready)
+
+  ### Compiler Toolchains
+  - Fix clang 14 gcc 13 toolchain configuration
+
+  ## CI
+  - Update RSC CI to use ROCm 6.4.3
+  - Update local and shared CI software stack
+  - Fix spec exclusion in RSC CI
+  - Bump spack-packages version in CI environments to add latest Camp and Umpire CUDA support
+  - Update to Spack v1.1.1
+
+  ## Packages
+  - Update spack-packages reference from 3f482a6fca to 19195fc11b
+  - Spack-packages update adds latest Camp and Umpire releases with improved CUDA support
+  - Exclude RAJA 2025.03 from ROCm 7.2.0 builds due to C++ standard incompatibility
+
+# v2026.02.0
+
+Recommended Spack version: v1.1.0,
+Required spack-packages commit: 3f482a6fca
+
+## Packages
+- BREAKING: moved local packages to upstream spack/spack-packages Updates of
+  the radiuss packages should not be pushed directly to spack/spack-packages.
+  Reference to spack-packages was updated accordingly.  We kept the structure
+  for a local repository for temporary testing purpose only.
+
+- With the update of the spack-packages reference, some changes happened in
+  radiuss packages (latest releases, updated dependencies...). Please refer to
+  spack-packages history for more details.
+
+## Configs Update
+- Added rocprofiler external for Caliper
+
+# v2025.11.1
 
 Recommended Spack version: v1.0.2,
 Vetted spack-packages commit: a229f54670

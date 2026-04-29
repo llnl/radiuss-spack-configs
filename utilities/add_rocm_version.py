@@ -62,7 +62,7 @@ def get_prefix_pattern(package_name, version):
     elif package_name == "llvm-amdgpu":
         return f"/opt/rocm-{version}/llvm"
     elif package_name == "cray-mpich":
-        return f"/usr/tce/packages/cray-mpich/cray-mpich-8.1.31-rocmcc-{version}-magic"
+        return f"/usr/tce/packages/cray-mpich/cray-mpich-9.1.0-rocmcc-{version}-magic"
     else:
         return f"/opt/rocm-{version}"
 
@@ -149,7 +149,7 @@ def add_rocm_version_to_package(packages_data, package_name, new_version):
 
     # Generate new external entry
     prefix = get_prefix_pattern(package_name, new_version)
-    new_spec = f"{package_name}@{new_version}%rocmcc@{new_version}"
+    new_spec = f"{package_name}@{new_version}%llvm-amdgpu@{new_version}"
 
     new_external = {
         'spec': new_spec,
@@ -195,7 +195,7 @@ def add_rocm_version_to_cray_mpich(package, new_version):
         return False
 
     # Check if this ROCm version already exists
-    new_spec_pattern = f"cray-mpich@8.1.31%rocmcc@{new_version}"
+    new_spec_pattern = f"cray-mpich@9.1.0%llvm-amdgpu@{new_version}"
     for external in externals:
         if external.get('spec', '') == new_spec_pattern:
             print(f"  Version {new_version} already exists for cray-mpich")
@@ -203,7 +203,7 @@ def add_rocm_version_to_cray_mpich(package, new_version):
 
     # Generate new external entry
     prefix = get_prefix_pattern("cray-mpich", new_version)
-    new_spec = f"cray-mpich@8.1.31%rocmcc@{new_version}"
+    new_spec = f"cray-mpich@9.1.0%llvm-amdgpu@{new_version}"
 
     new_external = {
         'spec': new_spec,
@@ -216,9 +216,9 @@ def add_rocm_version_to_cray_mpich(package, new_version):
     # Sort externals by ROCm compiler version
     def extract_rocmcc_version_from_spec(external):
         spec = external.get('spec', '')
-        # Look for %rocmcc@version pattern
-        if '%rocmcc@' in spec:
-            rocmcc_part = spec.split('%rocmcc@')[1]
+        # Look for %llvm-amdgpu@version pattern
+        if '%llvm-amdgpu@' in spec:
+            rocmcc_part = spec.split('%llvm-amdgpu@')[1]
             # Get version (might have other stuff after it)
             version_part = rocmcc_part.split()[0]  # Take first part before any spaces
             try:
@@ -230,7 +230,7 @@ def add_rocm_version_to_cray_mpich(package, new_version):
 
     # Sort to keep ROCm entries together and in version order
     externals.sort(key=lambda x: (
-        0 if '%rocmcc@' not in x.get('spec', '') else 1,  # Non-ROCm first, then ROCm
+        0 if '%llvm-amdgpu@' not in x.get('spec', '') else 1,  # Non-ROCm first, then ROCm
         extract_rocmcc_version_from_spec(x)  # Then by ROCm version
     ))
 
