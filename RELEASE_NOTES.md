@@ -1,3 +1,131 @@
+# v2026.03.0
+
+  Recommended Spack version: v1.1.1
+  Required spack-packages commit: 19195fc11b
+
+  ## Configs Update
+
+  ### ROCm Updates
+  - Update to ROCm 6.4.3 on Corona, Tioga, and Tuolumne
+  - Add ROCm 7.2.0 support on Cray machines (Tioga, Tuolumne)
+  - Update MPICH to 8.1.33 for ROCm 6.4.3 stack
+  - Add MPICH 9.0.1 for ROCm 6.4.3 shared jobs
+  - Add MPICH 9.1 for ROCm 7.2 stack
+
+  ### External Packages
+  - Add git external specifications
+  - Add libxcrypt external specifications
+  - Add ncurses external specifications
+  - Add openssl external specifications
+  - Update mvapich2 externals: replace clang 18 with clang 19 and add prefix
+  - Fix mvapich2 external spec formatting
+
+  ### CUDA Updates
+  - Add CUDA 13.1.1 support with clang 19.1.3 using toolchain in CI
+  - Temporarily disable CUDA 13 builds (codes not ready)
+
+  ### Compiler Toolchains
+  - Fix clang 14 gcc 13 toolchain configuration
+
+  ## CI
+  - Update RSC CI to use ROCm 6.4.3
+  - Update local and shared CI software stack
+  - Fix spec exclusion in RSC CI
+  - Bump spack-packages version in CI environments to add latest Camp and Umpire CUDA support
+  - Update to Spack v1.1.1
+
+  ## Packages
+  - Update spack-packages reference from 3f482a6fca to 19195fc11b
+  - Spack-packages update adds latest Camp and Umpire releases with improved CUDA support
+  - Exclude RAJA 2025.03 from ROCm 7.2.0 builds due to C++ standard incompatibility
+
+# v2026.02.0
+
+Recommended Spack version: v1.1.0,
+Required spack-packages commit: 3f482a6fca
+
+## Packages
+- BREAKING: moved local packages to upstream spack/spack-packages Updates of
+  the radiuss packages should not be pushed directly to spack/spack-packages.
+  Reference to spack-packages was updated accordingly.  We kept the structure
+  for a local repository for temporary testing purpose only.
+
+- With the update of the spack-packages reference, some changes happened in
+  radiuss packages (latest releases, updated dependencies...). Please refer to
+  spack-packages history for more details.
+
+## Configs Update
+- Added rocprofiler external for Caliper
+
+# v2025.11.1
+
+Recommended Spack version: v1.0.2,
+Vetted spack-packages commit: a229f54670
+
+## Packages
+- BLT:
+    - patch googletest with fix for oneapi 2025 (change in flag name).
+
+# v2025.11.0
+
+Recommended Spack version: v1.0.2,
+Vetted spack-packages commit: a229f54670
+
+## Packages
+- Camp:
+    - add release 2025.12
+- Care:
+    - better constraints on umpire raja and chai dependencies (protect from c++ standard mix up)
+- CHAI:
+    - better constraints on umpire and raja dependencies (protect from c++ standard mix up)
+- quandary:
+    - add version 4.3
+- RAJA:
+    - better constraints on camp (protect from c++ standard mix up)
+    - add conflict with cuda 13:
+    - add rocprim 7 requires c++17.
+- RAJAPerf:
+    - add release 2025.03 which requires blt 7
+    - add rocprim7 requires c++17.
+- Umpire:
+    - better constraints on camp (protect from c++ standard mix up)
+    - add conflict with cuda 13:.
+- Do not use dirname to infer rocm root from llvm-amdgpu prefix
+
+## Configs Update
+- Corona:
+    - gcc 13
+    - oneapi 2025
+    - sycl clang 22 custom install
+    - llvm-amdgpu 6.4.2
+- Dane:
+    - gcc 13
+    - llvm 19
+    - oneapi 2025
+    - llvm 14 gcc 13 toolchain
+    - llvm 18 gcc 13 toolchain
+    - llvm 19 gcc 13 toolchain
+- Matrix:
+    - gcc 13
+    - llvm 14 gcc 11 toolchain
+    - llvm 18 gcc 13 toolchain
+- Tioga:
+    - Add cce 20
+- Tuolumne:
+    - Add cce 20
+- Use rocm root as prefix for llvm-amdgpu
+
+## CI
+- Matrix: update to cuda_arch 90.
+
+## Shared specs:
+- llvm 14 -> llvm 19
+- oneapi 2023 -> oneapi 2025
+- gcc 10 -> gcc 13
+- gcc 11 -> gcc 13
+- cce 19 -> cce 20
+- sycl clang 20 -> sycl clang 22
+
 # v2025.10.0
 
 Recommended Spack version: v1.0.2
