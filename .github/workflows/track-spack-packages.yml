@@ -36,6 +36,17 @@ jobs:
             echo "Unable to read current spack-packages commit." >&2
             exit 1
           fi
+          for TARGET_FILE in ${TARGET_FILES}; do
+            FILE_COMMIT=$(grep -E '^\s*commit:\s*[0-9a-f]{40}\s*$' "${TARGET_FILE}" | sed -E 's/^\s*commit:\s*([0-9a-f]{40})\s*$/\1/')
+            if [[ -z "${FILE_COMMIT}" ]]; then
+              echo "Unable to read spack-packages commit in ${TARGET_FILE}." >&2
+              exit 1
+            fi
+            if [[ "${FILE_COMMIT}" != "${CURRENT_COMMIT}" ]]; then
+              echo "Inconsistent pinned commits found across target files." >&2
+              exit 1
+            fi
+          done
 
           SPACK_PACKAGES_DIR="${RUNNER_TEMP}/spack-packages"
           git clone "${SPACK_PACKAGES_REPO}" "${SPACK_PACKAGES_DIR}"
@@ -50,10 +61,11 @@ jobs:
             echo "Unable to resolve latest commit for ${DEFAULT_BRANCH}." >&2
             exit 1
           fi
+          LATEST_COMMIT_SHORT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse --short=12 "${LATEST_COMMIT}")
 
           echo "current_commit=${CURRENT_COMMIT}" >> "${GITHUB_OUTPUT}"
           echo "latest_commit=${LATEST_COMMIT}" >> "${GITHUB_OUTPUT}"
-          echo "latest_commit_short=${LATEST_COMMIT:0:12}" >> "${GITHUB_OUTPUT}"
+          echo "latest_commit_short=${LATEST_COMMIT_SHORT}" >> "${GITHUB_OUTPUT}"
 
           if [[ "${CURRENT_COMMIT}" == "${LATEST_COMMIT}" ]]; then
             echo "should_update=false" >> "${GITHUB_OUTPUT}"
@@ -69,7 +81,14 @@ jobs:
           fi
 
           CHANGED_FILES_OUTPUT=$(git -C "${SPACK_PACKAGES_DIR}" diff --name-only "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- packages)
-          mapfile -t CHANGED_FILES < <(printf '%s\n' "${CHANGED_FILES_OUTPUT}" | sed '/^$/d')
+          readarray -t CHANGED_FILES <<< "${CHANGED_FILES_OUTPUT}"
+          FILTERED_CHANGED_FILES=()
+          for FILE in "${CHANGED_FILES[@]}"; do
+            if [[ -n "${FILE}" ]]; then
+              FILTERED_CHANGED_FILES+=("${FILE}")
+            fi
+          done
+          CHANGED_FILES=("${FILTERED_CHANGED_FILES[@]}")
 
           if [[ "${#CHANGED_FILES[@]}" -eq 0 ]]; then
             echo "should_update=false" >> "${GITHUB_OUTPUT}"
