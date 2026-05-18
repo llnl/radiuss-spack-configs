@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          CURRENT_COMMIT=$(grep -E '^\s*commit:\s*[0-9a-f]{40}\s*$' .gitlab/spack/envs/shared-ci/spack.yaml | sed -E 's/^\s*commit:\s*([0-9a-f]{40})\s*$/\1/')
+          CURRENT_COMMIT=$(grep -E '^\s*commit:\s*[0-9a-f]{40,64}\s*$' .gitlab/spack/envs/shared-ci/spack.yaml | sed -E 's/^\s*commit:\s*([0-9a-f]{40,64})\s*$/\1/')
           if [[ -z "${CURRENT_COMMIT}" ]]; then
             echo "Unable to read current spack-packages commit." >&2
             exit 1
@@ -98,7 +98,7 @@ jobs:
 
           target_files = os.environ["TARGET_FILES"].split()
           new_commit = os.environ["NEW_COMMIT"]
-          pattern = re.compile(r"(^\s*commit:\s*)([0-9a-f]{40})(\s*$)", re.MULTILINE)
+          pattern = re.compile(r"(^\s*commit:\s*)([0-9a-f]{40,64})(\s*$)", re.MULTILINE)
 
           for relative_path in target_files:
             file_path = pathlib.Path(relative_path)
@@ -121,7 +121,7 @@ jobs:
             Automated daily update from the `spack/spack-packages` default branch.
 
             This PR updates pinned `spack-packages` references because monitored CI package definitions changed:
-            `camp`, `umpire`, `raja`, `raja-perf`, `chai`, `care`, `caliper`, `aluminum`, `axom`, `dihydrogen`, `hydrogen`, `lbann`, `sina`.
+            `${{ env.MONITORED_PACKAGES }}`.
 
             Previous commit: `${{ steps.detect.outputs.current_commit }}`
             New commit: `${{ steps.detect.outputs.latest_commit }}`
