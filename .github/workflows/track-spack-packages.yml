@@ -139,7 +139,7 @@ jobs:
 
       - name: Create pull request
         if: steps.detect.outputs.should_update == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8.1.1
         with:
           branch: automation/spack-packages-${{ steps.detect.outputs.latest_commit_short }}
           delete-branch: true
