@@ -1,0 +1,137 @@
+name: Track spack-packages updates
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  track-spack-packages:
+    runs-on: ubuntu-latest
+    env:
+      SPACK_PACKAGES_REPO: https://github.com/spack/spack-packages.git
+      MONITORED_PACKAGES: camp umpire raja raja-perf chai care caliper aluminum axom dihydrogen hydrogen lbann sina
+      TARGET_FILES: >-
+        .gitlab/spack/envs/shared-ci/spack.yaml
+        .gitlab/spack/envs/cached-cmake/spack.yaml
+        toss_4_x86_64_ib/spack.yaml
+        toss_4_x86_64_ib_cray/spack.yaml
+        blueos_3_ppc64le_ib/spack.yaml
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect relevant upstream changes
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CURRENT_COMMIT=$(grep -E '^\s*commit:\s*[0-9a-f]{40}\s*$' .gitlab/spack/envs/shared-ci/spack.yaml | sed -E 's/^\s*commit:\s*([0-9a-f]{40})\s*$/\1/')
+          if [[ -z "${CURRENT_COMMIT}" ]]; then
+            echo "Unable to read current spack-packages commit." >&2
+            exit 1
+          fi
+
+          SPACK_PACKAGES_DIR="${RUNNER_TEMP}/spack-packages"
+          git clone "${SPACK_PACKAGES_REPO}" "${SPACK_PACKAGES_DIR}"
+
+          DEFAULT_BRANCH=$(git -C "${SPACK_PACKAGES_DIR}" symbolic-ref --quiet --short refs/remotes/origin/HEAD | sed 's@^origin/@@')
+          LATEST_COMMIT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse "origin/${DEFAULT_BRANCH}")
+
+          echo "current_commit=${CURRENT_COMMIT}" >> "${GITHUB_OUTPUT}"
+          echo "latest_commit=${LATEST_COMMIT}" >> "${GITHUB_OUTPUT}"
+          echo "latest_commit_short=${LATEST_COMMIT:0:12}" >> "${GITHUB_OUTPUT}"
+
+          if [[ "${CURRENT_COMMIT}" == "${LATEST_COMMIT}" ]]; then
+            echo "should_update=false" >> "${GITHUB_OUTPUT}"
+            echo "reason=already_up_to_date" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if ! git -C "${SPACK_PACKAGES_DIR}" rev-parse --verify --quiet "${CURRENT_COMMIT}^{commit}" >/dev/null; then
+            echo "Current commit ${CURRENT_COMMIT} not available in cloned history; forcing update." >&2
+            echo "should_update=true" >> "${GITHUB_OUTPUT}"
+            echo "reason=current_commit_not_found" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          mapfile -t CHANGED_FILES < <(git -C "${SPACK_PACKAGES_DIR}" diff --name-only "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- packages)
+
+          if [[ "${#CHANGED_FILES[@]}" -eq 0 ]]; then
+            echo "should_update=false" >> "${GITHUB_OUTPUT}"
+            echo "reason=no_package_changes" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          SHOULD_UPDATE=false
+          for PACKAGE in ${MONITORED_PACKAGES}; do
+            for FILE in "${CHANGED_FILES[@]}"; do
+              if [[ "${FILE}" == "packages/${PACKAGE}/"* ]]; then
+                SHOULD_UPDATE=true
+                break 2
+              fi
+            done
+          done
+
+          echo "should_update=${SHOULD_UPDATE}" >> "${GITHUB_OUTPUT}"
+          if [[ "${SHOULD_UPDATE}" == "true" ]]; then
+            echo "reason=monitored_package_changed" >> "${GITHUB_OUTPUT}"
+          else
+            echo "reason=no_monitored_package_changes" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Update pinned spack-packages commit
+        if: steps.detect.outputs.should_update == 'true'
+        shell: python
+        env:
+          NEW_COMMIT: ${{ steps.detect.outputs.latest_commit }}
+        run: |
+          import os
+          import pathlib
+          import re
+          import sys
+
+          target_files = os.environ["TARGET_FILES"].split()
+          new_commit = os.environ["NEW_COMMIT"]
+          pattern = re.compile(r"(^\s*commit:\s*)([0-9a-f]{40})(\s*$)", re.MULTILINE)
+
+          for relative_path in target_files:
+            file_path = pathlib.Path(relative_path)
+            content = file_path.read_text(encoding="utf-8")
+            new_content, count = pattern.subn(rf"\1{new_commit}\3", content)
+            if count == 0:
+              print(f"No spack-packages commit line found in {relative_path}", file=sys.stderr)
+              sys.exit(1)
+            file_path.write_text(new_content, encoding="utf-8")
+
+      - name: Create pull request
+        if: steps.detect.outputs.should_update == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/spack-packages-${{ steps.detect.outputs.latest_commit_short }}
+          delete-branch: true
+          commit-message: Update spack-packages reference to ${{ steps.detect.outputs.latest_commit_short }}
+          title: Update spack-packages reference to ${{ steps.detect.outputs.latest_commit_short }}
+          body: |
+            Automated daily update from the `spack/spack-packages` default branch.
+
+            This PR updates pinned `spack-packages` references because monitored CI package definitions changed:
+            `camp`, `umpire`, `raja`, `raja-perf`, `chai`, `care`, `caliper`, `aluminum`, `axom`, `dihydrogen`, `hydrogen`, `lbann`, `sina`.
+
+            Previous commit: `${{ steps.detect.outputs.current_commit }}`
+            New commit: `${{ steps.detect.outputs.latest_commit }}`
+
+            Opening this PR triggers CI on the updated reference.
+          labels: |
+            dependencies
+            automation
+
+      - name: Log decision
+        if: steps.detect.outputs.should_update != 'true'
+        run: |
+          echo "No PR created. Reason: ${{ steps.detect.outputs.reason }}"
