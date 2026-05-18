@@ -40,8 +40,16 @@ jobs:
           SPACK_PACKAGES_DIR="${RUNNER_TEMP}/spack-packages"
           git clone "${SPACK_PACKAGES_REPO}" "${SPACK_PACKAGES_DIR}"
 
-          DEFAULT_BRANCH=$(git -C "${SPACK_PACKAGES_DIR}" symbolic-ref --quiet --short refs/remotes/origin/HEAD | sed 's@^origin/@@')
+          DEFAULT_BRANCH=$(git -C "${SPACK_PACKAGES_DIR}" remote show origin | sed -n '/HEAD branch/s/.*: //p')
+          if [[ -z "${DEFAULT_BRANCH}" ]]; then
+            echo "Unable to determine default branch for ${SPACK_PACKAGES_REPO}." >&2
+            exit 1
+          fi
           LATEST_COMMIT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse "origin/${DEFAULT_BRANCH}")
+          if [[ -z "${LATEST_COMMIT}" || ! "${LATEST_COMMIT}" =~ ^[0-9a-f]{40,64}$ ]]; then
+            echo "Unable to resolve latest commit for ${DEFAULT_BRANCH}." >&2
+            exit 1
+          fi
 
           echo "current_commit=${CURRENT_COMMIT}" >> "${GITHUB_OUTPUT}"
           echo "latest_commit=${LATEST_COMMIT}" >> "${GITHUB_OUTPUT}"
@@ -60,7 +68,8 @@ jobs:
             exit 0
           fi
 
-          mapfile -t CHANGED_FILES < <(git -C "${SPACK_PACKAGES_DIR}" diff --name-only "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- packages)
+          CHANGED_FILES_OUTPUT=$(git -C "${SPACK_PACKAGES_DIR}" diff --name-only "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- packages)
+          mapfile -t CHANGED_FILES < <(printf '%s\n' "${CHANGED_FILES_OUTPUT}" | sed '/^$/d')
 
           if [[ "${#CHANGED_FILES[@]}" -eq 0 ]]; then
             echo "should_update=false" >> "${GITHUB_OUTPUT}"
