@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SPACK_PACKAGES_REPO: https://github.com/spack/spack-packages.git
-      MONITORED_PACKAGES: camp umpire raja raja-perf chai care caliper aluminum axom dihydrogen hydrogen lbann sina
+      MONITORED_PACKAGES: camp umpire raja raja-perf chai care caliper
       TARGET_FILES: >-
         .gitlab/spack/envs/shared-ci/spack.yaml
         .gitlab/spack/envs/cached-cmake/spack.yaml
@@ -80,7 +80,7 @@ jobs:
             exit 0
           fi
 
-          CHANGED_FILES_OUTPUT=$(git -C "${SPACK_PACKAGES_DIR}" diff --name-only "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- packages)
+          CHANGED_FILES_OUTPUT=$(git -C "${SPACK_PACKAGES_DIR}" diff --name-only "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- repos/spack_repo/builtin/packages)
           readarray -t CHANGED_FILES <<< "${CHANGED_FILES_OUTPUT}"
           FILTERED_CHANGED_FILES=()
           for FILE in "${CHANGED_FILES[@]}"; do
@@ -99,7 +99,7 @@ jobs:
           SHOULD_UPDATE=false
           for PACKAGE in ${MONITORED_PACKAGES}; do
             for FILE in "${CHANGED_FILES[@]}"; do
-              if [[ "${FILE}" == "packages/${PACKAGE}/"* ]]; then
+              if [[ "${FILE}" == "repos/spack_repo/builtin/packages/${PACKAGE//-/_}/"* ]]; then
                 SHOULD_UPDATE=true
                 break 2
               fi
