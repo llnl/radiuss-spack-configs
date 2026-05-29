@@ -1,3 +1,16 @@
+# v 2026.xx.x
+
+  ## Configs Update
+
+  ### Retire lassen and poodle
+  - Remove remaining lassen and poodle configuration files.
+  - Stop pointing dane and matrix config to poodle one.
+
+  ## CI
+  - Clear any reference to lassen and poodle.
+
+  ## Packages
+
 # v2026.03.0
 
   Recommended Spack version: v1.1.1

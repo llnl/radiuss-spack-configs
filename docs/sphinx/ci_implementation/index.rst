@@ -53,7 +53,7 @@ the files that will actually describe our pipelines.
 
 The additional CI files are found under the ``.gitlab`` directory. There, the
 ``variables.yml`` file sets variable for the different LC machines we run CI on,
-namely ``corona``, ``dane``, ``lassen``, ``tioga`` and ``tuo``. The
+namely ``corona``, ``dane``, ``matrix``, ``tioga`` and ``tuolumne``. The
 pipelines for each machine is described in the corresponding ``<machine>.yml``
 file.
 
