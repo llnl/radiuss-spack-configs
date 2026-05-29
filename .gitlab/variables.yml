@@ -34,15 +34,6 @@
     MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
     SPACK_TARGET: sapphirerapids
 
-.lassen-variables:
-  variables:
-    SPACK_DISABLE_LOCAL_CONFIG: ""
-    MY_SPACK_DEBUG: ""
-    MY_SPACK_PARENT_DIR: ${CUSTOM_CI_BUILDS_DIR}/llnl-stack-${CI_PIPELINE_ID}-lassen
-    SPACK_USER_CACHE_PATH: ${CUSTOM_CI_BUILDS_DIR}/llnl-stack-${CI_PIPELINE_ID}-lassen/spack-user-cache
-    MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
-    SPACK_TARGET: power9le
-
 .tioga-variables:
   variables:
     SPACK_DISABLE_LOCAL_CONFIG: ""

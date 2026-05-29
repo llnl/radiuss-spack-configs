@@ -39,12 +39,6 @@ ci:
     #    - export JOBID=$(squeue -h --name=${DANE_ALLOC_NAME} --format=%A)
     #    - srun $( [[ -n "${JOBID}" ]] && echo "--jobid=${JOBID}" ) ${DANE_JOB_ALLOC} .gitlab/spack/ci-script.sh
     - match:
-      - 'target=power9le'
-      build-job:
-        tags: [lassen, shell]
-        script::
-        - lalloc ${LASSEN_JOB_ALLOC} .gitlab/spack/ci-script.sh
-    - match:
       - 'target=zen3'
       build-job:
         tags: [tioga, shell]
