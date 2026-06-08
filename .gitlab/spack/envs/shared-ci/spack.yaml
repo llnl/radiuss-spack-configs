@@ -91,3 +91,5 @@ spack:
     - 'raja-perf +rocm amdgpu_target=gfx942 %%llvm-amdgpu@=7.2.1 ^hip@7.2.1'
     # exclude quandary from corona builds
     - 'quandary +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1'
+    # exclude quandary intel-oneapi which hangs
+    - 'quandary %oneapi-2025-gcc-10'
