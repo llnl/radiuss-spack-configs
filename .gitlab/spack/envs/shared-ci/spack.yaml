@@ -92,4 +92,4 @@ spack:
     # exclude quandary from corona builds
     - 'quandary +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1'
     # exclude quandary intel-oneapi which hangs
-    - 'quandary %oneapi-2025-gcc-10'
+    - 'quandary %oneapi'
