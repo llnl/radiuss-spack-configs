@@ -45,7 +45,7 @@ spack:
     - +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1
     when: env.get("LCSCHEDCLUSTER", "") == "corona"
   - compilers:
-    # - '%oneapi-2025-gcc-10'
+    - '%oneapi-2025-gcc-10'
     - '%clang-19-gcc-13'
     - '%gcc@=13.3.1'
     # matrix spec
@@ -92,4 +92,4 @@ spack:
     # exclude quandary from corona builds
     - 'quandary +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1'
     # exclude quandary intel-oneapi which hangs
-    - 'quandary %c,cxx=oneapi@=2025.2.0'
+    - 'quandary %oneapi-2025-gcc-10'
