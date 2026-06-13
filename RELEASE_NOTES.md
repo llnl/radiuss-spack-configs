@@ -1,16 +1,31 @@
-# v 2026.xx.x
+# v2026.6.0
+
+  Recommended Spack version: v1.1.1
+  Required spack-packages commit: 2ecbb0f68f380dcecb0d0a0240c6a255db892a54
 
   ## Configs Update
+  - Update ROCm to 7.2.1 (replacing 7.2.0) on Tioga and Tuolumne.
+  - Match hipblas and hipblas-common versions and remove compilers from hipblas-common (Corona, Tioga, Tuolumne).
 
   ### Retire lassen and poodle
   - Remove remaining lassen and poodle configuration files.
   - Stop pointing dane and matrix config to poodle one.
+  - Remove links to retired machines.
 
   ## CI
   - Clear any reference to lassen and poodle.
   - Add hubcast config file.
+  - Improve get-spack script.
+  - Add retry reindex jobs to all machines.
+  - Include ci.yaml directly in the spack config.
+  - Add extra spack spec debug output to the CI.
+  - Add a track-spack-packages GitHub workflow that opens a tracking issue when spack-packages references change.
 
   ## Packages
+  - Update spack-packages reference from 19195fc11b to 2ecbb0f68f380dcecb0d0a0240c6a255db892a54.
+  - Bump RAJA to a release requiring C++20.
+  - Bump Camp to a release requiring C++20.
+  - Update Umpire with its latest change.
 
 # v2026.03.0
 
