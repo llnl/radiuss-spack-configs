@@ -8,7 +8,7 @@
 variables:
   #MY_SPACK_REPO: https://lc.llnl.gov/gitlab/radiuss/spack-mirror.git
   MY_SPACK_REPO: https://github.com/spack/spack.git
-  MY_SPACK_BRANCH: v1.1.1
+  MY_SPACK_BRANCH: v1.2
 
 include:
   - local: .gitlab/corona.yml
