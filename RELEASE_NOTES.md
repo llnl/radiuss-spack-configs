@@ -1,4 +1,8 @@
-# v2026.6.0
+# ????.?.?
+  Recommended Spack version: v1.2.0
+  Required spack-packages commit: d4f7c711a6a42f1c4d551c8fd10fce9a11340a81
+
+# 2026.6.0
 
   Recommended Spack version: v1.1.1
   Required spack-packages commit: 2ecbb0f68f380dcecb0d0a0240c6a255db892a54
