@@ -99,7 +99,7 @@ then
   if [[ "${current_commit}" != "${tagged_commit}" ]]
   then
     echo "Warning: Checkout wasn't pointing at pipeline tag, fixing..."
-    git -C "${SPACK_DIR}" checkout --detach "${tagget_commit}"
+    git -C "${SPACK_DIR}" checkout --detach "${tagged_commit}"
     echo "Warning: Fixed!"
   fi
   exit 0
