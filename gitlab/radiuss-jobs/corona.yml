@@ -8,4 +8,5 @@
 rocmcc_6_4_2_hip:
   variables:
     SPEC: "${PROJECT_CORONA_VARIANTS} +rocm amdgpu_target=gfx906 %llvm-amdgpu@=6.4.2 ^hip@6.4.2 ${PROJECT_CORONA_DEPS}"
+    MODULE_LIST: "rocm/6.4.2"
   extends: .job_on_corona
