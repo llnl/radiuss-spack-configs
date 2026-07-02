@@ -26,7 +26,7 @@
     - one_of: ['%intel-oneapi-compilers', '%intel-oneapi-compilers-classic']
 
   # compilers
-  gcc:
+  gc:
     externals:
     - spec: gcc@10.3.1 languages='c,c++,fortran'
       prefix: /usr/tce/packages/gcc/gcc-10.3.1
@@ -158,7 +158,7 @@
       prefix: /opt/rocm-6.0.2
       extra_attributes:
         compilers:
-          cc: /opt/rocm-6.0.2/llvm/bin/amdclang
+          c: /opt/rocm-6.0.2/llvm/bin/amdclang
           cxx: /opt/rocm-6.0.2/llvm/bin/amdclang++
           fortran: /opt/rocm-6.0.2/llvm/bin/amdflang
         flags: {}
@@ -168,7 +168,7 @@
       prefix: /opt/rocm-6.4.2/llvm
       extra_attributes:
         compilers:
-          cc: /opt/rocm-6.4.2/llvm/bin/amdclang
+          c: /opt/rocm-6.4.2/llvm/bin/amdclang
           cxx: /opt/rocm-6.4.2/llvm/bin/amdclang++
           fortran: /opt/rocm-6.4.2/llvm/bin/amdflang
         flags: {}
