@@ -178,7 +178,7 @@
       prefix: /opt/rocm-6.0.2
       extra_attributes:
         compilers:
-          cc: /opt/rocm-6.0.2/llvm/bin/amdclang
+          c: /opt/rocm-6.0.2/llvm/bin/amdclang
           cxx: /opt/rocm-6.0.2/llvm/bin/amdclang++
           fortran: /opt/rocm-6.0.2/llvm/bin/amdflang
         flags: {}
@@ -188,7 +188,7 @@
       prefix: /opt/rocm-6.4.2/llvm
       extra_attributes:
         compilers:
-          cc: /opt/rocm-6.4.2/llvm/bin/amdclang
+          c: /opt/rocm-6.4.2/llvm/bin/amdclang
           cxx: /opt/rocm-6.4.2/llvm/bin/amdclang++
           fortran: /opt/rocm-6.4.2/llvm/bin/amdflang
         flags: {}
