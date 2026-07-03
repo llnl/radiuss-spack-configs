@@ -1,7 +1,7 @@
-# v2026.6.0
+# 2026.6.0
 
-  Recommended Spack version: v1.1.1
-  Required spack-packages commit: 2ecbb0f68f380dcecb0d0a0240c6a255db892a54
+  Recommended Spack version: v1.2.0
+  Required spack-packages commit: 4d3d0f8ee5ffd6f099727f46ec704f3f4ee98e5c
 
   ## Configs Update
   - Update ROCm to 7.2.1 (replacing 7.2.0) on Tioga and Tuolumne.
