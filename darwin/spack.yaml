@@ -34,7 +34,7 @@ spack:
       modules: []
       operating_system: elcapitan
       paths:
-        cc: /usr/bin/clang
+        c: /usr/bin/clang
         cxx: /usr/bin/clang++
         f77: /usr/local/bin/gfortran
         fc: /usr/local/bin/gfortran
@@ -46,7 +46,7 @@ spack:
       modules: []
       operating_system: sierra
       paths:
-        cc: /usr/bin/clang
+        c: /usr/bin/clang
         cxx: /usr/bin/clang++
         f77: /usr/local/bin/gfortran
         fc: /usr/local/bin/gfortran
@@ -59,7 +59,7 @@ spack:
       modules: []
       operating_system: highsierra
       paths:
-        cc: /usr/bin/clang
+        c: /usr/bin/clang
         cxx: /usr/bin/clang++
         f77: /usr/local/bin/gfortran
         fc: /usr/local/bin/gfortran
@@ -72,7 +72,7 @@ spack:
       modules: []
       operating_system: mojave
       paths:
-        cc: /usr/bin/clang
+        c: /usr/bin/clang
         cxx: /usr/bin/clang++
         f77: /usr/local/bin/gfortran
         fc: /usr/local/bin/gfortran
@@ -85,7 +85,7 @@ spack:
       modules: []
       operating_system: mojave
       paths:
-        cc: /usr/local/opt/llvm/bin/clang
+        c: /usr/local/opt/llvm/bin/clang
         cxx: /usr/local/opt/llvm/bin/clang++
         f77: /usr/local/bin/gfortran
         fc: /usr/local/bin/gfortran
@@ -95,7 +95,7 @@ spack:
   - compiler:
       spec: apple-clang@11.0.1
       paths:
-        cc: /usr/bin/clang
+        c: /usr/bin/clang
         cxx: /usr/bin/clang++
         f77: /usr/local/bin/gfortran
         fc: /usr/local/bin/gfortran
@@ -109,7 +109,7 @@ spack:
   - compiler:
       spec: apple-clang@13.1.6
       paths:
-        cc: /usr/bin/clang
+        c: /usr/bin/clang
         cxx: /usr/bin/clang++
         f77: /opt/homebrew/bin/gfortran
         fc: /opt/homebrew/bin/gfortran

@@ -82,33 +82,23 @@
         extra_rpaths: []
   intel-oneapi-compilers:
     externals:
-    - spec: intel-oneapi-compilers@2022.1.0
-      prefix: /usr/tce/packages/intel/intel-2022.1.0
-      extra_attributes:
-        compilers:
-          c: /usr/tce/packages/intel/intel-2022.1.0/compiler/2022.1.0/linux/bin/icx
-          cxx: /usr/tce/packages/intel/intel-2022.1.0/compiler/2022.1.0/linux/bin/icpx
-          fortran: /usr/tce/packages/intel/intel-2022.1.0/compiler/2022.1.0/linux/bin/ifx
-        flags: {}
-        environment: {}
-        extra_rpaths: []
-    - spec: intel-oneapi-compilers@2023.2.1
-      prefix: /usr/tce/packages/intel/intel-2023.2.1
-      extra_attributes:
-        compilers:
-          c: /usr/tce/packages/intel/intel-2023.2.1/compiler/2023.2.1/linux/bin/icx
-          cxx: /usr/tce/packages/intel/intel-2023.2.1/compiler/2023.2.1/linux/bin/icpx
-          fortran: /usr/tce/packages/intel/intel-2023.2.1/compiler/2023.2.1/linux/bin/ifx
-        flags: {}
-        environment: {}
-        extra_rpaths: []
     - spec: intel-oneapi-compilers@2024.2.1
-      prefix: /collab/usr/global/tools/intel/toss_4_x86_64_ib/oneapi-2024.2.1/2024.2
+      prefix: /usr/tce/packages/intel/intel-2024.2.1
       extra_attributes:
         compilers:
-          c: /collab/usr/global/tools/intel/toss_4_x86_64_ib/oneapi-2024.2.1/2024.2/bin/icx
-          cxx: /collab/usr/global/tools/intel/toss_4_x86_64_ib/oneapi-2024.2.1/2024.2/bin/icpx
-          fortran: /collab/usr/global/tools/intel/toss_4_x86_64_ib/oneapi-2024.2.1/2024.2/bin/ifx
+          c: /usr/tce/packages/intel/intel-2024.2.1/compiler/2024.2/bin/icx
+          cxx: /usr/tce/packages/intel/intel-2024.2.1/compiler/2024.2/bin/icpx
+          fortran: /usr/tce/packages/intel/intel-2024.2.1/compiler/2024.2/bin/ifx
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+    - spec: intel-oneapi-compilers@2025.2.0
+      prefix: /usr/tce/packages/intel/intel-2025.2.0
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/intel/intel-2025.2.0/compiler/2025.2/bin/icx
+          cxx: /usr/tce/packages/intel/intel-2025.2.0/compiler/2025.2/bin/icpx
+          fortran: /usr/tce/packages/intel/intel-2025.2.0/compiler/2025.2/bin/ifx
         flags: {}
         environment: {}
         extra_rpaths: []
@@ -212,11 +202,8 @@
         file_systems=lustre,nfs,ufs process_managers=slurm %intel-oneapi-compilers-classic@=2021.6.0
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0
     - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
-        file_systems=lustre,nfs,ufs process_managers=slurm %intel-oneapi-compilers@=2022.1.0
-      prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-2022.1.0
-    - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
-        file_systems=lustre,nfs,ufs process_managers=slurm %intel-oneapi-compilers@=2023.2.1
-      prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-2023.2.1
+        file_systems=lustre,nfs,ufs process_managers=slurm %intel-oneapi-compilers@=2025.2.0
+      prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-2025.2.0
     - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
         file_systems=lustre,nfs,ufs process_managers=slurm %llvm@=14.0.6
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-clang-14.0.6
@@ -462,23 +449,13 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]intel-oneapi-compilers-classic@2021.6.0'
       when: '%fortran'
-  oneapi-2022-gcc-10:
+  oneapi-2025-gcc-10:
     - spec: cflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-10.3.1'
     - spec: cxxflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-10.3.1'
     - spec: fflags='-gcc-name=/usr/tce/packages/gcc/gcc-10.3.1/bin/gcc'
-    - spec: '%[virtuals=c]intel-oneapi-compilers@2022.1.0'
+    - spec: '%[virtuals=c]intel-oneapi-compilers@2025.2.0'
       when: '%c'
-    - spec: '%[virtuals=cxx]intel-oneapi-compilers@2022.1.0'
+    - spec: '%[virtuals=cxx]intel-oneapi-compilers@2025.2.0'
       when: '%cxx'
-    - spec: '%[virtuals=fortran]intel-oneapi-compilers@2022.1.0'
-      when: '%fortran'
-  oneapi-2023-gcc-10:
-    - spec: cflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-10.3.1'
-    - spec: cxxflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-10.3.1'
-    - spec: fflags='-gcc-name=/usr/tce/packages/gcc/gcc-10.3.1/bin/gcc'
-    - spec: '%[virtuals=c]intel-oneapi-compilers@2023.2.1'
-      when: '%c'
-    - spec: '%[virtuals=cxx]intel-oneapi-compilers@2023.2.1'
-      when: '%cxx'
-    - spec: '%[virtuals=fortran]intel-oneapi-compilers@2023.2.1'
+    - spec: '%[virtuals=fortran]intel-oneapi-compilers@2025.2.0'
       when: '%fortran'
