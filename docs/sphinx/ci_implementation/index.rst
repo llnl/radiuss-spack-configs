@@ -39,6 +39,13 @@ Incidentally, this CI setup will populate a buildcache with pre-built binaries
 of our RADIUSS projects, which could prove useful to developers willing to
 save build time for the selected specs.
 
+Buildcache entries are written under a ``CACHE_TARGET`` namespace. The default
+branch writes to ``main``, merge request pipelines write to
+``mr-<merge-request-iid>``, and other branch pipelines write to
+``ref-<commit-ref-slug>``. Non-main pipelines also configure the ``main``
+buildcache as a read mirror, so they can reuse existing binaries without
+publishing experimental builds into the default branch namespace.
+
 
 =================
 CI file structure
