@@ -12,7 +12,7 @@ hostname
 
 . ${MY_SPACK_PARENT_DIR}/spack/share/spack/setup-env.sh
 export SPACK_DISABLE_LOCAL_CONFIG=""
-export SPACK_USER_CACHE_PATH="${MY_SPACK_USER_CACHE}"
+. ${CI_PROJECT_DIR}/.gitlab/spack/configure-user-cache.sh
 spack --version
 spack ${MY_SPACK_DEBUG} env activate --without-view ${SPACK_CONCRETE_ENV_DIR}
 spack ${MY_SPACK_DEBUG} config blame repos

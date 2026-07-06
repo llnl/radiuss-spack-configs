@@ -16,7 +16,7 @@ project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 . ${MY_SPACK_PARENT_DIR}/spack/share/spack/setup-env.sh
 export SPACK_DISABLE_LOCAL_CONFIG=""
-export SPACK_USER_CACHE_PATH="${MY_SPACK_USER_CACHE}"
+. ${CI_PROJECT_DIR}/.gitlab/spack/configure-user-cache.sh
 spack --version
 SPACK_CI_CONFIGURE_ENV=false
 . ${CI_PROJECT_DIR}/.gitlab/spack/configure-storage.sh
