@@ -14,6 +14,7 @@
     MY_SPACK_PARENT_DIR: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-corona
     SPACK_USER_CACHE_PATH: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-corona/spack-user-cache
     MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
+    SPACK_CI_STORAGE_ROOT: /usr/workspace/bradiuss/rsc-ci
     SPACK_TARGET: zen
 
 .dane-variables:
@@ -23,6 +24,7 @@
     MY_SPACK_PARENT_DIR: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-dane
     SPACK_USER_CACHE_PATH: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-dane/spack-user-cache
     MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
+    SPACK_CI_STORAGE_ROOT: /usr/workspace/bradiuss/rsc-ci
     SPACK_TARGET: sapphirerapids
 
 .matrix-variables:
@@ -32,6 +34,7 @@
     MY_SPACK_PARENT_DIR: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-matrix
     SPACK_USER_CACHE_PATH: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-dane/spack-user-cache
     MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
+    SPACK_CI_STORAGE_ROOT: /usr/workspace/bradiuss/rsc-ci
     SPACK_TARGET: sapphirerapids
 
 .tioga-variables:
@@ -41,6 +44,7 @@
     MY_SPACK_PARENT_DIR: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-tioga
     SPACK_USER_CACHE_PATH: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-tioga/spack-user-cache
     MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
+    SPACK_CI_STORAGE_ROOT: /usr/workspace/bradiuss/rsc-ci
     SPACK_TARGET: zen3
 
 .tuolumne-variables:
@@ -50,4 +54,5 @@
     MY_SPACK_PARENT_DIR: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-tuolumne
     SPACK_USER_CACHE_PATH: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-tuolumne/spack-user-cache
     MY_SPACK_USER_CACHE: /dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache
+    SPACK_CI_STORAGE_ROOT: /usr/workspace/bradiuss/rsc-ci
     SPACK_TARGET: zen4

@@ -39,12 +39,19 @@ Incidentally, this CI setup will populate a buildcache with pre-built binaries
 of our RADIUSS projects, which could prove useful to developers willing to
 save build time for the selected specs.
 
-Buildcache entries are written under a ``CACHE_TARGET`` namespace. The default
-branch writes to ``main``, merge request pipelines write to
+Persistent CI storage is written under a ``CACHE_TARGET`` namespace. The
+default branch writes to ``main``, merge request pipelines write to
 ``mr-<merge-request-iid>``, and other branch pipelines write to
-``ref-<commit-ref-slug>``. Non-main pipelines also configure the ``main``
-buildcache as a read mirror, so they can reuse existing binaries without
-publishing experimental builds into the default branch namespace.
+``ref-<commit-ref-slug>``. Each namespace has its own persistent Spack install
+tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
+pipelines also configure the ``main`` install tree as a Spack upstream and the
+``main`` buildcache as a read mirror, so they can reuse existing binaries
+without publishing experimental builds into the default branch namespace.
+
+The install tree is the fast path used by Spack during installation, while the
+filesystem buildcache gives Spack CI the mirror metadata it needs to prune
+already-built specs during pipeline generation. Build and user cache locations
+remain under ``/dev/shm`` through the machine-specific CI variables.
 
 
 =================
