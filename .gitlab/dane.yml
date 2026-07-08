@@ -74,6 +74,7 @@ build-on-dane:
       - local: ".gitlab/spack/reindex-dane.yml"
     strategy: depend
     forward:
+      yaml_variables: true
       pipeline_variables: true
   needs: [generate-on-dane]
   rules:

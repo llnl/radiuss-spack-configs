@@ -73,6 +73,7 @@ build-on-tuolumne:
       - local: ".gitlab/spack/reindex-tuolumne.yml"
     strategy: depend
     forward:
+      yaml_variables: true
       pipeline_variables: true
   needs: [generate-on-tuolumne]
   rules:

@@ -73,6 +73,7 @@ build-on-corona:
       - local: ".gitlab/spack/reindex-corona.yml"
     strategy: depend
     forward:
+      yaml_variables: true
       pipeline_variables: true
   needs: [generate-on-corona]
   rules:

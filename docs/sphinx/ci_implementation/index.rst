@@ -48,6 +48,14 @@ pipelines also configure the ``main`` install tree as a Spack upstream and the
 ``main`` buildcache as a read mirror, so they can reuse existing binaries
 without publishing experimental builds into the default branch namespace.
 
+By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
+storage setup configures Spack package permissions with ``read: world``,
+``write: group``, and ``group: SPACK_CI_STORAGE_GROUP`` so install tree
+contents remain writable by the RADIUSS group. It also applies the storage
+group to the persistent cache directories, marks those directories setgid, and
+sets a group-writable umask so buildcache entries and other files written under
+the persistent storage root remain accessible to members of the RADIUSS group.
+
 The install tree is the fast path used by Spack during installation, while the
 filesystem buildcache gives Spack CI the mirror metadata it needs to prune
 already-built specs during pipeline generation. Build and user cache locations

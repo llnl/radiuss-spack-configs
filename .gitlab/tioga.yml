@@ -73,6 +73,7 @@ build-on-tioga:
       - local: ".gitlab/spack/reindex-tioga.yml"
     strategy: depend
     forward:
+      yaml_variables: true
       pipeline_variables: true
   needs: [generate-on-tioga]
   rules:
