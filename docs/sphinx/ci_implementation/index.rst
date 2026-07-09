@@ -58,8 +58,15 @@ the persistent storage root remain accessible to members of the RADIUSS group.
 
 The install tree is the fast path used by Spack during installation, while the
 filesystem buildcache gives Spack CI the mirror metadata it needs to prune
-already-built specs during pipeline generation. Build and user cache locations
-remain under ``/dev/shm`` through the machine-specific CI variables.
+already-built specs during pipeline generation.
+
+The Spack checkout itself is a third storage layer. It is kept under
+``MY_SPACK_PARENT_DIR`` on ``/dev/shm`` and reused by all jobs for the same
+machine and pipeline, so the CI does not clone Spack separately for every build
+job. In contrast, the Spack user cache is computed at job runtime and includes
+the GitLab job id, so each job gets its own staging, test, and misc cache
+locations under ``/dev/shm``. This keeps parallel Spack jobs isolated while the
+checkout and persistent binary/install storage remain shared where useful.
 
 
 =================
