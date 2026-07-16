@@ -16,9 +16,9 @@ project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 . ${MY_SPACK_PARENT_DIR}/spack/share/spack/setup-env.sh
 export SPACK_DISABLE_LOCAL_CONFIG=""
-export SPACK_USER_CACHE_PATH="${MY_SPACK_USER_CACHE}"
+. ${CI_PROJECT_DIR}/.gitlab/spack/configure-user-cache.sh
 spack --version
-spack ${MY_SPACK_DEBUG} config blame mirrors
-spack ${MY_SPACK_DEBUG} mirror add --oci-username-variable CI_REGISTRY_USER --oci-password-variable CI_REGISTRY_PASSWORD buildcache-destination oci://${CI_REGISTRY_IMAGE}/${SPACK_TARGET}
+SPACK_CI_CONFIGURE_ENV=false
+. ${CI_PROJECT_DIR}/.gitlab/spack/configure-storage.sh
 spack ${MY_SPACK_DEBUG} config blame mirrors
 spack buildcache update-index --keys buildcache-destination

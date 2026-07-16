@@ -13,6 +13,22 @@ variables:
 # at the same location whoever triggers a pipeline.
   CUSTOM_CI_BUILDS_DIR: /usr/workspace/bradiuss/gitlab-runner
 
+workflow:
+  rules:
+    - if: $CACHE_TARGET != null
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CACHE_TARGET: "main"
+    - if: $CI_MERGE_REQUEST_IID
+      variables:
+        CACHE_TARGET: "mr-${CI_MERGE_REQUEST_IID}"
+    - if: $CI_COMMIT_REF_SLUG
+      variables:
+        CACHE_TARGET: "ref-${CI_COMMIT_REF_SLUG}"
+    - when: always
+      variables:
+        CACHE_TARGET: "manual"
+
 stages:
   - setup
   - generate
@@ -42,5 +58,4 @@ no-env-name:
       echo -e "\e[31m\"MY_ENV_NAME\" is required and should point to an existing directory in .gitlab/spack/envs.\e[0m"
       echo -e "\e[31m\"MY_ENV_NAME\" can only be defined in GitLab UI (see documentation).\e[0m"
       echo -e "\e[31mAvailable environments \e[0m"
-      echo -e "\e[31$(ls --ignore empty .gitlab/spack/envs)\e[0m"
-
+      echo -e "\e[31m$(ls --ignore empty .gitlab/spack/envs)\e[0m"

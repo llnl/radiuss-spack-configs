@@ -88,7 +88,16 @@ current_checkout_matches_commit() {
   [[ "${current_commit}" == "${resolved_commit}" ]]
 }
 
+configure_spack_git_repo() {
+  git -C "${SPACK_DIR}" config feature.manyFiles true
+}
+
 ensure_existing_spack_dir_is_git_repo
+
+if [[ -d "${SPACK_DIR}/.git" ]]
+then
+  configure_spack_git_repo
+fi
 
 if pipeline_tag_exists
 then
@@ -117,6 +126,7 @@ then
   then
     mkdir -p "${MY_SPACK_PARENT_DIR}"
     git init "${SPACK_DIR}"
+    configure_spack_git_repo
   fi
 
   git -C "${SPACK_DIR}" fetch --depth 1 "${MY_SPACK_REPO}" "${MY_SPACK_COMMIT}"
@@ -133,7 +143,7 @@ else
   if [[ ! -d "${SPACK_DIR}" ]]
   then
     mkdir -p "${MY_SPACK_PARENT_DIR}"
-    git clone "${MY_SPACK_REPO}" --depth 1 --branch "${MY_SPACK_BRANCH}" "${SPACK_DIR}"
+    git clone --depth 2 -c feature.manyFiles=true --branch "${MY_SPACK_BRANCH}" "${MY_SPACK_REPO}" "${SPACK_DIR}"
   elif [[ ! -d "${SPACK_DIR}/.git" ]]
   then
     echo "Error: ${SPACK_DIR} exists but is not a git repository." >&2
