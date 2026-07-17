@@ -59,3 +59,13 @@ no-env-name:
       echo -e "\e[31m\"MY_ENV_NAME\" can only be defined in GitLab UI (see documentation).\e[0m"
       echo -e "\e[31mAvailable environments \e[0m"
       echo -e "\e[31m$(ls --ignore empty .gitlab/spack/envs)\e[0m"
+
+cleanup-merged-cache-targets:
+  tags: [shell, oslic]
+  stage: clean
+  rules:
+    - if: $MY_ENV_NAME != null && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: on_success
+    - when: never
+  script:
+    - bash .gitlab/spack/cleanup-target-roots.sh

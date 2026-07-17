@@ -47,6 +47,9 @@ tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
 pipelines also configure the ``main`` install tree as a Spack upstream and the
 ``main`` buildcache as a read mirror, so they can reuse existing binaries
 without publishing experimental builds into the default branch namespace.
+Main branch pipelines also run a cleanup job that removes stale ``mr-*`` and
+``ref-*`` storage targets corresponding to merge requests and branch references
+already merged into ``main``.
 
 By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
 storage setup configures Spack package permissions with ``read: world``,
