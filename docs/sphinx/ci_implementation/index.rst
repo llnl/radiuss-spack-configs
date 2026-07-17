@@ -49,7 +49,8 @@ pipelines also configure the ``main`` install tree as a Spack upstream and the
 without publishing experimental builds into the default branch namespace.
 Main branch pipelines also run a cleanup job that removes stale ``mr-*`` and
 ``ref-*`` storage targets corresponding to merge requests and branch references
-already merged into ``main``.
+already merged into ``main``. That cleanup job runs only when ``MY_ENV_NAME``
+is unset and scans all configured environments under ``SPACK_CI_STORAGE_ROOT``.
 
 By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
 storage setup configures Spack package permissions with ``read: world``,

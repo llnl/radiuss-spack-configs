@@ -64,8 +64,8 @@ cleanup-merged-cache-targets:
   tags: [shell, oslic]
   stage: clean
   rules:
-    - if: $MY_ENV_NAME != null && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$MY_ENV_NAME == null && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
     - when: never
   script:
-    - bash .gitlab/spack/cleanup-target-roots.sh
+    - python3 .gitlab/spack/cleanup-target-roots.py
