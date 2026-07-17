@@ -19,4 +19,4 @@ spack --version
 SPACK_CI_CONFIGURE_ENV=false
 . ${CI_PROJECT_DIR}/.gitlab/spack/configure-storage.sh
 spack ${MY_SPACK_DEBUG} config blame mirrors
-spack buildcache update-index --keys buildcache-destination
+spack buildcache update-index buildcache-destination
