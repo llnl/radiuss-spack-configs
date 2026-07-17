@@ -28,6 +28,9 @@ def require_env(var_name: str) -> str:
 
 
 def slugify_ref_name(ref_name: str) -> str:
+    # Keep this aligned with CI_COMMIT_REF_SLUG semantics for ref-* matching.
+    # This mirrors the common GitLab behavior for ASCII names, but Rails'
+    # byte-oriented slugging can differ on some non-ASCII edge cases.
     slug = re.sub(r"[^0-9a-z]+", "-", ref_name.lower()).strip("-")
     return slug[:63].rstrip("-")
 

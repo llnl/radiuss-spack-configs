@@ -68,4 +68,4 @@ cleanup-merged-cache-targets:
       when: on_success
     - when: never
   script:
-    - python3 .gitlab/spack/cleanup-target-roots.py
+    - python3 .gitlab/scripts/cleanup-target-roots.py
