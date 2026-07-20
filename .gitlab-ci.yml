@@ -64,9 +64,9 @@ cleanup-merged-cache-targets:
   tags: [shell, oslic]
   stage: clean
   rules:
-    # MY_ENV_NAME is configured in GitLab UI and cannot realistically be unset per pipeline
-    # once defined. We intentionally trigger global cleanup only on explicit empty override.
-    - if: '$MY_ENV_NAME == "" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    # Global cleanup is intentionally opt-in. Set MY_ENV_NAME="" and RSC_CLEANUP=ON
+    # (for example in a scheduled pipeline) to run cleanup without running env builds.
+    - if: '$MY_ENV_NAME == "" && $RSC_CLEANUP == "ON"'
       when: on_success
     - when: never
   script:

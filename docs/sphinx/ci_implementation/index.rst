@@ -47,14 +47,14 @@ tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
 pipelines also configure the ``main`` install tree as a Spack upstream and the
 ``main`` buildcache as a read mirror, so they can reuse existing binaries
 without publishing experimental builds into the default branch namespace.
-Main branch pipelines also run a cleanup job that removes stale ``mr-*`` and
-``ref-*`` storage targets corresponding to merge requests and branch references
-already merged into ``main``. That cleanup job scans all configured
-environments under ``SPACK_CI_STORAGE_ROOT`` and is intentionally gated on
-``MY_ENV_NAME == ""`` (explicit empty override). In practice, once
-``MY_ENV_NAME`` is defined in GitLab UI variables, it cannot be unset for a
-single triggered pipeline. The ``MY_ENV_NAME == null`` case is mainly relevant
-for first-time bootstrap on a fresh GitLab instance before that variable exists.
+A dedicated cleanup job removes stale ``mr-*`` and ``ref-*`` storage targets
+corresponding to merge requests and branch references already merged into
+``main``. The job scans all configured environments under
+``SPACK_CI_STORAGE_ROOT`` and is gated by two explicit variables:
+``MY_ENV_NAME == ""`` and ``RSC_CLEANUP == "ON"``. This makes cleanup opt-in,
+so regular branch pipelines (including ``develop``) do not trigger cleanup by
+default. The intended usage is a scheduled pipeline configured with those
+variables.
 
 By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
 storage setup configures Spack package permissions with ``read: world``,
