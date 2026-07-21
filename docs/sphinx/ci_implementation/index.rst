@@ -47,9 +47,9 @@ tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
 pipelines also configure the ``main`` install tree as a Spack upstream and the
 ``main`` buildcache as a read mirror, so they can reuse existing binaries
 without publishing experimental builds into the default branch namespace.
-A dedicated cleanup job removes stale ``mr-*`` and ``ref-*`` storage targets
-corresponding to merge requests and branch references already merged into
-``main``. The job scans all configured environments under
+A dedicated cleanup job removes stale ``ref-*`` storage targets corresponding
+to branch references already merged into ``main``. The job scans all configured
+environments under
 ``SPACK_CI_STORAGE_ROOT`` and is gated by two explicit variables:
 ``MY_ENV_NAME == ""`` and ``RSC_CLEANUP == "ON"``. This makes cleanup opt-in,
 so regular branch pipelines (including ``develop``) do not trigger cleanup by
