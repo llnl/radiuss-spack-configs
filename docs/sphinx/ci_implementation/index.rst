@@ -40,13 +40,20 @@ of our RADIUSS projects, which could prove useful to developers willing to
 save build time for the selected specs.
 
 Persistent CI storage is written under a ``CACHE_TARGET`` namespace. The
-default branch writes to ``main``, merge request pipelines write to
-``mr-<merge-request-iid>``, and other branch pipelines write to
+default branch writes to ``main`` and other branch pipelines write to
 ``ref-<commit-ref-slug>``. Each namespace has its own persistent Spack install
 tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
 pipelines also configure the ``main`` install tree as a Spack upstream and the
 ``main`` buildcache as a read mirror, so they can reuse existing binaries
 without publishing experimental builds into the default branch namespace.
+A dedicated cleanup job removes stale ``ref-*`` storage targets corresponding
+to branch references already merged into ``main`` or no longer present on the
+remote. The job scans all configured environments under
+``SPACK_CI_STORAGE_ROOT`` and is gated by two explicit variables:
+``MY_ENV_NAME == ""`` and ``RSC_CLEANUP == "ON"``. This makes cleanup opt-in,
+so regular branch pipelines (including ``develop``) do not trigger cleanup by
+default. The intended usage is a scheduled pipeline configured with those
+variables.
 
 By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
 storage setup configures Spack package permissions with ``read: world``,
