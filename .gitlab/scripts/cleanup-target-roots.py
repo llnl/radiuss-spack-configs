@@ -32,6 +32,32 @@ def slugify_ref_name(ref_name: str) -> str:
     return slug[:63].rstrip("-")
 
 
+def list_remote_branches() -> set[str]:
+    output = subprocess.run(
+        [
+            "git",
+            "--no-pager",
+            "for-each-ref",
+            "--format=%(refname:short)",
+            "refs/remotes/origin",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+    remote_branches: set[str] = set()
+    for line in output.splitlines():
+        if not line.startswith("origin/"):
+            continue
+        branch_name = line.removeprefix("origin/")
+        if branch_name == "HEAD":
+            continue
+        remote_branches.add(branch_name)
+
+    return remote_branches
+
+
 def list_merged_remote_branches(default_branch: str) -> set[str]:
     subprocess.run(
         ["git", "--no-pager", "fetch", "--prune", "origin", "+refs/heads/*:refs/remotes/origin/*"],
@@ -82,7 +108,13 @@ def main() -> int:
 
     print(f"[Information] Looking up remote branches already merged into {default_branch}.")
     merged_branch_names = list_merged_remote_branches(default_branch)
+    remote_branch_names = list_remote_branches()
 
+    existing_ref_dirs = {
+        f"ref-{slug}"
+        for slug in (slugify_ref_name(ref_name) for ref_name in remote_branch_names)
+        if slug
+    }
     merged_ref_dirs = {
         f"ref-{slug}"
         for slug in (slugify_ref_name(ref_name) for ref_name in merged_branch_names)
@@ -98,7 +130,9 @@ def main() -> int:
     removed_count = 0
     for cache_target_dir in candidates:
         cache_target_name = cache_target_dir.name
-        remove_dir = cache_target_name.startswith("ref-") and cache_target_name in merged_ref_dirs
+        remove_dir = cache_target_name.startswith("ref-") and (
+            cache_target_name in merged_ref_dirs or cache_target_name not in existing_ref_dirs
+        )
         if not remove_dir:
             continue
 
