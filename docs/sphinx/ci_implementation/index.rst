@@ -39,6 +39,42 @@ Incidentally, this CI setup will populate a buildcache with pre-built binaries
 of our RADIUSS projects, which could prove useful to developers willing to
 save build time for the selected specs.
 
+Persistent CI storage is written under a ``CACHE_TARGET`` namespace. The
+default branch writes to ``main`` and other branch pipelines write to
+``ref-<commit-ref-slug>``. Each namespace has its own persistent Spack install
+tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
+pipelines also configure the ``main`` install tree as a Spack upstream and the
+``main`` buildcache as a read mirror, so they can reuse existing binaries
+without publishing experimental builds into the default branch namespace.
+A dedicated cleanup job removes stale ``ref-*`` storage targets corresponding
+to branch references already merged into ``main`` or no longer present on the
+remote. The job scans all configured environments under
+``SPACK_CI_STORAGE_ROOT`` and is gated by two explicit variables:
+``MY_ENV_NAME == ""`` and ``RSC_CLEANUP == "ON"``. This makes cleanup opt-in,
+so regular branch pipelines (including ``develop``) do not trigger cleanup by
+default. The intended usage is a scheduled pipeline configured with those
+variables.
+
+By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
+storage setup configures Spack package permissions with ``read: world``,
+``write: group``, and ``group: SPACK_CI_STORAGE_GROUP`` so install tree
+contents remain writable by the RADIUSS group. It also applies the storage
+group to the persistent cache directories, marks those directories setgid, and
+sets a group-writable umask so buildcache entries and other files written under
+the persistent storage root remain accessible to members of the RADIUSS group.
+
+The install tree is the fast path used by Spack during installation, while the
+filesystem buildcache gives Spack CI the mirror metadata it needs to prune
+already-built specs during pipeline generation.
+
+The Spack checkout itself is a third storage layer. It is kept under
+``MY_SPACK_PARENT_DIR`` on ``/dev/shm`` and reused by all jobs for the same
+machine and pipeline, so the CI does not clone Spack separately for every build
+job. In contrast, the Spack user cache is computed at job runtime and includes
+the GitLab job id, so each job gets its own staging, test, and misc cache
+locations under ``/dev/shm``. This keeps parallel Spack jobs isolated while the
+checkout and persistent binary/install storage remain shared where useful.
+
 
 =================
 CI file structure

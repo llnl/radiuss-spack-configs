@@ -19,7 +19,7 @@ variables:
     - if: '$ON_MATRIX == "OFF"'
       when: never
     # We should always release resources allocated in the pipeline.
-    - if: '$CI_JOB_NAME =~ /release-matrix/'
+    - if: '$CI_JOB_NAME =~ /^(rm-spack-matrix|release-matrix)$/'
       when: always
     # A true statement is expected to allow jobs to run. Here is the default.
     - when: on_success
@@ -74,6 +74,7 @@ build-on-matrix:
       - local: ".gitlab/spack/reindex-matrix.yml"
     strategy: depend
     forward:
+      yaml_variables: true
       pipeline_variables: true
   needs: [generate-on-matrix]
 #[--send-variable-child]

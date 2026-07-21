@@ -19,7 +19,7 @@ variables:
     - if: '$ON_TUOLUMNE == "OFF"'
       when: never
     # We should always release resources allocated in the pipeline.
-    - if: '$CI_JOB_NAME =~ /release-tuolumne/'
+    - if: '$CI_JOB_NAME =~ /^(rm-spack-tuolumne|release-tuolumne)$/'
       when: always
     # A true statement is expected to allow jobs to run. Here is the default.
     - when: on_success
@@ -73,6 +73,7 @@ build-on-tuolumne:
       - local: ".gitlab/spack/reindex-tuolumne.yml"
     strategy: depend
     forward:
+      yaml_variables: true
       pipeline_variables: true
   needs: [generate-on-tuolumne]
   rules:
