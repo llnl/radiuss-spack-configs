@@ -19,9 +19,6 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
         CACHE_TARGET: "main"
-    - if: $CI_MERGE_REQUEST_IID
-      variables:
-        CACHE_TARGET: "mr-${CI_MERGE_REQUEST_IID}"
     - if: $CI_COMMIT_REF_SLUG
       variables:
         CACHE_TARGET: "ref-${CI_COMMIT_REF_SLUG}"
