@@ -128,6 +128,7 @@ def main() -> int:
 
     resolved_storage_root = storage_root.resolve()
     removed_count = 0
+    skipped_permission_count = 0
     for cache_target_dir in candidates:
         cache_target_name = cache_target_dir.name
         remove_dir = cache_target_name.startswith("ref-") and (
@@ -147,11 +148,26 @@ def main() -> int:
             return 1
 
         print(f"[Information] Removing stale cache target: {cache_target_dir}")
-        shutil.rmtree(cache_target_dir)
-        removed_count += 1
+        try:
+            shutil.rmtree(cache_target_dir)
+            removed_count += 1
+        except PermissionError as err:
+            print(
+                f"[Warning] Skipping stale cache target due to insufficient permissions: "
+                f"{cache_target_dir} ({err})",
+                file=sys.stderr,
+            )
+            skipped_permission_count += 1
 
     noun = "directory" if removed_count == 1 else "directories"
     print(f"[Information] Removed {removed_count} stale cache target {noun}.")
+    if skipped_permission_count:
+        noun = "directory" if skipped_permission_count == 1 else "directories"
+        print(
+            f"[Warning] Skipped {skipped_permission_count} stale cache target {noun} "
+            f"because of insufficient permissions.",
+            file=sys.stderr,
+        )
     return 0
 
 
