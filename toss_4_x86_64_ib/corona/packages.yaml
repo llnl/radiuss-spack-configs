@@ -145,7 +145,7 @@
         environment: {}
         extra_rpaths: [/opt/rocm-6.0.2/lib, /opt/rocm-6.0.2/llvm/lib]
     - spec: llvm-amdgpu@6.4.3
-      prefix: /opt/rocm-6.4.3/llvm
+      prefix: /opt/rocm-6.4.3
       extra_attributes:
         compilers:
           c: /opt/rocm-6.4.3/llvm/bin/amdclang
