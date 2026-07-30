@@ -1,3 +1,32 @@
+# v2026.07.0
+
+  Recommended Spack version: v1.2.2
+  Required spack-packages commit: e4c0b2d275f9b4714f80156f79f1e29347dedf16
+
+  ## Configs Update
+  - Update ROCm to 6.4.3 on Corona.
+  - Fix out-of-sync packages.yaml for toss4 machines.
+  - Remove extra llvm in ROCm 6.4.3 prefix.
+  - Fix cc -> c yaml entry in packages.yaml.
+  - Stop setting spack-packages builtin repo ref in shared environment.
+
+  ## CI
+  - Update to Spack v1.2.2.
+  - Optimize Spack CI:
+    - Optimized git checkout settings.
+    - Use RADIUSS workspace and filesystem storage for CI caches.
+    - Compute Spack user cache per CI job.
+    - Improve buildcache handling.
+  - Use ROCm 6.4.3 in RSC CI.
+  - Implement stale cache cleanup for main branch and merged refs.
+  - Improve CI cleanup script with permission warnings and opt-in mechanism.
+  - Fixes for empty buildcache and unsigned mirror keys.
+  - Fix variables in reindex script.
+
+  ## Others
+  - Add module list.
+  - Fix syntax in unused darwin config.
+
 # 2026.6.0
 
   Recommended Spack version: v1.2.0
