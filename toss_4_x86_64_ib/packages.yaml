@@ -3,17 +3,6 @@
     # This defaults us to machine specific flags of ivybridge which allows
     # us to run on broadwell, cascadelake and sapphirerapids as well
     target: [ivybridge]
-    require:
-    - spec: ^blt%intel-oneapi-compilers
-      when: '%intel-oneapi-compilers ^blt'
-    - spec: ^blt%llvm
-      when: '%llvm ^blt'
-    - spec: ^blt%gcc
-      when: '%gcc ^blt'
-    - spec: ^blt%intel-oneapi-compilers-classic
-      when: '%intel-oneapi-compilers-classic ^blt'
-    - spec: ^mvapich2
-      when: '^mpi'
     providers:
       blas: [openblas]
       lapack: [netlib-lapack]

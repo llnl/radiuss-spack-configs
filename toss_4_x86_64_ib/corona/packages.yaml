@@ -2,16 +2,6 @@
   all:
     require:
     - 'target=zen'
-    - spec: ^blt%intel-oneapi-compilers
-      when: '%intel-oneapi-compilers ^blt'
-    - spec: ^blt%llvm
-      when: '%llvm ^blt'
-    - spec: ^blt%gcc
-      when: '%gcc ^blt'
-    - spec: ^blt%intel-oneapi-compilers-classic
-      when: '%intel-oneapi-compilers-classic ^blt'
-    - spec: ^mvapich2
-      when: '^mpi'
     providers:
       blas: [openblas]
       lapack: [netlib-lapack]
@@ -489,6 +479,15 @@
       prefix: /usr
 
 'toolchains:':
+  rocm_6_4_3_gcc_13:
+    - spec: '%[virtuals=c]llvm-amdgpu@=6.4.3'
+      when: '%c'
+    - spec: '%[virtuals=cxx]llvm-amdgpu@=6.4.3'
+      when: '%cxx'
+    - spec: '%[virtuals=fortran]gcc@13.3.1'
+      when: '%fortran'
+    - spec: '%mpi=mvapich2@2.3.7%gcc@=13.3.1'
+      when: '%mpi'
   sycl-clang-22-gcc-10:
     - spec: '%[virtuals=c]llvm@22.0.0git+clang~flang~lld~lldb'
       when: '%c'
