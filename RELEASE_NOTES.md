@@ -1,3 +1,8 @@
+# XXXX.XX.X
+
+  Recommended Spack version: v1.2.2
+  Recommended spack-packages commit: 4b6b842d494ab86ebef5304e6bfe766aa421a66b
+
 # v2026.07.0
 
   Recommended Spack version: v1.2.2
