@@ -130,6 +130,7 @@
         compilers:
           c: /opt/rocm-5.7.1/llvm/bin/amdclang
           cxx: /opt/rocm-5.7.1/llvm/bin/amdclang++
+          hip: /opt/rocm-5.7.1/llvm/bin/amdclang++
           fortran: /opt/rocm-5.7.1/llvm/bin/amdflang
         flags: {}
         environment: {}
@@ -140,6 +141,7 @@
         compilers:
           c: /opt/rocm-6.0.2/llvm/bin/amdclang
           cxx: /opt/rocm-6.0.2/llvm/bin/amdclang++
+          hip: /opt/rocm-6.0.2/llvm/bin/amdclang++
           fortran: /opt/rocm-6.0.2/llvm/bin/amdflang
         flags: {}
         environment: {}
@@ -150,6 +152,7 @@
         compilers:
           c: /opt/rocm-6.4.3/llvm/bin/amdclang
           cxx: /opt/rocm-6.4.3/llvm/bin/amdclang++
+          hip: /opt/rocm-6.4.3/llvm/bin/amdclang++
           fortran: /opt/rocm-6.4.3/llvm/bin/amdflang
         flags: {}
         environment: {}
