@@ -26,12 +26,12 @@ directory convention (for example, ``raja-perf`` becomes ``raja_perf``).
 Literal paths can also be tracked; the cached-CMake build-system implementation
 is one such path.
 
-The workflow first looks for the shared generated branch
-``automation/spack-packages-tracker``. When that branch has a valid
-``spack.repos.builtin.commit`` value for the matrix entry's ``spack.yaml``,
-that in-progress pin is the baseline. Otherwise the baseline is the pin in the
-default-branch version of ``spack.yaml``. Each matrix entry independently
-updates only its own environment file.
+The workflow first looks for its generated branch,
+``automation/spack-packages-tracker-<matrix-entry>``. When that branch has a
+valid ``spack.repos.builtin.commit`` value for the matrix entry's
+``spack.yaml``, that in-progress pin is the baseline. Otherwise the baseline
+is the pin in the default-branch version of ``spack.yaml``. Each matrix entry
+independently updates only its own environment file.
 
 Selecting a stable target
 =========================
@@ -58,14 +58,14 @@ Prepared branches and issues
 ============================
 
 For a normal update, the workflow creates a branch named
-``automation/spack-packages-tracker`` from the repository's checked-out
-default branch. The branch name does not include the target SHA, so it is the
-one long-lived generated pull-request source for the tracker. A matrix entry
+``automation/spack-packages-tracker-<matrix-entry>`` from the repository's
+checked-out default branch. The branch name does not include the target SHA, so
+each matrix entry has one long-lived generated pull-request source. An entry
 changes its own pinned commit in ``spack.yaml``, commits that change, and pushes
-the branch. Matrix jobs run serially because they share this branch. Later runs
-that select a newer target add a new commit to it; a rerun that selects the
-already-pinned target makes no change. This lets the branch remain the
-pull-request source as relevant upstream changes arrive.
+its branch. Later runs that select a newer target add a new commit to that
+branch; a rerun that selects the already-pinned target makes no change. This
+lets the branch remain the pull-request source as relevant upstream changes
+arrive without mixing updates from different tracked scopes.
 
 The branch is automation-owned. If its tracked environment file no longer
 contains a valid Spack commit, the workflow rebuilds the branch from the

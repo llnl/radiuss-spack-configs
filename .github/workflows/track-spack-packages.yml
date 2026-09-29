@@ -14,9 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Both matrix entries update the same generated branch, so serialize them
-      # to avoid concurrent non-fast-forward pushes.
-      max-parallel: 1
       matrix:
         include:
           # Watch a curated list of packages used by this env.
@@ -38,7 +35,7 @@ jobs:
 
     env:
       SPACK_PACKAGES_REPO: https://github.com/spack/spack-packages.git
-      TRACKER_BRANCH: automation/spack-packages-tracker
+      TRACKER_BRANCH: automation/spack-packages-tracker-${{ matrix.name }}
       SPACK_YAML: ${{ matrix.spack_yaml }}
 
     steps:
