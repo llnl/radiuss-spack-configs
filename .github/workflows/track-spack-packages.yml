@@ -5,7 +5,7 @@ on:
     - cron: '17 6 * * 1'
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 jobs:
@@ -35,13 +35,14 @@ jobs:
 
     env:
       SPACK_PACKAGES_REPO: https://github.com/spack/spack-packages.git
+      TRACKER_BRANCH: automation/spack-packages-tracker-${{ matrix.name }}
       SPACK_YAML: ${{ matrix.spack_yaml }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Resolve current and latest spack-packages commits
+      - name: Resolve tracking baseline and develop commits
         id: commits
         shell: bash
         run: |
@@ -49,41 +50,51 @@ jobs:
 
           # Read the upstream pin from spack.repos.builtin.commit.
           # Spack stores full 40-character SHA-1 hashes here.
-          CURRENT_COMMIT=$(yq '.spack.repos.builtin.commit' "${SPACK_YAML}")
-          if [[ -z "${CURRENT_COMMIT}" || "${CURRENT_COMMIT}" == "null" ]]; then
+          CONFIG_COMMIT=$(yq '.spack.repos.builtin.commit' "${SPACK_YAML}")
+          if [[ -z "${CONFIG_COMMIT}" || "${CONFIG_COMMIT}" == "null" ]]; then
             echo "Missing .spack.repos.builtin.commit in ${SPACK_YAML}." >&2
             exit 1
           fi
-          if ! [[ "${CURRENT_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "Invalid commit hash in ${SPACK_YAML}: ${CURRENT_COMMIT}" >&2
+          if ! [[ "${CONFIG_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Invalid commit hash in ${SPACK_YAML}: ${CONFIG_COMMIT}" >&2
             exit 1
+          fi
+
+          # An existing generated branch is the in-progress proposal. Use its
+          # pin as the baseline so reruns only report changes not yet captured
+          # by that proposal. A malformed branch is repaired later from the
+          # configuration pin.
+          CURRENT_COMMIT="${CONFIG_COMMIT}"
+          if git fetch origin "refs/heads/${TRACKER_BRANCH}:refs/remotes/origin/${TRACKER_BRANCH}"; then
+            TRACKER_COMMIT=$(git show "origin/${TRACKER_BRANCH}:${SPACK_YAML}" 2>/dev/null \
+              | yq '.spack.repos.builtin.commit' || true)
+            if [[ "${TRACKER_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+              CURRENT_COMMIT="${TRACKER_COMMIT}"
+              echo "Using existing tracker branch pin: ${CURRENT_COMMIT}"
+            else
+              echo "Tracker branch ${TRACKER_BRANCH} has no valid pin in ${SPACK_YAML}; it will be repaired." >&2
+            fi
           fi
 
           SPACK_PACKAGES_DIR="${RUNNER_TEMP}/spack-packages"
           git clone "${SPACK_PACKAGES_REPO}" "${SPACK_PACKAGES_DIR}"
 
-          DEFAULT_BRANCH=$(git -C "${SPACK_PACKAGES_DIR}" remote show origin \
-            | sed -n '/HEAD branch/s/.*: //p')
-          if [[ -z "${DEFAULT_BRANCH}" ]]; then
-            echo "Unable to determine default branch of ${SPACK_PACKAGES_REPO}." >&2
+          git -C "${SPACK_PACKAGES_DIR}" fetch origin develop
+          DEVELOP_COMMIT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse origin/develop)
+          if [[ -z "${DEVELOP_COMMIT}" || ! "${DEVELOP_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Unable to resolve the latest commit on develop." >&2
             exit 1
           fi
-          LATEST_COMMIT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse "origin/${DEFAULT_BRANCH}")
-          if [[ -z "${LATEST_COMMIT}" || ! "${LATEST_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "Unable to resolve latest commit on ${DEFAULT_BRANCH}." >&2
-            exit 1
-          fi
-          LATEST_COMMIT_SHORT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse --short=12 "${LATEST_COMMIT}")
+          DEVELOP_COMMIT_SHORT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse --short=12 "${DEVELOP_COMMIT}")
 
           echo "current_commit=${CURRENT_COMMIT}" >> "${GITHUB_OUTPUT}"
-          echo "latest_commit=${LATEST_COMMIT}" >> "${GITHUB_OUTPUT}"
-          echo "latest_commit_short=${LATEST_COMMIT_SHORT}" >> "${GITHUB_OUTPUT}"
+          echo "develop_commit=${DEVELOP_COMMIT}" >> "${GITHUB_OUTPUT}"
+          echo "develop_commit_short=${DEVELOP_COMMIT_SHORT}" >> "${GITHUB_OUTPUT}"
 
           echo "Current commit : ${CURRENT_COMMIT}"
-          echo "Latest commit : ${LATEST_COMMIT}"
+          echo "Develop commit : ${DEVELOP_COMMIT}"
 
       - name: Resolve watched paths
-        id: paths
         shell: bash
         env:
           PACKAGES: ${{ matrix.packages }}
@@ -121,7 +132,7 @@ jobs:
         shell: bash
         env:
           CURRENT_COMMIT: ${{ steps.commits.outputs.current_commit }}
-          LATEST_COMMIT: ${{ steps.commits.outputs.latest_commit }}
+          DEVELOP_COMMIT: ${{ steps.commits.outputs.develop_commit }}
         run: |
           set -euo pipefail
 
@@ -132,7 +143,7 @@ jobs:
           : > "${CHANGED_PATHS_FILE}"
           : > "${DIFF_FILE}"
 
-          if [[ "${CURRENT_COMMIT}" == "${LATEST_COMMIT}" ]]; then
+          if [[ "${CURRENT_COMMIT}" == "${DEVELOP_COMMIT}" ]]; then
             echo "should_update=false" >> "${GITHUB_OUTPUT}"
             echo "reason=already_up_to_date" >> "${GITHUB_OUTPUT}"
             exit 0
@@ -144,11 +155,23 @@ jobs:
             echo "Current commit ${CURRENT_COMMIT} not in upstream history; forcing update." >&2
             echo "should_update=true" >> "${GITHUB_OUTPUT}"
             echo "reason=current_commit_not_found" >> "${GITHUB_OUTPUT}"
+            echo "can_prepare=false" >> "${GITHUB_OUTPUT}"
+            echo "target_commit=${DEVELOP_COMMIT}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if ! git -C "${SPACK_PACKAGES_DIR}" merge-base --is-ancestor \
+            "${CURRENT_COMMIT}" "${DEVELOP_COMMIT}"; then
+            echo "Current commit ${CURRENT_COMMIT} is not an ancestor of develop; manual review is required." >&2
+            echo "should_update=true" >> "${GITHUB_OUTPUT}"
+            echo "reason=current_commit_not_on_develop" >> "${GITHUB_OUTPUT}"
+            echo "can_prepare=false" >> "${GITHUB_OUTPUT}"
+            echo "target_commit=${DEVELOP_COMMIT}" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
 
           CHANGED=$(git -C "${SPACK_PACKAGES_DIR}" diff --name-only \
-            "${CURRENT_COMMIT}..${LATEST_COMMIT}" -- "${WATCH[@]}")
+            "${CURRENT_COMMIT}..${DEVELOP_COMMIT}" -- "${WATCH[@]}")
           if [[ -z "${CHANGED}" ]]; then
             echo "should_update=false" >> "${GITHUB_OUTPUT}"
             echo "reason=no_relevant_changes" >> "${GITHUB_OUTPUT}"
@@ -168,20 +191,111 @@ jobs:
           done
           printf '%s\n' "${TRACKED_AND_CHANGED[@]}" > "${CHANGED_PATHS_FILE}"
 
-          git -C "${SPACK_PACKAGES_DIR}" diff "${CURRENT_COMMIT}..${LATEST_COMMIT}" \
+          # The last commit that touches a watched path is the first revision
+          # with all watched changes currently present on develop.  Pinning it,
+          # rather than develop HEAD, keeps the result stable as unrelated
+          # commits land on develop.
+          TARGET_COMMIT=$(git -C "${SPACK_PACKAGES_DIR}" log -1 --format=%H \
+            "${CURRENT_COMMIT}..${DEVELOP_COMMIT}" -- "${WATCH[@]}")
+          if [[ -z "${TARGET_COMMIT}" || ! "${TARGET_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Unable to determine the target commit on develop." >&2
+            exit 1
+          fi
+          TARGET_COMMIT_SHORT=$(git -C "${SPACK_PACKAGES_DIR}" rev-parse --short=12 "${TARGET_COMMIT}")
+
+          git -C "${SPACK_PACKAGES_DIR}" diff "${CURRENT_COMMIT}..${TARGET_COMMIT}" \
             -- "${TRACKED_AND_CHANGED[@]}" > "${DIFF_FILE}"
 
           echo "should_update=true" >> "${GITHUB_OUTPUT}"
           echo "reason=relevant_changes_found" >> "${GITHUB_OUTPUT}"
+          echo "can_prepare=true" >> "${GITHUB_OUTPUT}"
+          echo "target_commit=${TARGET_COMMIT}" >> "${GITHUB_OUTPUT}"
+          echo "target_commit_short=${TARGET_COMMIT_SHORT}" >> "${GITHUB_OUTPUT}"
+
+      - name: Prepare and push update branch
+        id: prepare
+        if: steps.detect.outputs.can_prepare == 'true'
+        shell: bash
+        env:
+          CURRENT_COMMIT: ${{ steps.commits.outputs.current_commit }}
+          TARGET_COMMIT: ${{ steps.detect.outputs.target_commit }}
+          MATRIX_NAME: ${{ matrix.name }}
+        run: |
+          set -euo pipefail
+
+          # Keep one generated branch for all tracked environments. Its name is
+          # intentionally independent of the target so subsequent relevant
+          # upstream changes update the same review branch.
+          BRANCH_NAME="${TRACKER_BRANCH}"
+          BASE_COMMIT=$(git rev-parse HEAD)
+
+          # Start from the existing proposal when it exists; otherwise create
+          # the generated branch from the checked-out default branch.
+          if git show-ref --verify --quiet "refs/remotes/origin/${BRANCH_NAME}"; then
+            git switch --track -c "${BRANCH_NAME}" "origin/${BRANCH_NAME}"
+          else
+            git switch -c "${BRANCH_NAME}"
+          fi
+
+          # A generated branch with an invalid pin is disposable. Rebuild it
+          # from the default branch and use the validated tracking baseline.
+          SOURCE_COMMIT=$(yq '.spack.repos.builtin.commit' "${SPACK_YAML}")
+          if ! [[ "${SOURCE_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Resetting malformed generated branch ${BRANCH_NAME}." >&2
+            git switch --detach "${BASE_COMMIT}"
+            git switch -C "${BRANCH_NAME}"
+            SOURCE_COMMIT="${CURRENT_COMMIT}"
+          fi
+
+          if [[ "${SOURCE_COMMIT}" == "${TARGET_COMMIT}" ]]; then
+            echo "Existing prepared branch ${BRANCH_NAME} is already up to date."
+            echo "branch_name=${BRANCH_NAME}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "Updating prepared branch ${BRANCH_NAME} from ${SOURCE_COMMIT}."
+
+          # Requiring the current SHA to occur exactly once prevents an
+          # accidental broad replacement. Existing generated branches are
+          # deliberately advanced to the newest target rather than rejected.
+          python3 - "${SPACK_YAML}" "${SOURCE_COMMIT}" "${TARGET_COMMIT}" <<'PY'
+          from pathlib import Path
+          import sys
+
+          path = Path(sys.argv[1])
+          current_commit, target_commit = sys.argv[2:]
+          contents = path.read_text()
+          count = contents.count(current_commit)
+          if count != 1:
+              raise SystemExit(
+                  f"Expected one occurrence of {current_commit} in {path}, found {count}."
+              )
+          path.write_text(contents.replace(current_commit, target_commit))
+          PY
+
+          git diff --check
+          git add "${SPACK_YAML}"
+          if git diff --cached --quiet; then
+            echo "Preparing the update branch did not change ${SPACK_YAML}." >&2
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update ${MATRIX_NAME} spack-packages reference" \
+            -m "${SOURCE_COMMIT} -> ${TARGET_COMMIT}"
+          git push --force-with-lease origin "HEAD:refs/heads/${BRANCH_NAME}"
+          echo "branch_name=${BRANCH_NAME}" >> "${GITHUB_OUTPUT}"
 
       - name: Create issue
         if: steps.detect.outputs.should_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           CURRENT_COMMIT: ${{ steps.commits.outputs.current_commit }}
-          LATEST_COMMIT: ${{ steps.commits.outputs.latest_commit }}
-          LATEST_COMMIT_SHORT: ${{ steps.commits.outputs.latest_commit_short }}
+          TARGET_COMMIT: ${{ steps.detect.outputs.target_commit }}
+          TARGET_COMMIT_SHORT: ${{ steps.detect.outputs.target_commit_short || steps.commits.outputs.develop_commit_short }}
           MATRIX_NAME: ${{ matrix.name }}
+          PREPARED_BRANCH: ${{ steps.prepare.outputs.branch_name }}
+          CAN_PREPARE: ${{ steps.detect.outputs.can_prepare }}
         run: |
           set -euo pipefail
 
@@ -212,23 +326,34 @@ jobs:
 
           BODY_FILE="${RUNNER_TEMP}/issue-body.md"
           ISSUE_TITLE_PREFIX="[spack-packages-tracker:${MATRIX_NAME}]"
-          ISSUE_TITLE="${ISSUE_TITLE_PREFIX} Update spack-packages reference to ${LATEST_COMMIT_SHORT}"
+          ISSUE_TITLE="${ISSUE_TITLE_PREFIX} Update spack-packages reference to ${TARGET_COMMIT_SHORT}"
           {
-            echo "Automated weekly check detected relevant changes in \`spack/spack-packages\` for **${MATRIX_NAME}**."
+            echo "Automated weekly check detected relevant changes on \`spack/spack-packages:develop\` for **${MATRIX_NAME}**."
             echo
             echo "## spack-packages references"
             echo
             echo "| | Commit |"
             echo "|---|---|"
             echo "| Current | \`${CURRENT_COMMIT}\` |"
-            echo "| New | \`${LATEST_COMMIT}\` |"
+            echo "| Prepared target | \`${TARGET_COMMIT}\` |"
+            echo
+            echo "The target is the last \`develop\` commit that changes a watched path. Later unrelated commits do not change this target."
+            echo
+            echo "## Prepared branch"
+            echo
+            if [[ "${CAN_PREPARE}" == "true" && -n "${PREPARED_BRANCH}" ]]; then
+              echo "A ready-to-review branch was pushed: [\`${PREPARED_BRANCH}\`](https://github.com/${GITHUB_REPOSITORY}/tree/${PREPARED_BRANCH})."
+              echo "Open a pull request from this branch after reviewing the changes."
+            else
+              echo "_No branch was prepared because the current pin is unavailable or is not an ancestor of \`develop\`. Manual review is required._"
+            fi
             echo
             echo "## Changed paths"
             echo
             printf '%s' "${CHANGED_SECTION}"
             echo "## Diff"
             echo
-            echo "Changes in \`spack/spack-packages\` from \`${CURRENT_COMMIT}\` to \`${LATEST_COMMIT}\`:"
+            echo "Changes in \`spack/spack-packages\` from \`${CURRENT_COMMIT}\` to \`${TARGET_COMMIT}\`:"
             echo
             echo "${DIFF_SECTION}"
           } > "${BODY_FILE}"
