@@ -223,9 +223,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Keep one generated branch for all tracked environments. Its name is
-          # intentionally independent of the target so subsequent relevant
-          # upstream changes update the same review branch.
+          # Keep one generated branch for this matrix entry. Its name is
+          # independent of the target so subsequent relevant upstream changes
+          # update the same review branch.
           BRANCH_NAME="${TRACKER_BRANCH}"
           BASE_COMMIT=$(git rev-parse HEAD)
 
@@ -239,7 +239,7 @@ jobs:
 
           # A generated branch with an invalid pin is disposable. Rebuild it
           # from the default branch and use the validated tracking baseline.
-          SOURCE_COMMIT=$(yq '.spack.repos.builtin.commit' "${SPACK_YAML}")
+          SOURCE_COMMIT=$(yq '.spack.repos.builtin.commit' "${SPACK_YAML}" 2>/dev/null || true)
           if ! [[ "${SOURCE_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
             echo "Resetting malformed generated branch ${BRANCH_NAME}." >&2
             git switch --detach "${BASE_COMMIT}"
@@ -296,14 +296,27 @@ jobs:
           MATRIX_NAME: ${{ matrix.name }}
           PREPARED_BRANCH: ${{ steps.prepare.outputs.branch_name }}
           CAN_PREPARE: ${{ steps.detect.outputs.can_prepare }}
+          REASON: ${{ steps.detect.outputs.reason }}
         run: |
           set -euo pipefail
 
           CHANGED_PATHS_FILE="${RUNNER_TEMP}/changed-paths.txt"
           DIFF_FILE="${RUNNER_TEMP}/spack-packages-diff.txt"
 
+          case "${REASON}" in
+            current_commit_not_found)
+              COMPARISON_NOTE="The current pin is not available in upstream history, so a path list and diff are unavailable."
+              ;;
+            current_commit_not_on_develop)
+              COMPARISON_NOTE="The current pin is not an ancestor of develop, so a path list and diff are unavailable."
+              ;;
+            *)
+              COMPARISON_NOTE="A path list and diff are unavailable."
+              ;;
+          esac
+
           if [[ ! -s "${CHANGED_PATHS_FILE}" ]]; then
-            CHANGED_SECTION="_Could not determine changed paths (current commit not found in upstream history)._"
+            CHANGED_SECTION="_${COMPARISON_NOTE}_"
           else
             CHANGED_SECTION=""
             while IFS= read -r P; do
@@ -313,7 +326,7 @@ jobs:
 
           DIFF_CONTENT=$(cat "${DIFF_FILE}")
           if [[ -z "${DIFF_CONTENT}" ]]; then
-            DIFF_SECTION="_Diff unavailable (current commit not found in upstream history)._"
+            DIFF_SECTION="_${COMPARISON_NOTE}_"
           else
             # GitHub issue bodies are capped at 65536 characters; leave headroom
             # for surrounding markdown by truncating the diff earlier.
