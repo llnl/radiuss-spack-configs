@@ -33,14 +33,13 @@ RADIUSS Spack Configs User Documentation
 ========================================
 
 The steps necessary to leverage RADIUSS Spack Configs are documented in the
-:ref:`RADIUSS Spack Configs User Guide<sphinx/user_guide/index>`.
+:doc:`RADIUSS Spack Configs User Guide <user_guide/index>`.
 
-.. # RADIUSS Spack Configs Developer Documentation
-.. # =============================================
-.. #
-.. # TODO: In the  :doc:`RADIUSS Spack Configs Developer Guide <sphinx/dev_guide/index>`,
-.. # we discuss the layout of the RADIUSS Spack Configs repository and how to
-.. # contribute to it.
+RADIUSS Spack Configs Developer Documentation
+=============================================
+
+Repository maintenance, including the automated tracking of upstream Spack
+package changes, is documented in the :ref:`developer-guide`.
 
 
 Shared Spack specs for CI
@@ -92,11 +91,11 @@ development process.
    user_guide/index
    ci_implementation/index
 
-.. # .. toctree::
-.. #    :hidden:
-.. #    :caption: Developer Documentation
-.. #
-.. #    sphinx/dev_guide/index
+.. toctree::
+   :hidden:
+   :caption: Developer Documentation
+
+   developer_guide/index
 
 .. _RADIUSS Spack Configs: https://radiuss-spack-configs.readthedocs.io/en/latest/index.html
 .. _RADIUSS Shared CI: https://radiuss-shared-ci.readthedocs.io/en/latest/index.html
