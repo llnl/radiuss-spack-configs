@@ -48,6 +48,8 @@ rad-bat spack --spec SPEC --dest PATH
     [--output-dir PATH]
     [--upstream PATH ...]
     [--buildcache URL]
+    [--buildcache-username-variable NAME]
+    [--buildcache-password-variable NAME]
     [--push-to-buildcache]
     [--host-config-name NAME]
     [--jobs N] [--source PATH]

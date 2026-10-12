@@ -202,6 +202,8 @@ class WorkflowTests(unittest.TestCase):
                     str(output_dir),
                     [],
                     None,
+                    None,
+                    None,
                     False,
                     "job.cmake",
                     4,
@@ -235,6 +237,8 @@ class WorkflowTests(unittest.TestCase):
                     None,
                     None,
                     [],
+                    None,
+                    None,
                     None,
                     True,
                     None,
@@ -285,6 +289,9 @@ class CiTests(unittest.TestCase):
                 "RAD_BAT_DEST": str(root / "work"),
                 "RAD_BAT_INSTALL_TREE": str(root / "persistent"),
                 "RAD_BAT_OUTPUT_DIR": str(root / "artifacts"),
+                "RAD_BAT_BUILDCACHE": "oci://registry.invalid/project",
+                "RAD_BAT_BUILDCACHE_USERNAME_VARIABLE": "CI_REGISTRY_USER",
+                "RAD_BAT_BUILDCACHE_PASSWORD_VARIABLE": "CI_JOB_TOKEN",
             }
             with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
                 "rad_bat.cli.run_spack"
@@ -292,6 +299,9 @@ class CiTests(unittest.TestCase):
                 self.assertEqual(cli.main(["ci"]), 0)
             self.assertEqual(workflow.call_args.args[4], str(root / "persistent"))
             self.assertEqual(workflow.call_args.args[5], str(root / "artifacts"))
+            self.assertEqual(workflow.call_args.args[7], "oci://registry.invalid/project")
+            self.assertEqual(workflow.call_args.args[8], "CI_REGISTRY_USER")
+            self.assertEqual(workflow.call_args.args[9], "CI_JOB_TOKEN")
 
 
 if __name__ == "__main__":

@@ -50,6 +50,8 @@ def build_parser() -> argparse.ArgumentParser:
     spack.add_argument("--output-dir")
     spack.add_argument("--upstream", action="append", default=[])
     spack.add_argument("--buildcache")
+    spack.add_argument("--buildcache-username-variable")
+    spack.add_argument("--buildcache-password-variable")
     spack.add_argument("--push-to-buildcache", action="store_true")
     spack.add_argument("--host-config-name")
     _add_common(spack)
@@ -120,6 +122,8 @@ def _run_ci() -> None:
         _ci_value("RAD_BAT_OUTPUT_DIR"),
         upstreams,
         _ci_value("RAD_BAT_BUILDCACHE"),
+        _ci_value("RAD_BAT_BUILDCACHE_USERNAME_VARIABLE"),
+        _ci_value("RAD_BAT_BUILDCACHE_PASSWORD_VARIABLE"),
         _truth(_ci_value("RAD_BAT_PUSH_TO_BUILDCACHE", "PUSH_TO_REGISTRY")),
         _ci_value("RAD_BAT_HOST_CONFIG_NAME"),
         jobs,
@@ -153,6 +157,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 arguments.output_dir,
                 arguments.upstream,
                 arguments.buildcache,
+                arguments.buildcache_username_variable,
+                arguments.buildcache_password_variable,
                 arguments.push_to_buildcache,
                 arguments.host_config_name,
                 arguments.jobs,

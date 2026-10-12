@@ -235,6 +235,8 @@ def run_spack(
     output_dir_path: Optional[str],
     upstreams: List[str],
     buildcache: Optional[str],
+    buildcache_username_variable: Optional[str],
+    buildcache_password_variable: Optional[str],
     push_to_buildcache: bool,
     host_config_name: Optional[str],
     jobs: int,
@@ -297,6 +299,15 @@ def run_spack(
                 ],
             )
         if buildcache:
+            credential_arguments = []
+            if buildcache_username_variable:
+                credential_arguments.extend(
+                    ["--oci-username-variable", buildcache_username_variable]
+                )
+            if buildcache_password_variable:
+                credential_arguments.extend(
+                    ["--oci-password-variable", buildcache_password_variable]
+                )
             _run_spack(
                 spack,
                 [
@@ -309,6 +320,9 @@ def run_spack(
                     "--type",
                     "binary",
                     "--unsigned",
+                ]
+                + credential_arguments
+                + [
                     "rad-bat",
                     buildcache,
                 ],
