@@ -42,7 +42,7 @@ There are two modes and no automatic mode in the initial implementation:
 rad-bat host-config --host-config PATH [--dest PATH] [--jobs N]
     [--source PATH] [-- COMMAND...]
 
-rad-bat spack --spec SPEC --dest PATH
+rad-bat spack --spec PROJECT-SPEC-FRAGMENT --dest PATH
     [--spack-env PATH]
     [--install-tree PATH]
     [--output-dir PATH]
@@ -69,6 +69,9 @@ same project command. `--install-tree` separates durable dependency installs
 from disposable work; `--output-dir` provides a predictable artifact location.
 Their direct-command defaults remain under the destination for developer
 convenience, while CI requires an explicit persistent install tree.
+The spec argument contains the project's variants, compiler, and dependency
+constraints; `rad-bat` prepends the configured package at `@develop` so the
+environment always has an explicit project root.
 
 `ci` translates CI environment variables to one of the normal modes. New
 tool-specific settings use `RAD_BAT_*`; the migration adapter may accept the

@@ -268,6 +268,7 @@ def run_spack(
     )
     install_tree.mkdir(parents=True, exist_ok=True)
     host_configs.mkdir(parents=True, exist_ok=True)
+    project_spec = "{}@develop {}".format(config.package, spec).strip()
 
     with logs.sections.section("spack_setup", "Preparing Spack environment"):
         _git_checkout(config.spack.url, config.spack.commit, checkout)
@@ -331,7 +332,10 @@ def run_spack(
     with logs.sections.section(
         "dependencies", "Concretizing and installing dependencies", collapsed=False
     ):
-        _run_spack(spack, ["-e", str(environment), "add", spec])
+        # RADIUSS CI jobs traditionally provide the variants, compiler, and
+        # dependency constraints only.  Give Spack the project root explicitly;
+        # anonymous specs cannot be added to an environment.
+        _run_spack(spack, ["-e", str(environment), "add", project_spec])
         _run_spack(
             spack,
             [

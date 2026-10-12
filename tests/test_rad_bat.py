@@ -195,15 +195,15 @@ class WorkflowTests(unittest.TestCase):
             ), mock.patch("rad_bat.workflows.run_command", side_effect=fake_command):
                 run_spack(
                     config,
-                    "umpire@develop +tools",
+                    "+tools",
                     str(destination),
                     None,
                     str(install_tree),
                     str(output_dir),
                     [],
-                    None,
-                    None,
-                    None,
+                    "oci://registry.invalid/project",
+                    "CI_REGISTRY_USER",
+                    "CI_JOB_TOKEN",
                     False,
                     "job.cmake",
                     4,
@@ -218,7 +218,17 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn(
                 "config:install_tree:root:{}".format(install_tree.resolve()), flattened
             )
-            self.assertNotIn("buildcache", flattened)
+            add_command = next(
+                command for command in commands
+                if len(command) == 5 and command[-2] == "add"
+            )
+            self.assertIn("umpire@develop +tools", add_command)
+            mirror_command = next(command for command in commands if "mirror" in command)
+            self.assertIn("--oci-username-variable", mirror_command)
+            self.assertIn("CI_REGISTRY_USER", mirror_command)
+            self.assertIn("--oci-password-variable", mirror_command)
+            self.assertIn("CI_JOB_TOKEN", mirror_command)
+            self.assertIn("oci://registry.invalid/project", mirror_command)
             self.assertEqual(commands[-1][0], "project-driver")
 
     def test_buildcache_push_requires_a_buildcache(self):
