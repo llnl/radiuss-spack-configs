@@ -10,7 +10,7 @@ from .errors import RadBatError
 
 
 FULL_COMMIT = re.compile(r"^[0-9a-fA-F]{40}$")
-PLACEHOLDERS = {"{host_config}", "{dest}", "{source}", "{jobs}"}
+PLACEHOLDERS = {"{host_config}", "{work_dir}", "{source}", "{jobs}"}
 
 
 @dataclass(frozen=True)

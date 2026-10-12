@@ -39,12 +39,12 @@ def build_parser() -> argparse.ArgumentParser:
         "host-config", help="build using an existing host-config without invoking Spack"
     )
     host_config.add_argument("--host-config", required=True)
-    host_config.add_argument("--dest")
+    host_config.add_argument("--work-dir")
     _add_common(host_config)
 
     spack = subparsers.add_parser("spack", help="generate a host-config with native Spack")
     spack.add_argument("--spec", required=True)
-    spack.add_argument("--dest", required=True)
+    spack.add_argument("--work-dir", required=True)
     spack.add_argument("--spack-env")
     spack.add_argument("--install-tree")
     spack.add_argument("--output-dir")
@@ -104,7 +104,7 @@ def _run_ci() -> None:
         run_host_config(
             config,
             _required_ci("RAD_BAT_HOST_CONFIG", "HOST_CONFIG"),
-            _ci_value("RAD_BAT_DEST"),
+            _ci_value("RAD_BAT_WORK_DIR"),
             jobs,
             None,
         )
@@ -116,7 +116,7 @@ def _run_ci() -> None:
     run_spack(
         config,
         _required_ci("RAD_BAT_SPEC", "SPEC"),
-        _required_ci("RAD_BAT_DEST"),
+        _required_ci("RAD_BAT_WORK_DIR"),
         _ci_value("RAD_BAT_SPACK_ENV"),
         _required_ci("RAD_BAT_INSTALL_TREE"),
         _ci_value("RAD_BAT_OUTPUT_DIR"),
@@ -143,7 +143,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             run_host_config(
                 config,
                 arguments.host_config,
-                arguments.dest,
+                arguments.work_dir,
                 arguments.jobs,
                 _command(arguments.command),
             )
@@ -151,7 +151,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             run_spack(
                 config,
                 arguments.spec,
-                arguments.dest,
+                arguments.work_dir,
                 arguments.spack_env,
                 arguments.install_tree,
                 arguments.output_dir,

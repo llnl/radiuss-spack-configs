@@ -26,7 +26,7 @@ def _project_command(
     config: ProjectConfig,
     override: Optional[List[str]],
     host_config: Path,
-    dest: Path,
+    work_dir: Path,
     jobs: int,
 ) -> List[str]:
     command = override if override else config.command
@@ -36,7 +36,7 @@ def _project_command(
         command,
         {
             "host_config": str(host_config),
-            "dest": str(dest),
+            "work_dir": str(work_dir),
             "source": str(config.root),
             "jobs": str(jobs),
         },
@@ -46,20 +46,23 @@ def _project_command(
 def run_host_config(
     config: ProjectConfig,
     host_config: str,
-    dest: Optional[str],
+    work_dir: Optional[str],
     jobs: int,
     command: Optional[List[str]],
 ) -> None:
     path = _resolve_from_root(config.root, host_config)
     if not path.is_file():
         raise RadBatError("host-config does not exist: {}".format(path))
-    destination = (
-        _resolve_from_root(config.root, dest) if dest else config.root / ".rad-bat-work"
+    resolved_work_dir = (
+        _resolve_from_root(config.root, work_dir)
+        if work_dir
+        else config.root / ".rad-bat-work"
     )
-    destination.mkdir(parents=True, exist_ok=True)
+    resolved_work_dir.mkdir(parents=True, exist_ok=True)
     with logs.sections.section("project", "Project build and test", collapsed=False):
         run_command(
-            _project_command(config, command, path, destination, jobs), cwd=config.root
+            _project_command(config, command, path, resolved_work_dir, jobs),
+            cwd=config.root,
         )
 
 
@@ -229,7 +232,7 @@ def _find_generated_host_config(
 def run_spack(
     config: ProjectConfig,
     spec: str,
-    dest: str,
+    work_dir: str,
     spack_env: Optional[str],
     install_tree_path: Optional[str],
     output_dir_path: Optional[str],
@@ -246,9 +249,9 @@ def run_spack(
         raise RadBatError("the project configuration has no spack section")
     if push_to_buildcache and not buildcache:
         raise RadBatError("--push-to-buildcache requires --buildcache")
-    destination = _resolve_from_root(config.root, dest)
-    destination.mkdir(parents=True, exist_ok=True)
-    managed_root = destination / ".rad-bat"
+    resolved_work_dir = _resolve_from_root(config.root, work_dir)
+    resolved_work_dir.mkdir(parents=True, exist_ok=True)
+    managed_root = resolved_work_dir / ".rad-bat"
     checkout = managed_root / "spack"
     isolation = managed_root / "isolation"
     environment = (
@@ -259,12 +262,12 @@ def run_spack(
     install_tree = (
         _resolve_from_root(config.root, install_tree_path)
         if install_tree_path
-        else destination / "install"
+        else resolved_work_dir / "install"
     )
     host_configs = (
         _resolve_from_root(config.root, output_dir_path)
         if output_dir_path
-        else destination / "host-configs"
+        else resolved_work_dir / "host-configs"
     )
     install_tree.mkdir(parents=True, exist_ok=True)
     host_configs.mkdir(parents=True, exist_ok=True)
@@ -383,5 +386,6 @@ def run_spack(
 
     with logs.sections.section("project", "Project build and test", collapsed=False):
         run_command(
-            _project_command(config, command, retained, destination, jobs), cwd=config.root
+            _project_command(config, command, retained, resolved_work_dir, jobs),
+            cwd=config.root,
         )

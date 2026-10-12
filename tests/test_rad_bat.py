@@ -14,7 +14,7 @@ from rad_bat import cli, logs
 from rad_bat.config import load_project_config
 from rad_bat.errors import RadBatError
 from rad_bat.runner import expand_command
-from rad_bat.workflows import _git_checkout, run_host_config, run_spack
+from rad_bat.workflows import _git_checkout, run_spack
 
 
 SPACK_COMMIT = "2a4c87fd44bd303643c0b0e0d7ed6fe1d1a23937"
@@ -25,7 +25,7 @@ def write_config(root: Path, command=None) -> None:
         "schema_version": 1,
         "project": {
             "package": "umpire",
-            "command": command or ["project-driver", "{host_config}", "{jobs}"],
+            "command": command or ["project-driver", "{host_config}", "{work_dir}", "{jobs}"],
         },
         "spack": {
             "url": "https://example.invalid/spack.git",
@@ -49,7 +49,7 @@ class ConfigTests(unittest.TestCase):
     def test_rejects_partial_placeholder(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            write_config(root, ["project-driver", "--prefix={dest}"])
+            write_config(root, ["project-driver", "--prefix={work_dir}"])
             with self.assertRaisesRegex(RadBatError, "partial placeholder"):
                 load_project_config(root)
 
@@ -67,13 +67,13 @@ class ConfigTests(unittest.TestCase):
 class RunnerTests(unittest.TestCase):
     def test_expands_whole_arguments(self):
         self.assertEqual(
-            expand_command(["driver", "{dest}"], {"dest": "/tmp/build"}),
+            expand_command(["driver", "{work_dir}"], {"work_dir": "/tmp/build"}),
             ["driver", "/tmp/build"],
         )
 
     def test_rejects_partial_arguments(self):
         with self.assertRaisesRegex(RadBatError, "partial"):
-            expand_command(["--dest={dest}"], {"dest": "/tmp/build"})
+            expand_command(["--work-dir={work_dir}"], {"work_dir": "/tmp/build"})
 
 
 class LogTests(unittest.TestCase):
@@ -148,12 +148,17 @@ class WorkflowTests(unittest.TestCase):
             write_config(root)
             host_config = root / "existing.cmake"
             host_config.touch()
-            config = load_project_config(root)
             with mock.patch("rad_bat.workflows.run_command") as command:
-                run_host_config(config, str(host_config), None, 3, None)
+                self.assertEqual(cli.main([
+                    "host-config", "--source", str(root),
+                    "--host-config", str(host_config),
+                    "--work-dir", "work with spaces", "--jobs", "3",
+                ]), 0)
             command.assert_called_once()
             self.assertEqual(command.call_args.args[0][0], "project-driver")
             self.assertIn(str(host_config.resolve()), command.call_args.args[0])
+            self.assertIn(str((root / "work with spaces").resolve()), command.call_args.args[0])
+            self.assertTrue((root / "work with spaces").is_dir())
 
     def test_spack_mode_prepares_dependencies_and_retains_host_config(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -230,6 +235,7 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn("CI_JOB_TOKEN", mirror_command)
             self.assertIn("oci://registry.invalid/project", mirror_command)
             self.assertEqual(commands[-1][0], "project-driver")
+            self.assertIn(str(destination.resolve()), commands[-1])
 
     def test_buildcache_push_requires_a_buildcache(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -266,6 +272,7 @@ class CiTests(unittest.TestCase):
                 "RAD_BAT_MODE": "host-config",
                 "RAD_BAT_SOURCE_DIR": str(root),
                 "HOST_CONFIG": "job.cmake",
+                "RAD_BAT_WORK_DIR": str(root / "work"),
                 "RAD_BAT_JOBS": "2",
             }
             with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
@@ -273,6 +280,7 @@ class CiTests(unittest.TestCase):
             ) as workflow:
                 self.assertEqual(cli.main(["ci"]), 0)
             self.assertEqual(workflow.call_args.args[1], "job.cmake")
+            self.assertEqual(workflow.call_args.args[2], str(root / "work"))
             self.assertEqual(workflow.call_args.args[3], 2)
 
     def test_ci_spack_requires_persistent_install_tree(self):
@@ -283,7 +291,7 @@ class CiTests(unittest.TestCase):
                 "RAD_BAT_MODE": "spack",
                 "RAD_BAT_SOURCE_DIR": str(root),
                 "RAD_BAT_SPEC": "umpire@develop",
-                "RAD_BAT_DEST": str(root / "work"),
+                "RAD_BAT_WORK_DIR": str(root / "work"),
             }
             with mock.patch.dict(os.environ, environment, clear=True):
                 self.assertEqual(cli.main(["ci"]), 2)
@@ -296,7 +304,7 @@ class CiTests(unittest.TestCase):
                 "RAD_BAT_MODE": "spack",
                 "RAD_BAT_SOURCE_DIR": str(root),
                 "RAD_BAT_SPEC": "umpire@develop",
-                "RAD_BAT_DEST": str(root / "work"),
+                "RAD_BAT_WORK_DIR": str(root / "work"),
                 "RAD_BAT_INSTALL_TREE": str(root / "persistent"),
                 "RAD_BAT_OUTPUT_DIR": str(root / "artifacts"),
                 "RAD_BAT_BUILDCACHE": "oci://registry.invalid/project",
@@ -308,6 +316,7 @@ class CiTests(unittest.TestCase):
             ) as workflow:
                 self.assertEqual(cli.main(["ci"]), 0)
             self.assertEqual(workflow.call_args.args[4], str(root / "persistent"))
+            self.assertEqual(workflow.call_args.args[2], str(root / "work"))
             self.assertEqual(workflow.call_args.args[5], str(root / "artifacts"))
             self.assertEqual(workflow.call_args.args[7], "oci://registry.invalid/project")
             self.assertEqual(workflow.call_args.args[8], "CI_REGISTRY_USER")

@@ -31,7 +31,7 @@ and test sequences in Axom, Smith, CHAI, CARE, Caliper, and RAJAPerf.
 - A configured command is an argv array. Arguments following `--` replace the
   configured command.
 - Substitutions are allowed only when the complete argument is a placeholder.
-  The initial placeholders are `{host_config}`, `{dest}`, `{source}`, and
+  The initial placeholders are `{host_config}`, `{work_dir}`, `{source}`, and
   `{jobs}`. Partial string interpolation is rejected.
 
 ### Explicit operating modes
@@ -39,10 +39,10 @@ and test sequences in Axom, Smith, CHAI, CARE, Caliper, and RAJAPerf.
 There are two modes and no automatic mode in the initial implementation:
 
 ```text
-rad-bat host-config --host-config PATH [--dest PATH] [--jobs N]
+rad-bat host-config --host-config PATH [--work-dir PATH] [--jobs N]
     [--source PATH] [-- COMMAND...]
 
-rad-bat spack --spec PROJECT-SPEC-FRAGMENT --dest PATH
+rad-bat spack --spec PROJECT-SPEC-FRAGMENT --work-dir PATH
     [--spack-env PATH]
     [--install-tree PATH]
     [--output-dir PATH]
@@ -59,15 +59,15 @@ rad-bat ci
 ```
 
 `host-config` never invokes Spack. It validates the selected host-config and
-runs the project command. Its default destination is an ignored, project-local
-work directory so the developer workflow remains convenient.
+runs the project command. Its default work directory is ignored and
+project-local so the developer workflow remains convenient.
 
-`spack` requires an explicit disposable work destination. It prepares a pinned
+`spack` requires an explicit disposable work directory. It prepares a pinned
 Spack instance, concretizes the requested spec, builds dependencies through the
 package's `initconfig` phase, retains the generated host-config, and runs the
 same project command. `--install-tree` separates durable dependency installs
 from disposable work; `--output-dir` provides a predictable artifact location.
-Their direct-command defaults remain under the destination for developer
+Their direct-command defaults remain under the work directory for developer
 convenience, while CI requires an explicit persistent install tree.
 The spec argument contains the project's variants, compiler, and dependency
 constraints; `rad-bat` prepends the configured package at `@develop` so the
@@ -120,7 +120,7 @@ shared native-Spack refresh path rather than project-specific Uberenv wrappers.
 - `spack isolate` modifies configuration inside its Spack checkout. Therefore
   the checkout is tool-managed and stored separately from dependency install
   trees. Replacing a Spack pin must not remove installed dependencies.
-- Work destinations are job-local and disposable. Dependency install trees are
+- Work directories are job-local and disposable. Dependency install trees are
   durable, per-project, and split into immutable refresh generations so an
   existing host-config always retains valid absolute paths.
 - Refresh jobs in the same generation may share an install tree. `rad-bat`
@@ -213,7 +213,7 @@ A representative shape is:
       "python3",
       "scripts/gitlab/build_and_test.py",
       "--host-config", "{host_config}",
-      "--dest", "{dest}",
+      "--work-dir", "{work_dir}",
       "--source", "{source}",
       "--jobs", "{jobs}"
     ]
