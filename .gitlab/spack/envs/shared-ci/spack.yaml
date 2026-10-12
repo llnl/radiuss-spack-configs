@@ -13,7 +13,7 @@ spack:
     #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
       git: https://github.com/spack/spack-packages.git
-      commit: 8d91d69ee03de85ff96b7e9823ca46f7211794a5
+      commit: 9076e6fcde9f689b724636e9d107bbcddd1c658b
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
