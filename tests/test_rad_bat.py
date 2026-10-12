@@ -188,6 +188,8 @@ class WorkflowTests(unittest.TestCase):
                     )
 
             destination = root / "destination"
+            install_tree = root / "persistent-install"
+            output_dir = root / "artifacts"
             with mock.patch.dict(os.environ, {"SYS_TYPE": "test-system"}, clear=False), mock.patch(
                 "rad_bat.workflows._git_checkout", side_effect=fake_checkout
             ), mock.patch("rad_bat.workflows.run_command", side_effect=fake_command):
@@ -196,6 +198,8 @@ class WorkflowTests(unittest.TestCase):
                     "umpire@develop +tools",
                     str(destination),
                     None,
+                    str(install_tree),
+                    str(output_dir),
                     [],
                     None,
                     False,
@@ -204,11 +208,14 @@ class WorkflowTests(unittest.TestCase):
                     None,
                 )
 
-            retained = destination / "host-configs" / "job.cmake"
+            retained = output_dir / "job.cmake"
             self.assertTrue(retained.is_file())
             flattened = [argument for command in commands for argument in command]
             self.assertIn("concretize", flattened)
             self.assertIn("initconfig", flattened)
+            self.assertIn(
+                "config:install_tree:root:{}".format(install_tree.resolve()), flattened
+            )
             self.assertNotIn("buildcache", flattened)
             self.assertEqual(commands[-1][0], "project-driver")
 
@@ -224,6 +231,8 @@ class WorkflowTests(unittest.TestCase):
                     config,
                     "umpire@develop",
                     str(root / "destination"),
+                    None,
+                    None,
                     None,
                     [],
                     None,
@@ -251,6 +260,38 @@ class CiTests(unittest.TestCase):
                 self.assertEqual(cli.main(["ci"]), 0)
             self.assertEqual(workflow.call_args.args[1], "job.cmake")
             self.assertEqual(workflow.call_args.args[3], 2)
+
+    def test_ci_spack_requires_persistent_install_tree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_MODE": "spack",
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "RAD_BAT_SPEC": "umpire@develop",
+                "RAD_BAT_DEST": str(root / "work"),
+            }
+            with mock.patch.dict(os.environ, environment, clear=True):
+                self.assertEqual(cli.main(["ci"]), 2)
+
+    def test_ci_spack_maps_install_tree_and_output_directory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_MODE": "spack",
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "RAD_BAT_SPEC": "umpire@develop",
+                "RAD_BAT_DEST": str(root / "work"),
+                "RAD_BAT_INSTALL_TREE": str(root / "persistent"),
+                "RAD_BAT_OUTPUT_DIR": str(root / "artifacts"),
+            }
+            with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
+                "rad_bat.cli.run_spack"
+            ) as workflow:
+                self.assertEqual(cli.main(["ci"]), 0)
+            self.assertEqual(workflow.call_args.args[4], str(root / "persistent"))
+            self.assertEqual(workflow.call_args.args[5], str(root / "artifacts"))
 
 
 if __name__ == "__main__":

@@ -44,6 +44,8 @@ rad-bat host-config --host-config PATH [--dest PATH] [--jobs N]
 
 rad-bat spack --spec SPEC --dest PATH
     [--spack-env PATH]
+    [--install-tree PATH]
+    [--output-dir PATH]
     [--upstream PATH ...]
     [--buildcache URL]
     [--push-to-buildcache]
@@ -58,10 +60,13 @@ rad-bat ci
 runs the project command. Its default destination is an ignored, project-local
 work directory so the developer workflow remains convenient.
 
-`spack` requires an explicit destination. It prepares a pinned Spack instance,
-concretizes the requested spec, builds dependencies through the package's
-`initconfig` phase, retains the generated host-config, and runs the same project
-command.
+`spack` requires an explicit disposable work destination. It prepares a pinned
+Spack instance, concretizes the requested spec, builds dependencies through the
+package's `initconfig` phase, retains the generated host-config, and runs the
+same project command. `--install-tree` separates durable dependency installs
+from disposable work; `--output-dir` provides a predictable artifact location.
+Their direct-command defaults remain under the destination for developer
+convenience, while CI requires an explicit persistent install tree.
 
 `ci` translates CI environment variables to one of the normal modes. New
 tool-specific settings use `RAD_BAT_*`; the migration adapter may accept the
@@ -74,9 +79,14 @@ job definitions are converted.
   invoke Spack or concretize.
 - Each CI job keeps its `SPEC` beside the host-config selection as the recipe
   used to regenerate it.
-- Manual or scheduled dependency-refresh jobs use `spack` mode. They leave the
-  generated host-config in the destination for review and manual promotion into
-  the project's tracked `host-configs/` directory.
+- A developer explicitly starts a refresh pipeline by setting
+  `RAD_BAT_CI_WORKFLOW=refresh`. `RAD_BAT_REFRESH_TARGET` selects one maintained
+  configuration; leaving it empty selects all of them. There is no stale-state
+  inference or fingerprint comparison.
+- Refresh jobs use `spack` mode and publish generated host-configs as GitLab
+  artifacts. The developer downloads, reviews, and commits them to the
+  project's `host-configs/` directory through the normal GitHub branch and pull
+  request workflow. GitLab never commits or pushes to its GitHub mirror.
 - Generated host-configs never overwrite tracked files automatically.
 - Moving dependency references, multi-project builds, refresh jobs, and other
   intentionally dynamic configurations explicitly use `spack` mode.
@@ -105,20 +115,25 @@ shared native-Spack refresh path rather than project-specific Uberenv wrappers.
 - `spack isolate` modifies configuration inside its Spack checkout. Therefore
   the checkout is tool-managed and stored separately from dependency install
   trees. Replacing a Spack pin must not remove installed dependencies.
-- A writable destination cannot be shared by concurrent refresh jobs. CI uses
-  scheduler/resource-group serialization for a shared refresh destination.
-  Ordinary builds consume published install trees as read-only upstreams.
+- Work destinations are job-local and disposable. Dependency install trees are
+  durable, per-project, and split into immutable refresh generations so an
+  existing host-config always retains valid absolute paths.
+- Refresh jobs in the same generation may share an install tree. `rad-bat`
+  serializes its write phase with a filesystem lock and uses a group-writable
+  umask; normal host-config jobs only read the selected generation.
 
 ### Dependency reuse and publication
 
-- Persistent filesystem install trees and Spack upstreams are the primary
-  dependency-reuse mechanism.
+- Persistent per-project filesystem install trees and Spack upstreams are the
+  primary dependency-reuse mechanism. Umpire and RAJA configure their own
+  storage roots rather than sharing one cross-project root in the first
+  implementation.
 - A `spack` run may read from an optional filesystem or OCI buildcache.
 - Publishing to a buildcache requires `--push-to-buildcache`; reads never imply
   writes.
 - A push publishes dependencies only, never the project-under-development.
-- A multi-project-triggered refresh may populate the shared upstream. This is
-  an intended use, provided writes to that destination are serialized.
+- A multi-project-triggered Spack job may populate an explicitly configured
+  upstream. This is an intended use, provided writes are serialized.
 
 ### Project boundary
 

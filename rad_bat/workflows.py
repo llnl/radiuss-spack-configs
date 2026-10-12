@@ -4,8 +4,10 @@ import hashlib
 import json
 import os
 import shutil
+import fcntl
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from .config import ProjectConfig, RepositoryConfig
 from .errors import RadBatError
@@ -143,6 +145,30 @@ def _reset_environment(template: Path, destination: Path) -> None:
     shutil.copytree(str(template.parent), str(destination))
 
 
+@contextmanager
+def _exclusive_install_tree(install_tree: Path) -> Iterator[None]:
+    """Serialize writes to a persistent install tree across refresh jobs."""
+
+    install_tree.mkdir(parents=True, exist_ok=True)
+    lock_path = install_tree / ".rad-bat-write.lock"
+    try:
+        lock_stream = lock_path.open("a+", encoding="utf-8")
+    except OSError as error:
+        raise RadBatError("cannot open install-tree lock {}: {}".format(lock_path, error))
+    with lock_stream:
+        logs.info("Waiting for exclusive access to install tree: {}".format(install_tree))
+        try:
+            fcntl.flock(lock_stream.fileno(), fcntl.LOCK_EX)
+        except OSError as error:
+            raise RadBatError("cannot lock install tree {}: {}".format(install_tree, error))
+        previous_umask = os.umask(0o002)
+        try:
+            yield
+        finally:
+            os.umask(previous_umask)
+            fcntl.flock(lock_stream.fileno(), fcntl.LOCK_UN)
+
+
 def _repository_checkout_name(repository: RepositoryConfig) -> str:
     assert repository.url is not None and repository.commit is not None
     identity = repository.url + "\0" + repository.commit
@@ -205,6 +231,8 @@ def run_spack(
     spec: str,
     dest: str,
     spack_env: Optional[str],
+    install_tree_path: Optional[str],
+    output_dir_path: Optional[str],
     upstreams: List[str],
     buildcache: Optional[str],
     push_to_buildcache: bool,
@@ -226,8 +254,16 @@ def run_spack(
         if spack_env
         else managed_root / "spack-env"
     )
-    install_tree = destination / "install"
-    host_configs = destination / "host-configs"
+    install_tree = (
+        _resolve_from_root(config.root, install_tree_path)
+        if install_tree_path
+        else destination / "install"
+    )
+    host_configs = (
+        _resolve_from_root(config.root, output_dir_path)
+        if output_dir_path
+        else destination / "host-configs"
+    )
     install_tree.mkdir(parents=True, exist_ok=True)
     host_configs.mkdir(parents=True, exist_ok=True)
 
@@ -296,11 +332,29 @@ def run_spack(
         )
         _run_spack(spack, ["-e", str(environment), "concretize"])
         before = _snapshot_host_configs(config.root)
-        _run_spack(
-            spack,
-            ["-e", str(environment), "install", "--until", "initconfig", "--jobs", str(jobs)],
-            cwd=config.root,
-        )
+        with _exclusive_install_tree(install_tree):
+            _run_spack(
+                spack,
+                ["-e", str(environment), "install", "--until", "initconfig", "--jobs", str(jobs)],
+                cwd=config.root,
+            )
+            if push_to_buildcache:
+                with logs.sections.section(
+                    "buildcache", "Publishing dependencies to buildcache"
+                ):
+                    _run_spack(
+                        spack,
+                        [
+                            "-e",
+                            str(environment),
+                            "buildcache",
+                            "push",
+                            "--only",
+                            "dependencies",
+                            "--unsigned",
+                            "rad-bat",
+                        ],
+                    )
         generated = _find_generated_host_config(config.root, before)
         output_name = host_config_name or generated.name
         if Path(output_name).name != output_name or not output_name.endswith(".cmake"):
@@ -308,22 +362,6 @@ def run_spack(
         retained = host_configs / output_name
         shutil.copy2(str(generated), str(retained))
         logs.info("Retained generated host-config: {}".format(retained))
-
-    if push_to_buildcache:
-        with logs.sections.section("buildcache", "Publishing dependencies to buildcache"):
-            _run_spack(
-                spack,
-                [
-                    "-e",
-                    str(environment),
-                    "buildcache",
-                    "push",
-                    "--only",
-                    "dependencies",
-                    "--unsigned",
-                    "rad-bat",
-                ],
-            )
 
     with logs.sections.section("project", "Project build and test", collapsed=False):
         run_command(

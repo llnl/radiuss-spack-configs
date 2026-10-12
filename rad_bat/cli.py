@@ -46,6 +46,8 @@ def build_parser() -> argparse.ArgumentParser:
     spack.add_argument("--spec", required=True)
     spack.add_argument("--dest", required=True)
     spack.add_argument("--spack-env")
+    spack.add_argument("--install-tree")
+    spack.add_argument("--output-dir")
     spack.add_argument("--upstream", action="append", default=[])
     spack.add_argument("--buildcache")
     spack.add_argument("--push-to-buildcache", action="store_true")
@@ -114,6 +116,8 @@ def _run_ci() -> None:
         _required_ci("RAD_BAT_SPEC", "SPEC"),
         _required_ci("RAD_BAT_DEST"),
         _ci_value("RAD_BAT_SPACK_ENV"),
+        _required_ci("RAD_BAT_INSTALL_TREE"),
+        _ci_value("RAD_BAT_OUTPUT_DIR"),
         upstreams,
         _ci_value("RAD_BAT_BUILDCACHE"),
         _truth(_ci_value("RAD_BAT_PUSH_TO_BUILDCACHE", "PUSH_TO_REGISTRY")),
@@ -145,6 +149,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 arguments.spec,
                 arguments.dest,
                 arguments.spack_env,
+                arguments.install_tree,
+                arguments.output_dir,
                 arguments.upstream,
                 arguments.buildcache,
                 arguments.push_to_buildcache,
