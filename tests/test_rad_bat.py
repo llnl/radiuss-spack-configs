@@ -263,25 +263,45 @@ class WorkflowTests(unittest.TestCase):
                 )
 
 
-class CiTests(unittest.TestCase):
-    def test_ci_host_config_maps_legacy_job_variable(self):
+class EnvironmentTests(unittest.TestCase):
+    def test_bare_command_maps_host_config_name_and_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             write_config(root)
             environment = {
                 "RAD_BAT_MODE": "host-config",
                 "RAD_BAT_SOURCE_DIR": str(root),
-                "HOST_CONFIG": "job.cmake",
+                "RAD_BAT_HOST_CONFIG_DIR": "maintained-host-configs",
+                "RAD_BAT_HOST_CONFIG_NAME": "job.cmake",
                 "RAD_BAT_WORK_DIR": str(root / "work"),
                 "RAD_BAT_JOBS": "2",
             }
             with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
                 "rad_bat.cli.run_host_config"
             ) as workflow:
-                self.assertEqual(cli.main(["ci"]), 0)
-            self.assertEqual(workflow.call_args.args[1], "job.cmake")
+                self.assertEqual(cli.main([]), 0)
+            self.assertEqual(
+                workflow.call_args.args[1],
+                str(Path("maintained-host-configs") / "job.cmake"),
+            )
             self.assertEqual(workflow.call_args.args[2], str(root / "work"))
             self.assertEqual(workflow.call_args.args[3], 2)
+
+    def test_missing_host_config_does_not_fall_back_to_spack(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_MODE": "host-config",
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "RAD_BAT_HOST_CONFIG_DIR": "host-configs",
+                "RAD_BAT_HOST_CONFIG_NAME": "missing.cmake",
+            }
+            with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
+                "rad_bat.cli.run_spack"
+            ) as spack_workflow:
+                self.assertEqual(cli.main([]), 2)
+            spack_workflow.assert_not_called()
 
     def test_ci_spack_requires_persistent_install_tree(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -294,7 +314,7 @@ class CiTests(unittest.TestCase):
                 "RAD_BAT_WORK_DIR": str(root / "work"),
             }
             with mock.patch.dict(os.environ, environment, clear=True):
-                self.assertEqual(cli.main(["ci"]), 2)
+                self.assertEqual(cli.main([]), 2)
 
     def test_ci_spack_maps_install_tree_and_output_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -314,7 +334,7 @@ class CiTests(unittest.TestCase):
             with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
                 "rad_bat.cli.run_spack"
             ) as workflow:
-                self.assertEqual(cli.main(["ci"]), 0)
+                self.assertEqual(cli.main([]), 0)
             self.assertEqual(workflow.call_args.args[4], str(root / "persistent"))
             self.assertEqual(workflow.call_args.args[2], str(root / "work"))
             self.assertEqual(workflow.call_args.args[5], str(root / "artifacts"))

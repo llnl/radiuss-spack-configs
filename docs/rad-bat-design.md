@@ -55,7 +55,7 @@ rad-bat spack --spec PROJECT-SPEC-FRAGMENT --work-dir PATH
     [--jobs N] [--source PATH]
     [-- COMMAND...]
 
-rad-bat ci
+rad-bat
 ```
 
 `host-config` never invokes Spack. It validates the selected host-config and
@@ -73,10 +73,13 @@ The spec argument contains the project's variants, compiler, and dependency
 constraints; `rad-bat` prepends the configured package at `@develop` so the
 environment always has an explicit project root.
 
-`ci` translates CI environment variables to one of the normal modes. New
-tool-specific settings use `RAD_BAT_*`; the migration adapter may accept the
+With no arguments, `rad-bat` translates environment variables to one of the
+normal modes. This is the CI interface, but it is not a separate operating
+mode. Tool-specific settings use `RAD_BAT_*`; the adapter may accept the
 established `HOST_CONFIG`, `SPEC`, and `MODULE_LIST` job inputs while project
-job definitions are converted.
+job definitions are converted. Host-config mode accepts an explicit
+`RAD_BAT_HOST_CONFIG`, or combines the project-wide
+`RAD_BAT_HOST_CONFIG_DIR` with the job's `RAD_BAT_HOST_CONFIG_NAME`.
 
 ### Host-config policy
 
@@ -84,15 +87,20 @@ job definitions are converted.
   invoke Spack or concretize.
 - Each CI job keeps its `SPEC` beside the host-config selection as the recipe
   used to regenerate it.
-- A developer explicitly starts a refresh pipeline by setting
-  `RAD_BAT_CI_WORKFLOW=refresh`. `RAD_BAT_REFRESH_TARGET` selects one maintained
-  configuration; leaving it empty selects all of them. There is no stale-state
-  inference or fingerprint comparison.
+- A project selects its ordinary default globally with `RAD_BAT_MODE`. Umpire
+  uses `host-config`; individual jobs override it only when their policy
+  differs.
+- A developer explicitly starts a complete refresh pipeline by overriding
+  `RAD_BAT_MODE=spack`. Every maintained job is regenerated from the `SPEC` and
+  stable host-config filename in its sole job definition. There is no separate
+  refresh job set, stale-state inference, or fingerprint comparison.
 - Refresh jobs use `spack` mode and publish generated host-configs as GitLab
   artifacts. The developer downloads, reviews, and commits them to the
   project's `host-configs/` directory through the normal GitHub branch and pull
   request workflow. GitLab never commits or pushes to its GitHub mirror.
 - Generated host-configs never overwrite tracked files automatically.
+- A missing maintained host-config is an error. `rad-bat` never falls back to
+  Spack implicitly; generating files requires an explicit refresh pipeline.
 - Moving dependency references, multi-project builds, refresh jobs, and other
   intentionally dynamic configurations explicitly use `spack` mode.
 - `rad-bat` does not infer whether a host-config is stale. This avoids an
@@ -171,7 +179,7 @@ No new `rad-bat` GitLab component is introduced. Existing machine components
 continue treating `job_cmd` as an opaque command, for example:
 
 ```text
-scripts/radiuss-spack-configs/bin/rad-bat ci
+scripts/radiuss-spack-configs/bin/rad-bat
 ```
 
 One shared-CI change is required: the machine component loads `MODULE_LIST` in
@@ -248,8 +256,8 @@ moving Spack default, pins the built-in `spack-packages` repository.
    `radiuss-shared-ci` branch.
 3. Integrate Umpire from a fresh `develop` branch without modifying the existing
    experimental `woptim/ci-spack-optimized` worktree.
-4. Validate CPU, CUDA, and HIP canaries in both modes.
-5. Remove Umpire's Uberenv integration only after the canaries pass.
+4. Generate and validate Umpire's complete CPU, CUDA, and HIP host-config set.
+5. Remove Umpire's old shell CI path.
 6. Integrate RAJA from a fresh `develop` branch.
 7. Evaluate Axom and Smith adoption through their existing Python drivers.
 
@@ -266,5 +274,6 @@ moving Spack default, pins the built-in `spack-packages` repository.
   explicit push flag.
 - Verify `MODULE_LIST` is loaded before Slurm and Flux launch and that generated
   reproducers contain the equivalent setup.
-- Run Umpire CPU, CUDA, and HIP CI canaries before replacing the current path.
+- Generate and validate Umpire's complete CPU, CUDA, and HIP host-config set
+  before enabling the ordinary host-config path.
 - Run each project driver independently of `rad-bat`.

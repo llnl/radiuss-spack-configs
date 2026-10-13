@@ -32,7 +32,13 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="rad-bat")
+    parser = argparse.ArgumentParser(
+        prog="rad-bat",
+        description=(
+            "With no arguments, read RAD_BAT_* environment variables; "
+            "use a subcommand to provide a workflow directly."
+        ),
+    )
     subparsers = parser.add_subparsers(dest="mode", required=True)
 
     host_config = subparsers.add_parser(
@@ -56,7 +62,6 @@ def build_parser() -> argparse.ArgumentParser:
     spack.add_argument("--host-config-name")
     _add_common(spack)
 
-    subparsers.add_parser("ci", help="translate CI environment variables to a workflow")
     return parser
 
 
@@ -88,11 +93,13 @@ def _required_ci(name: str, legacy: Optional[str] = None) -> str:
     value = _ci_value(name, legacy)
     if not value:
         names = name if not legacy else "{} (or {})".format(name, legacy)
-        raise RadBatError("{} is required in CI mode".format(names))
+        raise RadBatError(
+            "{} is required for environment-driven execution".format(names)
+        )
     return value
 
 
-def _run_ci() -> None:
+def _run_environment() -> None:
     mode = _required_ci("RAD_BAT_MODE")
     source = Path(_ci_value("RAD_BAT_SOURCE_DIR") or os.environ.get("CI_PROJECT_DIR", "."))
     config = load_project_config(source)
@@ -101,9 +108,22 @@ def _run_ci() -> None:
     except argparse.ArgumentTypeError as error:
         raise RadBatError("RAD_BAT_JOBS {}".format(error))
     if mode == "host-config":
+        host_config = _ci_value("RAD_BAT_HOST_CONFIG", "HOST_CONFIG")
+        if not host_config:
+            host_config_name = _required_ci("RAD_BAT_HOST_CONFIG_NAME")
+            if (
+                Path(host_config_name).name != host_config_name
+                or not host_config_name.endswith(".cmake")
+            ):
+                raise RadBatError(
+                    "RAD_BAT_HOST_CONFIG_NAME must be a .cmake filename without a directory"
+                )
+            host_config = str(
+                Path(_required_ci("RAD_BAT_HOST_CONFIG_DIR")) / host_config_name
+            )
         run_host_config(
             config,
-            _required_ci("RAD_BAT_HOST_CONFIG", "HOST_CONFIG"),
+            host_config,
             _ci_value("RAD_BAT_WORK_DIR"),
             jobs,
             None,
@@ -132,12 +152,13 @@ def _run_ci() -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = build_parser()
-    arguments = parser.parse_args(argv)
+    arguments_list = list(sys.argv[1:] if argv is None else argv)
     try:
-        if arguments.mode == "ci":
-            _run_ci()
+        if not arguments_list:
+            _run_environment()
             return 0
+        parser = build_parser()
+        arguments = parser.parse_args(arguments_list)
         config = load_project_config(Path(arguments.source))
         if arguments.mode == "host-config":
             run_host_config(
