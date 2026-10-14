@@ -233,6 +233,12 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn("CI_REGISTRY_USER", mirror_command)
             self.assertIn("--oci-password-variable", mirror_command)
             self.assertIn("CI_JOB_TOKEN", mirror_command)
+            repo_command = next(command for command in commands if "repo" in command)
+            self.assertEqual(
+                repo_command[1:3],
+                ["-e", str(destination.resolve() / ".rad-bat" / "spack-env")],
+            )
+            self.assertEqual(repo_command[3:5], ["repo", "add"])
             self.assertIn("oci://registry.invalid/project", mirror_command)
             self.assertEqual(commands[-1][0], "project-driver")
             self.assertIn(str(destination.resolve()), commands[-1])

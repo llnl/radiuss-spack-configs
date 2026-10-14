@@ -198,7 +198,15 @@ def _prepare_repositories(
                 raise RadBatError("remote Spack repository path does not exist: {}".format(path))
         _run_spack(
             spack,
-            ["repo", "add", "--scope", "env:{}".format(environment), str(path)],
+            [
+                "-e",
+                str(environment),
+                "repo",
+                "add",
+                "--scope",
+                "env:{}".format(environment),
+                str(path),
+            ],
         )
 
 

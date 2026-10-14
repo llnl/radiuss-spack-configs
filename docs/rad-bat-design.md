@@ -11,6 +11,11 @@ The tool is maintained directly in `radiuss-spack-configs`. Projects that
 already carry that repository as a submodule can run it without installing a
 Python package or adding another submodule.
 
+If installation is added later, its packaging metadata and console entry point
+also remain in `radiuss-spack-configs`. A project may install from its pinned
+submodule checkout or directly from that repository; `radiuss-shared-ci` is not
+a distribution source for `rad-bat`.
+
 The first adopters are Umpire and RAJA. The design also accounts for the build
 and test sequences in Axom, Smith, CHAI, CARE, Caliper, and RAJAPerf.
 
@@ -186,6 +191,13 @@ One shared-CI change is required: the machine component loads `MODULE_LIST` in
 the submitting shell before invoking `srun` or `flux batch`. Slurm and Flux then
 propagate that prepared environment to `job_cmd`. The emitted reproducer must
 perform the same module initialization and load before its scheduler command.
+
+When a project runs `rad-bat` directly from the `radiuss-spack-configs`
+submodule, it adds that submodule root to `PYTHONPATH` in its CI variables.
+This is necessary because `flux batch` relocates the submitted launcher into
+its spool directory; the separate `rad_bat` Python package remains in the
+project checkout. This source-checkout bootstrap is project configuration, not
+a responsibility of the shared machine components.
 
 Thus the responsibility split is:
 
