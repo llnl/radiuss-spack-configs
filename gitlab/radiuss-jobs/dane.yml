@@ -8,15 +8,17 @@
 oneapi_2025_2_0_gcc_10_3_1:
   variables:
     SPEC: "${PROJECT_DANE_VARIANTS} %oneapi-2025-gcc-10 ${PROJECT_DANE_DEPS}"
+    RAD_BAT_HOST_CONFIG_NAME: "dane-oneapi_2025_2_0_gcc_10_3_1.cmake"
   extends: .job_on_dane
 
 clang_19_1_3_gcc_13_3_1:
   variables:
     SPEC: "${PROJECT_DANE_VARIANTS} %clang-19-gcc-13 ${PROJECT_DANE_DEPS}"
+    RAD_BAT_HOST_CONFIG_NAME: "dane-clang_19_1_3_gcc_13_3_1.cmake"
   extends: .job_on_dane
 
 gcc_13_3_1:
   variables:
     SPEC: "${PROJECT_DANE_VARIANTS} %gcc@=13.3.1 ${PROJECT_DANE_DEPS}"
+    RAD_BAT_HOST_CONFIG_NAME: "dane-gcc_13_3_1.cmake"
   extends: .job_on_dane
-
