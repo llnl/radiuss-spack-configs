@@ -4,6 +4,7 @@ import json
 import io
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -13,7 +14,7 @@ from unittest import mock
 from rad_bat import cli, logs
 from rad_bat.config import load_project_config
 from rad_bat.errors import RadBatError
-from rad_bat.runner import expand_command
+from rad_bat.runner import expand_command, run_command, scheduler_pass_fds
 from rad_bat.workflows import _git_checkout, run_spack
 
 
@@ -74,6 +75,38 @@ class RunnerTests(unittest.TestCase):
     def test_rejects_partial_arguments(self):
         with self.assertRaisesRegex(RadBatError, "partial"):
             expand_command(["--work-dir={work_dir}"], {"work_dir": "/tmp/build"})
+
+    def test_preserves_valid_pmi_descriptor(self):
+        read_descriptor, write_descriptor = os.pipe()
+        try:
+            environment = {"PMI_FD": str(read_descriptor)}
+            self.assertEqual(scheduler_pass_fds(environment), (read_descriptor,))
+            with mock.patch("rad_bat.runner.subprocess.run") as run:
+                run_command(["project-driver"], env=environment)
+            self.assertEqual(run.call_args.kwargs["pass_fds"], (read_descriptor,))
+        finally:
+            os.close(read_descriptor)
+            os.close(write_descriptor)
+
+    def test_ignores_invalid_pmi_descriptor(self):
+        self.assertEqual(scheduler_pass_fds({"PMI_FD": "not-a-number"}), ())
+
+    def test_pmi_descriptor_survives_two_python_subprocesses(self):
+        read_descriptor, write_descriptor = os.pipe()
+        environment = os.environ.copy()
+        environment["PMI_FD"] = str(read_descriptor)
+        inner = "import os; os.fstat(int(os.environ['PMI_FD']))"
+        outer = (
+            "import subprocess, sys; "
+            "from rad_bat.runner import scheduler_pass_fds; "
+            "subprocess.run([sys.executable, '-c', {!r}], check=True, "
+            "pass_fds=scheduler_pass_fds())"
+        ).format(inner)
+        try:
+            run_command([sys.executable, "-c", outer], env=environment)
+        finally:
+            os.close(read_descriptor)
+            os.close(write_descriptor)
 
 
 class LogTests(unittest.TestCase):

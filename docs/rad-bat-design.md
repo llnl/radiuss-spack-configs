@@ -163,6 +163,8 @@ shared native-Spack refresh path rather than project-specific Uberenv wrappers.
 - repository, upstream, install-tree, and buildcache configuration;
 - dependency installation and host-config discovery;
 - safe command substitution and process execution;
+- propagation of scheduler communication descriptors such as `PMI_FD` across
+  Python subprocess boundaries;
 - shared command/severity logging, nested GitLab sections, timing, and logging
   context propagation to project drivers;
 - top-level diagnostics and exit-code propagation.
@@ -211,6 +213,70 @@ rad-bat:
 
 No Spack, host-config, caching, or project-build policy belongs in
 `radiuss-shared-ci`.
+
+## Scheduler steps and MPI tests
+
+The current Project CI layout can contain one scheduler nesting level:
+
+```text
+optional shared allocation
+└── project CI job allocation/step (build and test run on this node)
+    └── rad-bat -> project driver -> CTest -> test process
+```
+
+Experience with the LC jobs indicates that the shared allocation followed by
+the project CI job step is supported, while adding another scheduler step for
+each test is not consistently supported. The current preference is therefore
+for MPI-aware tests to run directly, or through `mpirun`, inside the resources
+already assigned to the CI job rather than unconditionally adding another
+`srun` or Flux allocation. Keeping the build and tests in the same job step
+also keeps them on the node that holds any node-local work directory and build
+artifacts.
+
+That model requires the scheduler's existing process-management connection to
+survive the Python launch chain. Bash previously inherited its open file
+descriptors. Python's `subprocess` helpers close non-standard descriptors by
+default, even though they retain environment variables such as `PMI_FD`. This
+leaves a child with a numeric `PMI_FD` that names a closed descriptor. `rad-bat`
+and the Umpire project driver consequently validate the descriptor with
+`fstat()` and pass an open `PMI_FD` explicitly to their children. Invalid or
+already closed values are ignored. This preserves the prior Bash behavior; it
+does not allocate resources or select an MPI launcher.
+
+BLT still controls individual CTest commands. A test with `NUM_MPI_TASKS` is
+launched through BLT's configured `MPIEXEC_EXECUTABLE`; a test without it runs
+as a direct CTest child. The inspected projects currently use both forms:
+
+| Project | Observed test-launch behavior |
+| --- | --- |
+| Umpire | Its MPI helper forwards `NUM_MPI_TASKS` to BLT for explicit one-, two-, and four-rank tests. `allocator_accessibility_tests`, however, calls `MPI_Init` when MPI is enabled and is registered as a plain `blt_add_test`, so it runs directly and exposed the closed-`PMI_FD` failure. |
+| RAJA | Its test and benchmark helpers support and forward `NUM_MPI_TASKS`, but the current RAJA test tree does not request it or initialize MPI. |
+| RAJAPerf | Its MPI unit test requests four ranks through `NUM_MPI_TASKS`. Separate MPI performance jobs provide an explicit `srun --overlap` command. |
+| CHAI | Its current tests are direct `blt_add_test` commands and do not initialize MPI. `CHAI_ENABLE_MPI` is present for Umpire integration rather than MPI test launching. |
+| CARE | Its current tests are direct `blt_add_test` commands and do not initialize MPI. The library can accept an existing communicator but the tests do not create one. |
+| Caliper | Single-rank MPI application tests intentionally initialize MPI without `mpiexec` from a Python test harness. The optional multi-rank test uses `MPIEXEC_EXECUTABLE` explicitly. Caliper is therefore another direct-child use case. |
+| Smith | Its CMake test helper defaults every test to one MPI task and forwards `NUM_MPI_TASKS`; multi-rank tests request larger values. LC host-configs select `/usr/bin/srun` or the Flux `srun` wrapper, while non-LC configs use `mpirun`. ATS MPI applications likewise request ranks, while `nosrun` is used for non-MPI helper programs. |
+| Axom | Its test helper forwards `NUM_MPI_TASKS`, and many MPI tests specify rank counts. LC host-configs select `/usr/bin/srun` or the Flux `srun` wrapper; container configs use `mpirun`. |
+
+The scheduler resource flags remain project policy. In projects using RADIUSS
+Shared CI they are defined in `.gitlab/custom-variables.yml`; some projects use
+a shared top-level allocation and overlapping job steps, while others give
+each CI job its own allocation. `rad-bat` must not invent or normalize those
+flags.
+
+This is a compatibility decision to test, not a claim that the scheduler
+model is settled. Before making it a general project requirement, confirm with
+project and cluster teams:
+
+- whether inheriting `PMI_FD` into arbitrary descendants is a supported Flux
+  and Slurm/PMI interface, and whether other descriptors must accompany it;
+- whether tests should directly use the CI job's process-management context,
+  use `mpirun`, or create nested `srun`/Flux steps on each LC platform;
+- whether a test-level scheduler step is supported when the CI job is already
+  a step inside a shared allocation, particularly for the two-level nesting
+  that has failed in practice; and
+- which projects depend on node-local build artifacts or direct MPI-aware
+  tests, since those requirements constrain where test processes may run.
 
 ## Configuration model
 
