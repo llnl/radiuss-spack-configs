@@ -15,13 +15,13 @@ from rad_bat import cli, logs
 from rad_bat.config import load_project_config
 from rad_bat.errors import RadBatError
 from rad_bat.runner import expand_command, run_command, scheduler_pass_fds
-from rad_bat.workflows import _git_checkout, run_spack
+from rad_bat.workflows import _git_checkout, _project_spec, run_spack
 
 
 SPACK_COMMIT = "2a4c87fd44bd303643c0b0e0d7ed6fe1d1a23937"
 
 
-def write_config(root: Path, command=None) -> None:
+def write_config(root: Path, command=None, spec_fragments=None) -> None:
     document = {
         "schema_version": 1,
         "project": {
@@ -35,6 +35,8 @@ def write_config(root: Path, command=None) -> None:
             "repositories": [{"path": "local-repo"}],
         },
     }
+    if spec_fragments is not None:
+        document["spack"]["spec_fragments"] = spec_fragments
     (root / ".rad-bat.json").write_text(json.dumps(document), encoding="utf-8")
 
 
@@ -62,6 +64,35 @@ class ConfigTests(unittest.TestCase):
             document["spack"]["commit"] = "develop"
             (root / ".rad-bat.json").write_text(json.dumps(document), encoding="utf-8")
             with self.assertRaisesRegex(RadBatError, "full 40-character"):
+                load_project_config(root)
+
+    def test_loads_multiple_conditional_spec_fragments(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root, spec_fragments=[
+                {"if_env": "CAMP_REFERENCE", "value": "^camp@git.{CAMP_REFERENCE}=main"},
+                {"if_env": "CHAI_REFERENCE", "value": "^chai@git.{CHAI_REFERENCE}=develop"},
+            ])
+            config = load_project_config(root)
+            self.assertEqual(len(config.spack.spec_fragments), 2)
+            self.assertEqual(config.spack.spec_fragments[0].if_env, "CAMP_REFERENCE")
+
+    def test_rejects_invalid_spec_fragment_environment_variable(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root, spec_fragments=[
+                {"if_env": "CAMP-REFERENCE", "value": "^camp@git.{CAMP-REFERENCE}=main"},
+            ])
+            with self.assertRaisesRegex(RadBatError, "environment-variable name"):
+                load_project_config(root)
+
+    def test_rejects_mismatched_spec_fragment_placeholder(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root, spec_fragments=[
+                {"if_env": "CAMP_REFERENCE", "value": "^camp@git.{OTHER_REFERENCE}=main"},
+            ])
+            with self.assertRaisesRegex(RadBatError, "CAMP_REFERENCE"):
                 load_project_config(root)
 
 
@@ -142,6 +173,27 @@ class LogTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_conditional_spec_fragments_are_independent_and_optional(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root, spec_fragments=[
+                {"if_env": "CAMP_REFERENCE", "value": "^camp@git.{CAMP_REFERENCE}=main"},
+                {"if_env": "CHAI_REFERENCE", "value": "^chai@git.{CHAI_REFERENCE}=develop"},
+            ])
+            config = load_project_config(root)
+            self.assertEqual(
+                _project_spec(
+                    config,
+                    "+openmp",
+                    {"CAMP_REFERENCE": "abc123", "CHAI_REFERENCE": ""},
+                ),
+                "umpire@develop +openmp ^camp@git.abc123=main",
+            )
+            self.assertEqual(
+                _project_spec(config, "+openmp", {}),
+                "umpire@develop +openmp",
+            )
+
     def test_pinned_checkout_preserves_isolation_changes_when_commit_matches(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

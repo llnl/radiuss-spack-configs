@@ -43,6 +43,23 @@ def _project_command(
     )
 
 
+def _project_spec(
+    config: ProjectConfig,
+    spec: str,
+    environment: Optional[Dict[str, str]] = None,
+) -> str:
+    values = os.environ if environment is None else environment
+    parts = ["{}@develop".format(config.package), spec]
+    assert config.spack is not None
+    for fragment in config.spack.spec_fragments:
+        reference = values.get(fragment.if_env, "")
+        if reference:
+            parts.append(
+                fragment.value.replace("{{{}}}".format(fragment.if_env), reference)
+            )
+    return " ".join(part.strip() for part in parts if part.strip())
+
+
 def run_host_config(
     config: ProjectConfig,
     host_config: str,
@@ -279,7 +296,7 @@ def run_spack(
     )
     install_tree.mkdir(parents=True, exist_ok=True)
     host_configs.mkdir(parents=True, exist_ok=True)
-    project_spec = "{}@develop {}".format(config.package, spec).strip()
+    project_spec = _project_spec(config, spec)
 
     with logs.sections.section("spack_setup", "Preparing Spack environment"):
         _git_checkout(config.spack.url, config.spack.commit, checkout)

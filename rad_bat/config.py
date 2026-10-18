@@ -10,6 +10,7 @@ from .errors import RadBatError
 
 
 FULL_COMMIT = re.compile(r"^[0-9a-fA-F]{40}$")
+ENVIRONMENT_VARIABLE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 PLACEHOLDERS = {"{host_config}", "{work_dir}", "{source}", "{jobs}"}
 
 
@@ -22,11 +23,18 @@ class RepositoryConfig:
 
 
 @dataclass(frozen=True)
+class SpecFragmentConfig:
+    if_env: str
+    value: str
+
+
+@dataclass(frozen=True)
 class SpackConfig:
     url: str
     commit: str
     environment: str
     repositories: List[RepositoryConfig]
+    spec_fragments: List[SpecFragmentConfig]
 
 
 @dataclass(frozen=True)
@@ -100,9 +108,36 @@ def _validate_repository(value: Any, index: int) -> RepositoryConfig:
     return RepositoryConfig(url=url, commit=commit.lower(), subdirectory=subdirectory)
 
 
+def _validate_spec_fragment(value: Any, index: int) -> SpecFragmentConfig:
+    location = "spack.spec_fragments[{}]".format(index)
+    fragment = _object(value, location)
+    _only_keys(fragment, {"if_env", "value"}, location)
+    if_env = _string(fragment.get("if_env"), location + ".if_env")
+    if not ENVIRONMENT_VARIABLE.match(if_env):
+        raise RadBatError(
+            "{}.if_env must be an environment-variable name".format(location)
+        )
+    fragment_value = _string(fragment.get("value"), location + ".value")
+    placeholder = "{{{}}}".format(if_env)
+    if placeholder not in fragment_value:
+        raise RadBatError(
+            "{}.value must contain its {} placeholder".format(location, placeholder)
+        )
+    remainder = fragment_value.replace(placeholder, "")
+    if "{" in remainder or "}" in remainder:
+        raise RadBatError(
+            "{}.value contains a placeholder other than {}".format(location, placeholder)
+        )
+    return SpecFragmentConfig(if_env, fragment_value)
+
+
 def _validate_spack(value: Any) -> SpackConfig:
     spack = _object(value, "spack")
-    _only_keys(spack, {"url", "commit", "environment", "repositories"}, "spack")
+    _only_keys(
+        spack,
+        {"url", "commit", "environment", "repositories", "spec_fragments"},
+        "spack",
+    )
     url = _string(spack.get("url"), "spack.url")
     commit = _string(spack.get("commit"), "spack.commit")
     if not FULL_COMMIT.match(commit):
@@ -115,7 +150,14 @@ def _validate_spack(value: Any) -> SpackConfig:
         _validate_repository(repository, index)
         for index, repository in enumerate(repositories_value)
     ]
-    return SpackConfig(url, commit.lower(), environment, repositories)
+    spec_fragments_value = spack.get("spec_fragments", [])
+    if not isinstance(spec_fragments_value, list):
+        raise RadBatError("spack.spec_fragments must be a JSON array")
+    spec_fragments = [
+        _validate_spec_fragment(fragment, index)
+        for index, fragment in enumerate(spec_fragments_value)
+    ]
+    return SpackConfig(url, commit.lower(), environment, repositories, spec_fragments)
 
 
 def load_project_config(source: Path) -> ProjectConfig:

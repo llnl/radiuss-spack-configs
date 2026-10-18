@@ -78,6 +78,15 @@ The spec argument contains the project's variants, compiler, and dependency
 constraints; `rad-bat` prepends the configured package at `@develop` so the
 environment always has an explicit project root.
 
+Projects may declare conditional Spack spec fragments in `.rad-bat.json`.
+Each declaration names an environment variable and a fragment containing the
+matching placeholder. `rad-bat` appends the fragment only when that variable
+has a non-empty value. Defining the variable alone has no effect: the project
+must deliberately declare how it maps into its Spack spec. Conversely, when
+the variable is absent or empty, Spack selects the dependency version normally.
+The declaration is an array so one project can support any number of
+independent dependency overrides without adding project names to `rad-bat`.
+
 With no arguments, `rad-bat` translates environment variables to one of the
 normal modes. This is the CI interface, but it is not a separate operating
 mode. Tool-specific settings use `RAD_BAT_*`; the adapter may accept the
@@ -179,6 +188,14 @@ Other projects can retain their existing drivers. Axom can pass the selected
 host-config to `build_src.py`; Smith can adapt its Python wrapper. Their docs,
 tutorials, ATS, examples, and benchmark phases remain project-owned. RAJAPerf's
 performance execution and artifacts likewise remain outside the generic tool.
+
+Conditional spec fragments apply only to dependencies represented in the
+Spack DAG. They do not replace project-specific source preparation. For
+example, RAJA maps an optional `CAMP_REFERENCE` to a `^camp@...` spec fragment,
+whereas RAJAPerf's `RAJA_REFERENCE` selects the source checked out in
+`tpl/RAJA`. The RAJAPerf project driver must continue performing that checkout
+before configuring RAJAPerf. Keeping those mechanisms separate prevents the
+generic dependency workflow from acquiring project source-layout knowledge.
 
 ## `radiuss-shared-ci` integration
 
@@ -286,6 +303,7 @@ The project root contains `.rad-bat.json` with schema version 1. It records:
 - the default project command as an argv array;
 - the exact Spack URL and commit;
 - the RADIUSS machine-environment location;
+- optional environment-controlled Spack spec fragments; and
 - ordered local or pinned remote package repositories.
 
 A representative shape is:
@@ -308,6 +326,12 @@ A representative shape is:
     "url": "https://github.com/spack/spack.git",
     "commit": "2a4c87fd44bd303643c0b0e0d7ed6fe1d1a23937",
     "environment": "scripts/radiuss-spack-configs/{sys_type}/spack.yaml",
+    "spec_fragments": [
+      {
+        "if_env": "CAMP_REFERENCE",
+        "value": "^camp@git.{CAMP_REFERENCE}=main"
+      }
+    ],
     "repositories": [
       {
         "path": "scripts/radiuss-spack-configs/spack_repo/llnl_radiuss"
@@ -326,6 +350,15 @@ Paths in the file are resolved relative to the project root. A remote
 repository must include both `url` and a full `commit`; `subdirectory` selects
 the Spack repository within a remote monorepo. The project configuration, not a
 moving Spack default, pins the built-in `spack-packages` repository.
+
+Every `spec_fragments` entry requires exactly two fields. `if_env` must be a
+valid environment-variable name, and `value` must contain the corresponding
+placeholder. For the example above, a non-empty `CAMP_REFERENCE=abc123` appends
+`^camp@git.abc123=main`; an unset or empty `CAMP_REFERENCE` appends nothing.
+Projects must therefore maintain both sides of this interface: the CI or user
+defines the reference variable, and `.rad-bat.json` defines its meaning. This
+explicit pairing is a migration change from project scripts that previously
+contained hard-coded knowledge of variables such as `CAMP_REFERENCE`.
 
 ## Rollout
 
