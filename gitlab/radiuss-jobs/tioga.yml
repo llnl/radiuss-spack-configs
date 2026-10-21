@@ -8,14 +8,17 @@
 rocmcc_6_4_3_hip:
   variables:
     SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.3 ^hip@6.4.3 ${PROJECT_TIOGA_DEPS}"
+    RAD_BAT_HOST_CONFIG_NAME: "tioga-rocmcc_6_4_3_hip.cmake"
   extends: .job_on_tioga
 
 rocmcc_7_2_1_hip:
   variables:
     SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1 ${PROJECT_TIOGA_DEPS}"
+    RAD_BAT_HOST_CONFIG_NAME: "tioga-rocmcc_7_2_1_hip.cmake"
   extends: .job_on_tioga
 
 cce_21_0_0:
   variables:
     SPEC: "${PROJECT_TIOGA_VARIANTS} %cce@=21.0.0 ${PROJECT_TIOGA_DEPS}"
+    RAD_BAT_HOST_CONFIG_NAME: "tioga-cce_21_0_0.cmake"
   extends: .job_on_tioga
