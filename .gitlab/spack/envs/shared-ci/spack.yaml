@@ -13,7 +13,7 @@ spack:
     #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
       git: https://github.com/spack/spack-packages.git
-      commit: 8d91d69ee03de85ff96b7e9823ca46f7211794a5
+      commit: 3dec9a54b83ee77ebb828d5ce97359bbb793d4ff
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
@@ -77,6 +77,7 @@ spack:
     - chai
     - care
     - caliper
+    - 'mfem@4.10.0 +raja +umpire'
   - dependencies: []
   #[--definitions]
 
