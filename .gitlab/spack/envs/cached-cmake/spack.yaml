@@ -22,6 +22,10 @@ spack:
     reuse: false
     unify: false
   view: false
+  packages:
+    # Aluminum requires +rocm hwloc; Corona's external spec defaults to ~rocm.
+    hwloc:
+      buildable: true
   #[--general]
 
   #[config-override--]
@@ -94,9 +98,5 @@ spack:
     - 'raja-perf +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1'
     - 'raja-perf +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.1 ^hip@7.2.1'
     # No +rocm or +cuda variants for sina
-    - 'sina +rocm amdgpu_target=gfx90a %llvm-amdgpu@=6.4.3 ^hip@6.4.3'
-    - 'sina +cuda %clang-14 ^cuda@11.7.0+allow-unsupported-compilers'
-    - 'sina +cuda %clang-16-ibm ^cuda@11.8.0+allow-unsupported-compilers'
-    - 'sina +cuda %clang-16 ^cuda@11.8.0+allow-unsupported-compilers'
-    - 'sina +cuda %gcc@=13.3.1 ^cuda@11.8.0+allow-unsupported-compilers'
-    - 'sina +rocm amdgpu_target=gfx906 %llvm-amdgpu@=5.7.1 ^hip@5.7.1'
+    - 'sina +rocm'
+    - 'sina +cuda'
