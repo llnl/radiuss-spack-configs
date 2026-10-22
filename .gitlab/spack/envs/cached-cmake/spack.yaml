@@ -23,7 +23,7 @@ spack:
     unify: false
   view: false
   packages:
-    # Aluminum requires +rocm hwloc; Corona's external spec defaults to ~rocm.
+    # Permit GPU-enabled hwloc when a machine's externals do not satisfy the spec.
     hwloc:
       buildable: true
   #[--general]

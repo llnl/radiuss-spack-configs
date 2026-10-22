@@ -391,7 +391,8 @@
   hwloc:
     buildable: false
     externals:
-    - spec: hwloc@2.11.2
+    # Host RPM hwloc-2.14.0-2.t4 links ROCm SMI and registers the rsmi backend.
+    - spec: hwloc@2.14.0+rocm amdgpu_target=gfx906
       prefix: /usr
   libepoxy:
     buildable: false
