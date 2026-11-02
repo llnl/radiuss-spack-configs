@@ -10,6 +10,11 @@ small publication updates. Use explicit owners and parallel validation to
 converge before releases begin. Staggered releases are a condition to handle,
 not the intended schedule.
 
+.. graphviz:: /figures/release-coordination.dot
+   :align: center
+   :caption: Prepare and validate recipes together before publishing source releases.
+   :alt: Agree on participants and owners, prepare recipes, and validate candidates in parallel. Merge upstream, adopt the actual merged revision, converge, publish source and final metadata, then close the round with a common development baseline.
+
 .. _joint-release-process:
 
 Joint release process

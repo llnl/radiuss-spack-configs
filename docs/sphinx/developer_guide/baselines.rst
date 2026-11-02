@@ -25,7 +25,7 @@ Tag naming
 ----------
 
 Recent tags follow
-``v<configuration-release>-spack-<engine-reference>-packages-<recipe-short-sha>``.
+``v<release>-spack-<engine-ref>-packages-<recipe-sha>``.
 For example, the existing tag
 ``v2026.07.0-spack-v1.2.2-packages-e4c0b2d275`` records a configuration release,
 a Spack reference, and a recipe revision. The first field is the configuration

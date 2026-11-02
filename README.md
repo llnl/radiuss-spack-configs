@@ -14,7 +14,7 @@ This project requires no installation.
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://github.com/LLNL/radiuss-spack-configs/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+Propose changes through a GitHub pull request. For configuration and validation changes, follow the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/index.html); for documentation changes, see [docs/README.rst](docs/README.rst).
 
 ## Versioning
 
@@ -26,7 +26,7 @@ Start with the [developer workflow](https://radiuss-spack-configs.readthedocs.io
 
 Adrien M Bernede
 
-See also the list of [contributors](https://github.com/LLNL/radiuss-spack-configs/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/LLNL/radiuss-spack-configs/graphs/contributors) who participated in this project.
 
 ## License
 
@@ -34,9 +34,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 All new contributions must be made under the MIT License.
 
-See [LICENSE](https://github.com/LLNL/radiuss-spack-configs/blob/master/LICENSE),
-[COPYRIGHT](https://github.com/LLNL/radiuss-spack-configs/blob/master/COPYRIGHT), and
-[NOTICE](https://github.com/LLNL/radiuss-spack-configs/blob/master/NOTICE) for details.
+See [LICENSE](LICENSE),
+[COPYRIGHT](COPYRIGHT), and
+[NOTICE](NOTICE) for details.
 
 SPDX-License-Identifier: (MIT)
 

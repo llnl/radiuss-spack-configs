@@ -80,13 +80,22 @@ is fully independent simply because it has a new directory.
 Storage lifetimes and reuse
 ---------------------------
 
+.. graphviz:: /figures/repository-storage.dot
+   :align: center
+   :caption: Repository CI separates temporary work from persistent installations and buildcaches.
+   :alt: The selected environment uses a checkout shared per machine and pipeline and a cache isolated per job. Default-branch jobs write main storage; branch jobs write their own namespace and can read main binaries.
+
 Persistent storage is rooted at:
 
 .. code-block:: text
 
-   ${SPACK_CI_STORAGE_ROOT}/${MY_ENV_NAME}/${LCSCHEDCLUSTER}/${SPACK_TARGET}/${CACHE_TARGET}/
-     install/
-     buildcache/
+   ${SPACK_CI_STORAGE_ROOT}/
+     ${MY_ENV_NAME}/
+       ${LCSCHEDCLUSTER}/
+         ${SPACK_TARGET}/
+           ${CACHE_TARGET}/
+             install/
+             buildcache/
 
 ``SPACK_CI_STORAGE_ROOT`` defaults to ``/usr/workspace/radiuss/rsc-ci``.
 The default branch uses ``CACHE_TARGET=main``; other branch pipelines normally

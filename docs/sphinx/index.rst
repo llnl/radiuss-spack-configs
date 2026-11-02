@@ -10,6 +10,13 @@ Spack on Livermore Computing (LC) systems, plus specifications used by project
 CI. It helps developers prepare dependencies, generate a CMake host
 configuration, and return to their normal build and test loop.
 
+.. _overview:
+.. _radiuss-spack-configs-user-documentation:
+.. _radiuss-spack-configs-developer-documentation:
+.. _shared-spack-specs-for-ci:
+.. _ci-implementation-for-radiuss-spack-configs:
+.. _custom-ci-pipelines:
+
 Start with :doc:`user_guide/index`. Infrastructure maintainers should use
 :doc:`developer_guide/index` for platform changes and validation baselines.
 

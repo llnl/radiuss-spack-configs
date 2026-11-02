@@ -11,6 +11,11 @@ command and custom jobs, and `RADIUSS Shared CI
 <https://radiuss-shared-ci.readthedocs.io/en/latest/>`_ supplies versioned GitLab
 components for machine execution, allocations, and reporting.
 
+.. graphviz:: /figures/consumer-ci.dot
+   :align: center
+   :caption: Consumer CI combines shared specifications, project settings, and a selected CI component.
+   :alt: Shared jobs and project settings feed pipeline composition. The selected Shared CI component revision provides execution. The generated child pipeline runs the project preparation, build, and test driver with SPEC.
+
 This differs from :doc:`../ci_implementation/index`, which validates Spack
 environments inside RADIUSS Spack Configs itself.
 

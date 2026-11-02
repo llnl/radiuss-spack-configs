@@ -99,3 +99,16 @@ Essential precedence rules
 See the `Uberenv guide <https://uberenv.readthedocs.io/en/latest/>`_ for setup
 options and their mechanics. For release selection, use
 :doc:`../user_guide/releases`.
+
+Figure vocabulary
+-----------------
+
+Figures use the same shapes throughout: folders are Git repositories, a note
+labeled ``package.py`` is a recipe, tabbed documents are configuration inputs,
+small revision badges are pins, rounded boxes are actions, and parallelograms
+are generated outputs or storage artifacts.
+
+Solid arrows show execution or output flow. Dashed arrows with open heads show
+input or dependency relationships. Dotted arrows with V-shaped heads show
+adoption of a selected revision. Labels carry the meaning without relying on
+color.

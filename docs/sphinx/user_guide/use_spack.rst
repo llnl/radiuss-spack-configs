@@ -5,6 +5,9 @@
 .. _use_spack-label:
 .. _use-spack-to-install-dependencies-and-configure-the-project-build:
 
+.. _why-spack:
+.. _end-product:
+
 Prepare dependencies
 ====================
 
@@ -95,6 +98,10 @@ files; compiler externals and named toolchains are defined in
 :doc:`../reference/index` for file responsibilities.
 
 .. _generate-config-file:
+
+.. _setup-your-spack-package-to-generate-a-configuration-file:
+.. _cmake-projects-spack-cachedcmakepackage:
+.. _non-cmake-projects-custom-implementation:
 
 Generate a host configuration from a recipe
 -------------------------------------------

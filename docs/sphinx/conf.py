@@ -32,7 +32,8 @@ release = ''
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-'sphinx.ext.autosectionlabel'
+'sphinx.ext.autosectionlabel',
+'sphinx.ext.graphviz'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -141,4 +142,16 @@ texinfo_documents = [
     (master_doc, 'RADIUSS_Spack_Configs', u'RADIUSS Spack Configs Documentation',
      author, 'RADIUSS Spack Configs', 'Rapid Application Development via an Institutional Universal Software Stack',
      'Miscellaneous'),
+]
+
+# Shared rendering style for all standalone DOT sources.
+# Shapes and per-concept fills are documented in docs/README.rst.
+graphviz_output_format = 'svg'
+graphviz_dot_args = [
+    '-Gbgcolor=transparent', '-Gpad=0.15', '-Gnodesep=0.3', '-Granksep=0.4',
+    '-Gfontname=Helvetica', '-Gfontsize=12',
+    '-Nfontname=Helvetica', '-Nfontsize=12', '-Ncolor=#334155',
+    '-Nstyle=filled', '-Nfillcolor=white', '-Nmargin=0.12,0.08',
+    '-Efontname=Helvetica', '-Efontsize=10', '-Ecolor=#475569',
+    '-Earrowsize=0.7',
 ]

@@ -42,6 +42,11 @@ concretization alone does not show that a project builds or passes tests.
 .. _compare_ci_configs:
 .. _compare-the-build-and-ci-configurations-of-two-projects:
 
+.. _reference-used-to-import-radiuss-spack-configs:
+.. _reference-used-by-uberenv-to-clone-spack:
+.. _reference-used-to-import-radiuss-shared-ci:
+.. _local-jobs-defined-by-the-projects:
+
 Compare two configurations
 --------------------------
 
@@ -77,6 +82,8 @@ Use :doc:`changes` to select the input to update and
 .. _project-specific-variants-and-dependencies:
 .. _list-the-spack-specs-tested:
 
+.. _append-the-shared-jobs-to-your-local-jobs:
+
 Shared jobs and project overrides
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -84,6 +91,8 @@ Use :doc:`ci` for composition, variants, and failure exceptions, and
 :doc:`use_spack` to list shared specs from **RADIUSS Spack Configs**.
 
 .. _use-uberenv:
+
+.. _some-options:
 
 Run Uberenv
 ~~~~~~~~~~~

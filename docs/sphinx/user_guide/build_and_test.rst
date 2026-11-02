@@ -8,6 +8,11 @@
 Build and test
 ==============
 
+.. graphviz:: /figures/developer-loop.dot
+   :align: center
+   :caption: Prepare once for a specification, then repeat the source build and test loop.
+   :alt: A specification feeds Uberenv and Spack, which generate a host configuration. CMake configures, builds, and tests. Source edits repeat builds; recipe, dependency, or toolchain changes return to specification and preparation.
+
 After :doc:`use_spack`, select the generated host configuration explicitly.
 Use the CMake executable recorded in it, or a compatible CMake on your PATH,
 and retain the machine/toolchain environment used to prepare dependencies.

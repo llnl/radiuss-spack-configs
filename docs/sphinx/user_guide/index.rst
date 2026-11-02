@@ -12,6 +12,11 @@ generated host configuration → repeated CMake builds and tests**. This guide
 uses RAJA, with Uberenv at ``scripts/uberenv`` and RADIUSS Spack Configs at
 ``scripts/radiuss-spack-configs``, as its canonical integration example.
 
+.. graphviz:: /figures/components.dot
+   :align: center
+   :caption: Components that turn project requirements into a generated host configuration.
+   :alt: The project selects inputs. Uberenv uses the Spack engine, upstream recipes, and machine configuration to prepare dependencies and generate a CMake host configuration.
+
 Responsibilities
 ----------------
 
