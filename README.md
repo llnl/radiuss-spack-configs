@@ -1,8 +1,8 @@
 # RADIUSS Spack Configs
 
-The RADIUSS project promotes and supports key High Performance Computing (HPC) open-source software developed at the LLNL. These tools and libraries cover a wide range of features a team would need to develop a modern simulation code targeting HPC plaftorms.
+The RADIUSS project promotes and supports key High Performance Computing (HPC) open-source software developed at the LLNL. These tools and libraries cover a wide range of features a team would need to develop a modern simulation code targeting HPC platforms.
 
-Radiuss Spack Configs allows project to share a set of compilers and packages configurations for several machines.
+RADIUSS Spack Configs shares machine and toolchain configurations and CI specifications across projects. Upstream package recipes live in [spack-packages](https://github.com/spack/spack-packages).
 
 ## Getting Started
 
@@ -18,10 +18,9 @@ Please read [CONTRIBUTING.md](https://github.com/LLNL/radiuss-spack-configs/CONT
 
 ## Versioning
 
-### Tags nomenclature:
-Tags reflect the RAJA and Umpire latest release RADIUSS Spack Configs supports, together with the Spack reference that was used for vetting.
-We issue a tag as soon as one of the two parameter changes for the vetting of the main branch.
-We recommend using the same Spack as newer or older versions may not be compatible out of the box.
+Tags identify tested configuration releases and, in recent tags, the Spack engine and recipe-repository references used for validation. See [tested baselines](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/baselines.html) for the naming convention and adoption process.
+
+Start with the [developer workflow](https://radiuss-spack-configs.readthedocs.io/en/latest/user_guide/index.html), or use the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/index.html). Documentation build instructions are in [docs/README.rst](docs/README.rst).
 
 ## Authors
 

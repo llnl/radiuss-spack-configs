@@ -17,12 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'Radiuss Spack Configs'
-copyright = u'2022-2025, Adrien M. Bernede'
-author = u'Adrien M. Bernede'
+project = 'RADIUSS Spack Configs'
+copyright = '2019-2026, Lawrence Livermore National Security, LLC and RADIUSS Project Developers'
+author = 'RADIUSS Project Developers'
 
 # The full version, including alpha/beta/rc tags
-release = u'1.0'
+# The guide tracks the selected documentation revision, not a fixed release.
+release = ''
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,7 +36,9 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+autosectionlabel_prefix_document = True
+
+templates_path = []
 
 # The suffix(es) of source filenames.
 source_suffix = '.rst'
@@ -81,7 +84,7 @@ else:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -115,7 +118,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'RADIUSS_Spack_Configs.tex', u'RADIUSS Spack Configs Documentation',
-     u'Adrien M. Bernede', 'manual'),
+     author, 'manual'),
 ]
 
 
@@ -136,6 +139,6 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'RADIUSS_Spack_Configs', u'RADIUSS Spack Configs Documentation',
-     author, 'Adrien M. Bernede', 'Rapid Application Development via an Institutional Universal Software Stack',
+     author, 'RADIUSS Spack Configs', 'Rapid Application Development via an Institutional Universal Software Stack',
      'Miscellaneous'),
 ]
