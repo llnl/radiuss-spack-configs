@@ -11,40 +11,38 @@
 Prepare dependencies
 ====================
 
-Use the project checkout's tested pins first. RAJA's integration supplies
-``.uberenv_config.json`` and the submodules described in :doc:`index`. Run from
-the RAJA repository root and use a compute allocation appropriate to the LC
-machine for dependency builds.
+RAJA records its Spack and ``spack-packages`` revisions in
+``.uberenv_config.json``, and its Uberenv and RADIUSS Spack Configs revisions
+as Git submodules. Start with these recorded versions. From the RAJA repository
+root, run the following in a compute allocation on your LC machine:
 
 .. code-block:: bash
 
    git submodule update --init --recursive
    python3 scripts/uberenv/uberenv.py --spec="%gcc" --prefix="${PWD}/uberenv_libs"
 
-``--spec`` takes a Spack specification **without the project name**. Here
-``%gcc`` selects GCC; for a reproducible comparison use the complete compiler,
-version, variants, and dependency constraints from a supported shared job for
-your machine. List those specs from the configuration checkout:
+``--spec`` takes a Spack spec **without the project name**. Here ``%gcc``
+selects GCC. To reproduce a CI build, use its compiler version, variants, and
+dependency constraints. For example, list the shared Dane specs in the
+RADIUSS Spack Configs submodule:
 
 .. code-block:: bash
 
    git -C scripts/radiuss-spack-configs grep SPEC gitlab/radiuss-jobs/dane.yml
 
-Resolve any ``PROJECT_DANE_VARIANTS`` and ``PROJECT_DANE_DEPS`` hooks using the
-project's CI settings before reproducing a job. A spec for one machine is not
-necessarily valid on another.
+Replace ``PROJECT_DANE_VARIANTS`` and ``PROJECT_DANE_DEPS`` with their values
+from the project's CI settings before using a shared spec. Use specs intended
+for your machine.
 
-Uberenv configures Spack, prepares dependencies, and runs the project's recipe
-through ``initconfig``. Note the generated ``.cmake`` filename in the output,
-then continue to :doc:`build_and_test`. Keep the selected spec and input
-revisions with your build results.
+Uberenv configures Spack, which concretizes the spec, installs dependencies,
+and runs the project recipe through ``initconfig``. Use the generated
+``.cmake`` file shown in the output to :doc:`build and test <build_and_test>`.
 
 .. note::
 
-   For an indirect submodule, initialize recursively and use the paths and JSON
-   configuration owned by the enclosing integration. Update that enclosing
-   revision when adopting a change; adding another Uberenv checkout is not
-   necessary.
+   RAJAPerf gets Uberenv and RADIUSS Spack Configs through its ``tpl/RAJA``
+   submodule. Use RAJAPerf's build/test script: it calls that Uberenv checkout
+   with RAJAPerf's own ``.uberenv_config.json``.
 
 .. _uberenv-guide:
 .. _main-steps:
@@ -52,11 +50,11 @@ revisions with your build results.
 Integrating the same workflow in a project
 ------------------------------------------
 
-Add Uberenv and RADIUSS Spack Configs as submodules at the canonical paths,
-select validated revisions, and commit those selections in the project. The
-following JSON is a **template** for this layout, not a current recommended
-baseline. Replace both placeholder hashes with full validated commit hashes
-and set the package name for your project before running it.
+Add Uberenv at ``scripts/uberenv`` and RADIUSS Spack Configs at
+``scripts/radiuss-spack-configs`` as submodules. Select compatible revisions
+following :doc:`../developer_guide/baselines` and commit the submodule references.
+In this JSON **template**, replace both placeholders with tested commit hashes
+and set your project's Spack package name:
 
 .. code-block:: json
 
@@ -74,13 +72,13 @@ and set the package name for your project before running it.
    }
 
 In this layout ``package_source_dir`` is relative to the Uberenv script
-location, so ``../..`` selects the project checkout. Configuration and local
-recipe paths are relative to the project JSON location. ``package_version``
-selects the recipe's version-dependent behavior for that checkout; it does
-not change your Git branch or pin the recipe repository.
+location, so ``../..`` selects the project source directory.
+``spack_configs_path`` and ``spack_packages_path`` are relative to the directory
+containing ``.uberenv_config.json``. ``package_version`` determines which recipe
+conditions apply to the source; it does not change your Git checkout.
 
-The example uses upstream recipes. Add ``spack_packages_path`` only if an
-intentional local repository is needed; see :ref:`local-recipe-overrides`.
+The example uses upstream recipes. To test a project-local recipe, add
+``spack_packages_path``; see :ref:`local-recipe-overrides`.
 For all Uberenv options, consult the `Uberenv guide
 <https://uberenv.readthedocs.io/en/latest/>`_.
 
@@ -89,13 +87,16 @@ For all Uberenv options, consult the `Uberenv guide
 Shared machine configuration
 ----------------------------
 
-``spack_configs_path`` points to the configuration checkout. Uberenv selects
-platform/machine configuration using its platform detection, including LC's
-``SYS_TYPE``. Confirm the selected paths in its output. The repository contains
-platform and machine ``spack.yaml``, ``config.yaml``, and ``packages.yaml``
-files; compiler externals and named toolchains are defined in
-``packages.yaml``. See :doc:`../developer_guide/index` for maintenance and
-:doc:`../reference/index` for file responsibilities.
+``spack_configs_path`` tells Uberenv where to find RADIUSS Spack Configs:
+``scripts/radiuss-spack-configs`` in this example. Within that directory,
+Uberenv selects configuration files for the platform and machine, using LC's
+``SYS_TYPE`` as part of its detection. Check the paths printed by Uberenv.
+
+RADIUSS Spack Configs provides ``spack.yaml``, ``config.yaml``, and
+``packages.yaml`` files for supported platforms and machines. Compiler
+externals and named toolchains are defined in ``packages.yaml``. See
+:doc:`../developer_guide/index` for maintenance and :doc:`../reference/index`
+for file responsibilities.
 
 .. _generate-config-file:
 

@@ -18,7 +18,7 @@ configuration, and return to their normal build and test loop.
 .. _custom-ci-pipelines:
 
 Start with :doc:`user_guide/index`. Infrastructure maintainers should use
-:doc:`developer_guide/index` for platform changes and validation baselines.
+:doc:`developer_guide/index` for platform changes and validation procedures.
 
 .. toctree::
    :maxdepth: 1
@@ -53,4 +53,4 @@ Background and motivation
 LLNL's RADIUSS effort supports libraries and tools for scientific application
 development. Shared configurations let participating projects test comparable
 toolchains and exercise their upstream packaging during development. Build
-preparation also works outside CI; adopting one does not require the other.
+preparation also works in an interactive compute allocation, without CI.

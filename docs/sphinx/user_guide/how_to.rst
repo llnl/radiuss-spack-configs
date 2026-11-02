@@ -8,7 +8,8 @@
 Troubleshoot and find earlier guidance
 ======================================
 
-Start with the first failing stage and reproduce its inputs. A successful
+Start with the first failing command, using the same machine, spec, and
+project checkout. A successful
 concretization alone does not show that a project builds or passes tests.
 
 .. list-table:: Narrow a failure
@@ -18,14 +19,14 @@ concretization alone does not show that a project builds or passes tests.
    * - Symptom
      - Next action
    * - Package version or variant unavailable
-     - Check the recipe pin and repository precedence, including local
-       overrides. Follow :doc:`changes`.
+     - Check ``spack_packages_commit`` and whether a local recipe overrides
+       the upstream package. Follow :doc:`changes`.
    * - Compiler/external missing or concretization fails
      - Confirm the machine and selected configuration, then inspect
        ``spack config blame packages`` and the full spec in that environment.
    * - Setup fails after updating Spack or Uberenv
-     - Check compatibility of all pins; reproduce with a new Uberenv prefix
-       to distinguish stale setup state from an input problem.
+     - Check that the Spack, Uberenv, and recipe revisions are compatible;
+       retry with a new ``--prefix`` directory to rule out stale setup files.
    * - Host configuration missing or ambiguous
      - Check whether ``initconfig`` completed and select the intended output
        explicitly. Do not pick an arbitrary ``*.cmake`` file.
@@ -50,11 +51,11 @@ concretization alone does not show that a project builds or passes tests.
 Compare two configurations
 --------------------------
 
-Compare the source checkout, ``git submodule status --recursive``, JSON engine
-and recipe pins, selected machine configuration, expanded spec, and generated
-host configuration. Also compare Shared CI component references, project
+Compare the project commits, ``git submodule status --recursive`` output,
+Spack and recipe revisions in ``.uberenv_config.json``, machine configuration,
+expanded spec, and generated host configuration. Also compare Shared CI component references, project
 variables, and local job overrides. :ref:`reference-ownership` lists the owner
-of each input. Matching only the Spack version is insufficient.
+of each component.
 
 Earlier how-to sections
 -----------------------
@@ -72,7 +73,7 @@ The following entry points retain links from the previous guide.
 Update build infrastructure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use :doc:`changes` to select the input to update and
+Use :doc:`changes` to identify the component to update and
 :ref:`essential-precedence` to check which selection takes effect.
 
 .. _shared_ci_jobs:
@@ -97,7 +98,7 @@ Use :doc:`ci` for composition, variants, and failure exceptions, and
 Run Uberenv
 ~~~~~~~~~~~
 
-Follow :doc:`use_spack` for the canonical command and :doc:`build_and_test`
+Follow :doc:`use_spack` for the Uberenv command and :doc:`build_and_test`
 for the repeated source-edit loop.
 
 .. _spack-reference-during-the-release-process:

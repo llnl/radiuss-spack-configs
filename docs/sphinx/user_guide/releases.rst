@@ -5,10 +5,10 @@
 Coordinate releases
 ===================
 
-Prepare compatibility changes early so each project's release needs only
-small publication updates. Use explicit owners and parallel validation to
-converge before releases begin. Staggered releases are a condition to handle,
-not the intended schedule.
+Prepare and test recipe changes together before releasing the participating
+projects. Agree on who maintains each recipe and aim to use the same tested
+``spack-packages`` revision, leaving only final version metadata to add as
+source releases become available.
 
 .. graphviz:: /figures/release-coordination.dot
    :align: center
@@ -27,19 +27,19 @@ Joint release process
 #. Test candidate commits from project feature or release-staging branches.
    Validate development, intended release, and affected previous-release
    behavior across participants.
-#. Merge recipes upstream, replace candidate pins with the **actual merged
-   revision**, and converge on that baseline before releases begin.
+#. Merge recipes upstream and update each project's ``spack_packages_commit``
+   to the **actual merged revision** before releases begin.
 #. Add final ``version(...)`` entries with tags, commit hashes, or archive
    checksums as source releases become available. Coordinate any necessary
    recipe-pin updates among remaining participants and validate them.
-#. Close the round promptly and converge participating development branches on
-   a validated recipe baseline containing the final publication updates.
+#. Close the release round by updating participating development branches to
+   the same tested ``spack-packages`` revision, including final version metadata.
 
 Project ``develop`` branches and release tags must use upstream-merged recipe
 revisions. Published tags retain their tested pins; do not retag a source
 release simply to adopt a later recipe revision.
 
-Final metadata depends on source availability. A tagged project cannot embed a
+A tagged project cannot embed a
 recipe revision already containing its own final commit hash: changing that
 embedded pin changes the project's hash. Prepare recipe behavior first, then
 publish the final source identity in the upstream recipe afterward.
@@ -67,13 +67,13 @@ standard behavior using this condition:
 
    conflicts("cxxstd=17", when="@2026.07.0:")
 
-This historical example teaches preparing version-dependent behavior, not
-copying its version threshold into another package. Open-ended future-version
-conditions such as ``@2026.07.0:`` can also match ``develop``. Bounded release
-series such as ``@2025.12`` do not match ``develop``. Check both meanings when
-writing or reviewing recipe conditions.
+This rule rejects C++17 for RAJAPerf 2026.07.0 and later. Its open-ended
+condition also matches ``develop``. In contrast, a bounded release series
+such as ``@2025.12`` does not match ``develop``. Choose the version range
+according to which releases and development builds need the new behavior.
 
-A restriction on the parent version does not bound its dependencies.
+Restricting a rule to one version of a package does not limit the versions of
+its dependencies.
 `#5961 <https://github.com/spack/spack-packages/pull/5961>`_ introduced release
 updates that left CARE's older release dependency ranges open-ended;
 `#6652 <https://github.com/spack/spack-packages/pull/6652>`_ corrected them.
@@ -91,20 +91,20 @@ The distinction highlighted in `Adrien's review
 These are alternatives, not two declarations to add together. The first allows
 Umpire 2026.07 and ``develop``; the second excludes them and permits the
 2025.12 series. Apply the same compatibility review to RAJA, CHAI, and any
-other affected dependencies when introducing a release. Do not assume that
-updating the newest release's constraints preserves all previous releases.
+other affected dependencies when introducing a release.
 
-Validate both version semantics
--------------------------------
+.. _validate-both-version-semantics:
 
-For the RAJA integration, ``package_version: develop`` applies development
-recipe conditions to the local checkout. A release-staging checkout must also
-be tested with its intended release semantics, matching source and recipe
-expectations. Before source publication, validate candidate source through the
-project's local development build path; after publication, validate the actual
-version metadata and fetched source as well.
+Test development and release versions
+-------------------------------------
+
+In RAJA's ``.uberenv_config.json``, ``package_version: develop`` selects the
+recipe conditions for development builds. Also test the release-staging source
+with ``package_version`` set to the planned release version, so Spack applies
+its release conditions. Use local source until the release is published, then
+test that Spack fetches and builds it using the final ``version(...)`` entry.
 
 For each affected package, check that the candidate recipe permits compatible
 dependencies and rejects incompatible newer series for supported older
-releases. Concretization checks establish selection behavior; builds and tests
-establish source compatibility. Retain both in the release review evidence.
+releases. Concretize specs to check dependency selection, then build and test
+to check compatibility. Include both results in the release review.

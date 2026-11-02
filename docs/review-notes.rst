@@ -126,3 +126,17 @@ Validation used Sphinx 6.2.1, sphinx-rtd-theme 1.2.2, and docutils 0.18.1.
 Local outputs are ``docs/_build/html/index.html`` and
 ``docs/_build/latex/RADIUSS_Spack_Configs.pdf``; generated outputs are ignored
 by Git. No LC builds, Spack package builds, or GitLab pipelines were executed.
+
+Readability review follow-up
+----------------------------
+
+Clarified the distinction between project-local recipe experiments and the
+shared custom recipes or repository CI tests in RADIUSS Spack Configs. Named
+the relevant components, paths, and revision settings in developer steps;
+replaced generic engine/resolver wording with Spack's package-manager and
+concretizer terminology. The RAJAPerf note was checked against its project JSON
+and build/test script. Removed the editorial instruction about staggered releases.
+
+The follow-up passed strict Sphinx HTML/LaTeX builds and checked 578 local
+references, including the retained release-section anchor. External URLs were
+unchanged. The HTML and PDF outputs were regenerated for review.

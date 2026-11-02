@@ -2,8 +2,8 @@
 digraph components {
   rankdir=TB;
   project [label="RAJA\nproject source and tests", shape=folder, fillcolor="#e3edf7"];
-  settings [label=".uberenv_config.json\nselect preparation inputs", shape=tab, fillcolor="#eee8f5"];
-  engine [label="spack/spack\nresolution and installation", shape=folder, fillcolor="#e3edf7"];
+  settings [label=".uberenv_config.json\nselect tools and recipes", shape=tab, fillcolor="#eee8f5"];
+  spack [label="spack/spack\npackage manager", shape=folder, fillcolor="#e3edf7"];
   recipes [label="spack/spack-packages\nupstream recipes", shape=folder, fillcolor="#e3edf7"];
   recipe [label="package.py\nversions and build behavior", shape=note, fillcolor="#fff2cf"];
   configs [label="RADIUSS Spack Configs\nmachines and shared specs", shape=folder, fillcolor="#e3edf7"];
@@ -14,7 +14,7 @@ digraph components {
   settings -> uberenv [style=dashed, arrowhead=empty, label="configures"];
   recipes -> recipe [style=dashed, arrowhead=empty, label="provides"];
   configs -> machine [style=dashed, arrowhead=empty, label="provides"];
-  engine -> uberenv [style=dashed, arrowhead=empty, label="engine input"];
+  spack -> uberenv [style=dashed, arrowhead=empty, label="concretizes and installs"];
   recipe -> uberenv [style=dashed, arrowhead=empty, label="recipe input"];
   machine -> uberenv [style=dashed, arrowhead=empty, label="machine input"];
   uberenv -> host [label="runs initconfig"];

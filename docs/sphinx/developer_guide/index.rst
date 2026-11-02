@@ -21,8 +21,8 @@ paths and symlink targets before editing.
 
 Compilers are external packages in ``packages.yaml`` with executable paths in
 ``extra_attributes.compilers``. Named combinations live in the ``toolchains``
-section. Do not add a legacy ``compilers.yaml`` to this setup. Match the
-configuration syntax to the validated Spack engine and recipe baseline.
+section. Do not add a legacy ``compilers.yaml`` to this setup. Use configuration
+syntax supported by the tested Spack and ``spack-packages`` revisions.
 
 For a machine or toolchain update:
 
@@ -31,8 +31,8 @@ For a machine or toolchain update:
 #. Update the narrowest applicable configuration. Review external package
    constraints, compiler runtime dependencies, and named toolchains together.
 #. Update the relevant shared specifications in
-   ``gitlab/radiuss-jobs/<machine>.yml``. Check project variable hooks and job
-   names because consumers may override them.
+   ``gitlab/radiuss-jobs/<machine>.yml``. Check the project variant and dependency
+   variables and job names, which projects may override.
 #. Keep the corresponding compiler/specification definitions in
    ``.gitlab/spack/envs/shared-ci/spack.yaml`` consistent. These are maintained
    separately; they are not automatically imported from the shared job files.
@@ -44,6 +44,10 @@ paths and versions to the local installation; it is not an LC validation target.
 
 Repository maintenance
 ----------------------
+
+The optional ``spack_repo/llnl_radiuss`` repository holds custom packages
+that need to be shared among projects, or recipes tested in RADIUSS Spack
+Configs itself. For project-local experiments, use :ref:`local-recipe-overrides`.
 
 * :doc:`../ci_implementation/index` describes validation purposes, manual
   environment selection, and storage lifetimes.

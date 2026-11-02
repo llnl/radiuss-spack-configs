@@ -18,14 +18,14 @@ References and their owners
      - Consumer selection
      - Meaning
    * - Project source
-     - Project checkout; ``package_version`` supplies recipe version semantics
+     - Project checkout; ``package_version`` selects applicable recipe conditions
      - Source being built; ``develop`` is not a recipe-repository revision
    * - Recipe repository
      - ``spack_packages_commit`` in ``.uberenv_config.json``
      - Upstream recipes and build systems used by Spack
-   * - Spack engine
+   * - Spack
      - ``spack_commit`` or ``spack_branch`` in that JSON
-     - Resolver, configuration parser, and installation engine
+     - Package manager, including the concretizer and installer
    * - Shared configuration
      - RADIUSS Spack Configs submodule commit; ``spack_configs_path`` locates it
      - Machine settings and shared CI specifications
@@ -56,7 +56,8 @@ File responsibilities
      - Upstream versions, variants, dependencies, and build behavior;
        package directory names replace hyphens with underscores
    * - ``spack_repo/llnl_radiuss/repo.yaml`` and adjacent ``packages/``
-     - Optional local testing repository; recipes should be upstreamed
+     - Custom packages shared among projects, or recipes tested in
+       RADIUSS Spack Configs itself
    * - Platform/machine ``spack.yaml``
      - Environment settings and configuration includes
    * - Platform/machine ``packages.yaml``
@@ -69,7 +70,7 @@ File responsibilities
    * - ``.gitlab/spack/envs/<environment>/spack.yaml``
      - Repository validation specs and ``spack.repos.builtin.commit`` recipe pin
    * - ``.gitlab/spack/envs/<environment>/pipeline.yml``
-     - Repository CI engine selection and machine pipeline includes
+     - Spack revision and machine pipeline includes for repository CI
 
 .. _essential-precedence:
 
@@ -79,20 +80,21 @@ Essential precedence rules
 * In Uberenv, ``spack_commit`` takes precedence over ``spack_branch``.
   ``spack_packages_commit`` takes precedence over ``spack_packages_branch``,
   which takes precedence over ``spack_packages_tag``. Remove obsolete selectors
-  when changing selection strategy. A package-version need normally changes
-  the recipe pin, not the engine pin.
+  when changing selection strategy. To use a new package version, normally
+  update ``spack_packages_commit``; Spack itself may not need an update.
 * ``spack_packages_path`` selects optional local recipe directories; it does
   not pin the upstream recipe repository. Each ``packages`` directory needs
-  an adjacent parent ``repo.yaml``. In a list, the rightmost local repository
-  has highest priority; local recipes can hide upstream fixes.
+  a ``repo.yaml`` in its parent directory. In a list, the rightmost local
+  repository has highest priority; local recipes can hide upstream fixes.
 * Configuration includes, scopes, and override keys affect the effective Spack
   settings. Inspect ``spack config blame packages`` and
   ``spack config blame repos`` in the generated environment rather than
   inferring the result from one file. See `Spack configuration scopes
   <https://spack.readthedocs.io/en/latest/configuration.html>`_.
-* Repository CI consumes ``MY_ENV_NAME`` supplied by GitLab. Its engine
-  checkout uses ``MY_SPACK_COMMIT`` when set, otherwise ``MY_SPACK_BRANCH``
-  (which can name a tag). Consumer JSON pins do not configure repository CI.
+* RADIUSS Spack Configs CI selects an environment using GitLab's
+  ``MY_ENV_NAME`` variable. Its Spack checkout uses ``MY_SPACK_COMMIT`` when set,
+  otherwise ``MY_SPACK_BRANCH`` (which can name a tag). A project's
+  ``.uberenv_config.json`` does not configure these pipelines.
 * Consumer CI combines shared jobs with project settings. Inspect the final
   merged GitLab configuration when names collide; see :doc:`../user_guide/ci`.
 

@@ -18,7 +18,7 @@ Propose changes through a GitHub pull request. For configuration and validation 
 
 ## Versioning
 
-Tags identify tested configuration releases and, in recent tags, the Spack engine and recipe-repository references used for validation. See [tested baselines](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/baselines.html) for the naming convention and adoption process.
+Tags identify tested configuration releases and, in recent tags, the Spack and spack-packages revisions used for validation. See [tested baselines](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/baselines.html) for the naming convention and adoption process.
 
 Start with the [developer workflow](https://radiuss-spack-configs.readthedocs.io/en/latest/user_guide/index.html), or use the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/index.html). Documentation build instructions are in [docs/README.rst](docs/README.rst).
 

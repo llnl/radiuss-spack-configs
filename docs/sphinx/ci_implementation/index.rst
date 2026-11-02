@@ -31,12 +31,11 @@ directory under ``.gitlab/spack/envs``.
        currently being revised.
    * - Additional environments
      - Support other validation goals with their own specifications, recipe
-       baseline, engine selection, and machine coverage.
+       revision, Spack version, and machine coverage.
 
-The GitLab project configuration supplies the ``shared-ci`` default; the
-repository consumes the selected value through ``MY_ENV_NAME``. An unset or
-empty value takes the no-environment path, rather than assigning a default in
-``.gitlab-ci.yml``.
+The GitLab project settings define ``MY_ENV_NAME=shared-ci`` by default.
+``.gitlab-ci.yml`` uses this value to select an environment; if it is empty
+or unset, the pipeline displays instructions instead of building an environment.
 
 .. important::
 
@@ -102,7 +101,7 @@ The default branch uses ``CACHE_TARGET=main``; other branch pipelines normally
 use ``ref-${CI_COMMIT_REF_SLUG}``. An explicit ``CACHE_TARGET`` overrides that
 selection, and the fallback for other contexts is ``manual``.
 
-The install tree is the reuse path for installed packages. The filesystem
+Spack can reuse packages already present in the install tree. The filesystem
 buildcache provides binaries and mirror metadata that Spack CI uses to prune
 already-built specifications during pipeline generation. A non-main pipeline
 writes its own namespace and reads the ``main`` buildcache; it also uses the

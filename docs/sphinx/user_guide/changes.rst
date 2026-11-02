@@ -5,9 +5,9 @@
 Change recipes or dependencies
 ==============================
 
-Choose the input that owns the behavior you need to change. A newer package
-version normally needs newer recipes, while a new resolver or configuration
-capability needs a newer Spack engine.
+Update the component responsible for the change. A new package version usually
+requires newer recipes in ``spack-packages``. New concretizer features or
+configuration syntax may require a newer Spack version.
 
 .. list-table:: What to update
    :header-rows: 1
@@ -22,9 +22,9 @@ capability needs a newer Spack engine.
        regenerate the configuration.
    * - Needed package version
      - Update ``spack_packages_commit`` to a validated revision containing it.
-   * - Needed Spack engine capability
-     - Update Spack and check compatibility with Uberenv, recipes, and
-       configuration.
+   * - Needed Spack capability
+     - Update Spack and check compatibility with Uberenv, ``spack-packages``,
+       and RADIUSS Spack Configs.
    * - Shared machine/toolchain change
      - Update RADIUSS Spack Configs, validate it, and adopt that configuration
        revision.
@@ -36,32 +36,35 @@ Preparing and adopting a recipe change
    existing release conditions as well as development behavior.
 #. Test the candidate recipe revision from a project feature or release-staging
    branch. Record the candidate commit and the specification tested.
-#. Submit the change upstream, then replace the candidate pin with the actual
-   merged revision. Squash or rebase merges can change commit identities.
-#. Regenerate dependencies and the host configuration, and build/test the
-   project. Project ``develop`` branches and published release tags must use
-   upstream-merged recipe revisions.
+#. Open a pull request in ``spack/spack-packages``, then update
+   ``spack_packages_commit`` to the actual merged revision. Squash or rebase
+   merges can change commit identities.
+#. Rerun Uberenv to install dependencies and generate the host configuration,
+   then build and test the project. Project ``develop`` branches and release
+   tags must use upstream-merged recipe revisions.
 
-Use a new Uberenv prefix after engine/setup changes or when checking whether
-stale preparation state explains a failure. Keep the previous prefix available
-until dependent builds are no longer needed. Check :ref:`reference-ownership`
-when comparing revisions, and :doc:`releases` when several projects must
-converge.
+Use a new ``--prefix`` directory after updating Spack or Uberenv, or to check
+whether an existing installation causes a failure. Keep the old directory
+while other builds still use its dependencies. See :ref:`reference-ownership`
+for the revisions to compare and :doc:`releases` for updates across projects.
 
 .. _local-recipe-overrides:
 
 Temporary local recipe overrides
 --------------------------------
 
-A local override is useful for a short experiment, but can hide subsequent
-upstream fixes. The optional repository layout here is
-``spack_repo/llnl_radiuss/repo.yaml`` with recipes under
-``spack_repo/llnl_radiuss/packages/<name>/package.py``. For the canonical
-integration, its Uberenv packages path is
-``scripts/radiuss-spack-configs/spack_repo/llnl_radiuss/packages``.
+To test a recipe locally, create a Spack package repository inside your project.
+For example, use ``scripts/spack_repo/my_project/repo.yaml`` and
+``scripts/spack_repo/my_project/packages/<name>/package.py``, with repository
+metadata matching your Spack version. In the project's ``.uberenv_config.json``,
+add:
 
-Do not use the obsolete ``radiuss-spack-configs/packages`` path. A local
-repository must contain valid metadata for the selected Spack version. Verify
-which repository supplies the recipe, upstream the change, and remove the
-override once its merged revision is adopted. For repository ordering, see
-:ref:`essential-precedence`.
+.. code-block:: json
+
+   "spack_packages_path": "scripts/spack_repo/my_project/packages"
+
+Confirm that Spack uses your local recipe when you rerun Uberenv. Local recipes
+can hide upstream fixes and create a second source of truth, so keep this
+arrangement temporary. Prefer a pull request in ``spack/spack-packages``; once
+merged, update ``spack_packages_commit`` and remove the local override. See
+:ref:`essential-precedence` for repository ordering.

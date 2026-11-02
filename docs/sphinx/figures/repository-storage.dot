@@ -14,7 +14,7 @@ digraph repository_storage {
     main [label="main namespace\ninstall / buildcache", shape=parallelogram, fillcolor="#dcf2f4"];
     branch [label="ref-<slug> namespace\ninstall / buildcache", shape=parallelogram, fillcolor="#dcf2f4"];
   }
-  checkout -> pipeline [style=dashed, arrowhead=empty, label="engine input"];
+  checkout -> pipeline [style=dashed, arrowhead=empty, label="Spack version"];
   cache -> pipeline [style=dashed, arrowhead=empty, label="isolated work area"];
   pipeline -> branch [label="branch writes"];
   pipeline -> main [label="default branch writes"];

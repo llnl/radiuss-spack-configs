@@ -6,9 +6,9 @@ digraph release_coordination {
   validate [label="Validate candidate commits in parallel\nproject feature / release-staging branches", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   merge [label="Merge recipes upstream", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   pin [label="actual merged recipe revision", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4"];
-  converge [label="Converge participating projects\nbefore releases begin", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  converge [label="Use the same recipe revision\nbefore releases begin", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   publish [label="Publish source releases\nthen add final recipe metadata", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  close [label="Close the release round\nconverge development recipe pins", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  close [label="Close the release round\nupdate development recipe revisions", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   agree -> prepare -> validate -> merge;
   merge -> pin;
   pin -> converge [style=dotted, arrowhead=vee, color="#874e69", label="replace candidate pins"];
