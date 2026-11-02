@@ -89,11 +89,28 @@ independent dependency overrides without adding project names to `rad-bat`.
 
 With no arguments, `rad-bat` translates environment variables to one of the
 normal modes. This is the CI interface, but it is not a separate operating
-mode. Tool-specific settings use `RAD_BAT_*`; the adapter may accept the
-established `HOST_CONFIG`, `SPEC`, and `MODULE_LIST` job inputs while project
-job definitions are converted. Host-config mode accepts an explicit
-`RAD_BAT_HOST_CONFIG`, or combines the project-wide
-`RAD_BAT_HOST_CONFIG_DIR` with the job's `RAD_BAT_HOST_CONFIG_NAME`.
+mode. A non-empty `RAD_BAT_MODE` explicitly selects `host-config` or `spack`.
+When it is unset, the job inputs select the mode:
+
+| Spec | Host-config selector | Selected mode |
+| --- | --- | --- |
+| set | unset | `spack` |
+| unset | set | `host-config` |
+| set | set | `host-config` |
+| unset | unset | error |
+
+A host-config selector is either `RAD_BAT_HOST_CONFIG` (or legacy
+`HOST_CONFIG`) or `RAD_BAT_HOST_CONFIG_NAME`. A spec is `RAD_BAT_SPEC` (or
+legacy `SPEC`). Empty values count as unset. Every environment-driven run logs
+the set/unset inputs and selected mode without printing their values. An
+explicit mode still validates that its required input exists, and a missing
+selected host-config remains an error rather than falling back to Spack.
+
+Tool-specific settings use `RAD_BAT_*`; the adapter may accept the established
+`HOST_CONFIG`, `SPEC`, and `MODULE_LIST` job inputs while project job
+definitions are converted. Host-config mode combines the project-wide
+`RAD_BAT_HOST_CONFIG_DIR` with the job's `RAD_BAT_HOST_CONFIG_NAME` when no
+direct host-config path is provided.
 
 ### Host-config policy
 
@@ -101,10 +118,11 @@ job definitions are converted. Host-config mode accepts an explicit
   invoke Spack or concretize.
 - Each CI job keeps its `SPEC` beside the host-config selection as the recipe
   used to regenerate it.
-- A project selects its ordinary default globally with `RAD_BAT_MODE`. Umpire
-  uses `host-config`; individual jobs override it only when their policy
-  differs.
-- A developer explicitly starts a complete refresh pipeline by overriding
+- A maintained job defines both its `SPEC` and stable host-config name, so its
+  ordinary CI path selects `host-config` without a project-wide mode setting.
+- A spec-only job selects `spack`, preserving the historical behavior for jobs
+  whose configuration has not been frozen in the project.
+- A developer explicitly starts a complete refresh pipeline by setting
   `RAD_BAT_MODE=spack`. Every maintained job is regenerated from the `SPEC` and
   stable host-config filename in its sole job definition. There is no separate
   refresh job set, stale-state inference, or fingerprint comparison.

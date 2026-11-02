@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+from . import logs
 from .config import load_project_config
 from .errors import RadBatError
 from .workflows import run_host_config, run_spack
@@ -89,9 +90,13 @@ def _ci_value(name: str, legacy: Optional[str] = None) -> Optional[str]:
     return value
 
 
+def _is_set(value: Optional[str]) -> bool:
+    return bool(value and value.strip())
+
+
 def _required_ci(name: str, legacy: Optional[str] = None) -> str:
     value = _ci_value(name, legacy)
-    if not value:
+    if not _is_set(value):
         names = name if not legacy else "{} (or {})".format(name, legacy)
         raise RadBatError(
             "{} is required for environment-driven execution".format(names)
@@ -99,8 +104,50 @@ def _required_ci(name: str, legacy: Optional[str] = None) -> str:
     return value
 
 
+def _select_environment_mode(
+    explicit_mode: Optional[str], host_config: Optional[str], spec: Optional[str]
+) -> str:
+    mode_is_set = _is_set(explicit_mode)
+    host_config_is_set = _is_set(host_config)
+    spec_is_set = _is_set(spec)
+    mode = explicit_mode.strip() if mode_is_set else None
+
+    if mode is None:
+        if host_config_is_set:
+            mode = "host-config"
+        elif spec_is_set:
+            mode = "spack"
+
+    mode_state = "set to {}".format(explicit_mode.strip()) if mode_is_set else "unset"
+    input_state = (
+        "RAD_BAT_MODE {}, HOST_CONFIG {}, SPEC {}".format(
+            mode_state,
+            "set" if host_config_is_set else "unset",
+            "set" if spec_is_set else "unset",
+        )
+    )
+    if mode in {"host-config", "spack"}:
+        label = "Host-config" if mode == "host-config" else "Spack"
+        logs.info("{} => {} mode selected".format(input_state, label))
+        return mode
+
+    logs.info("{} => mode selection failed".format(input_state))
+    if mode_is_set:
+        raise RadBatError("RAD_BAT_MODE must be host-config or spack")
+    raise RadBatError(
+        "cannot infer a mode: set SPEC, HOST_CONFIG, or RAD_BAT_HOST_CONFIG_NAME"
+    )
+
+
 def _run_environment() -> None:
-    mode = _required_ci("RAD_BAT_MODE")
+    explicit_mode = _ci_value("RAD_BAT_MODE")
+    direct_host_config = _ci_value("RAD_BAT_HOST_CONFIG", "HOST_CONFIG")
+    host_config_name = _ci_value("RAD_BAT_HOST_CONFIG_NAME")
+    spec = _ci_value("RAD_BAT_SPEC", "SPEC")
+    host_config_selector = (
+        direct_host_config if _is_set(direct_host_config) else host_config_name
+    )
+    mode = _select_environment_mode(explicit_mode, host_config_selector, spec)
     source = Path(_ci_value("RAD_BAT_SOURCE_DIR") or os.environ.get("CI_PROJECT_DIR", "."))
     config = load_project_config(source)
     try:
@@ -108,8 +155,8 @@ def _run_environment() -> None:
     except argparse.ArgumentTypeError as error:
         raise RadBatError("RAD_BAT_JOBS {}".format(error))
     if mode == "host-config":
-        host_config = _ci_value("RAD_BAT_HOST_CONFIG", "HOST_CONFIG")
-        if not host_config:
+        host_config = direct_host_config
+        if not _is_set(host_config):
             host_config_name = _required_ci("RAD_BAT_HOST_CONFIG_NAME")
             if (
                 Path(host_config_name).name != host_config_name
@@ -129,8 +176,6 @@ def _run_environment() -> None:
             None,
         )
         return
-    if mode != "spack":
-        raise RadBatError("RAD_BAT_MODE must be host-config or spack")
     upstream_value = _ci_value("RAD_BAT_UPSTREAMS") or ""
     upstreams = [value for value in upstream_value.split(os.pathsep) if value]
     run_spack(

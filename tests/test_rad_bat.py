@@ -355,6 +355,122 @@ class WorkflowTests(unittest.TestCase):
 
 
 class EnvironmentTests(unittest.TestCase):
+    def _run_with_mocked_workflows(self, environment):
+        output = io.StringIO()
+        with mock.patch.dict(os.environ, environment, clear=True), mock.patch(
+            "rad_bat.cli.run_host_config"
+        ) as host_config, mock.patch(
+            "rad_bat.cli.run_spack"
+        ) as spack, redirect_stdout(output):
+            status = cli.main([])
+        return status, output.getvalue(), host_config, spack
+
+    def test_infers_spack_from_spec_only(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_MODE": "",
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "SPEC": "+tools",
+                "RAD_BAT_WORK_DIR": str(root / "work"),
+                "RAD_BAT_INSTALL_TREE": str(root / "install"),
+            }
+            status, output, host_config, spack = self._run_with_mocked_workflows(
+                environment
+            )
+            self.assertEqual(status, 0)
+            self.assertIn(
+                "RAD_BAT_MODE unset, HOST_CONFIG unset, SPEC set => Spack mode selected",
+                output,
+            )
+            host_config.assert_not_called()
+            spack.assert_called_once()
+
+    def test_infers_host_config_from_host_config_only(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "RAD_BAT_HOST_CONFIG_DIR": "host-configs",
+                "RAD_BAT_HOST_CONFIG_NAME": "job.cmake",
+            }
+            status, output, host_config, spack = self._run_with_mocked_workflows(
+                environment
+            )
+            self.assertEqual(status, 0)
+            self.assertIn(
+                "RAD_BAT_MODE unset, HOST_CONFIG set, SPEC unset "
+                "=> Host-config mode selected",
+                output,
+            )
+            host_config.assert_called_once()
+            spack.assert_not_called()
+
+    def test_infers_host_config_when_both_inputs_are_set(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "SPEC": "+tools",
+                "RAD_BAT_HOST_CONFIG_DIR": "host-configs",
+                "RAD_BAT_HOST_CONFIG_NAME": "job.cmake",
+            }
+            status, output, host_config, spack = self._run_with_mocked_workflows(
+                environment
+            )
+            self.assertEqual(status, 0)
+            self.assertIn(
+                "RAD_BAT_MODE unset, HOST_CONFIG set, SPEC set "
+                "=> Host-config mode selected",
+                output,
+            )
+            host_config.assert_called_once()
+            spack.assert_not_called()
+
+    def test_explicit_mode_overrides_inference(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            environment = {
+                "RAD_BAT_MODE": "spack",
+                "RAD_BAT_SOURCE_DIR": str(root),
+                "SPEC": "+tools",
+                "RAD_BAT_HOST_CONFIG_DIR": "host-configs",
+                "RAD_BAT_HOST_CONFIG_NAME": "job.cmake",
+                "RAD_BAT_WORK_DIR": str(root / "work"),
+                "RAD_BAT_INSTALL_TREE": str(root / "install"),
+            }
+            status, output, host_config, spack = self._run_with_mocked_workflows(
+                environment
+            )
+            self.assertEqual(status, 0)
+            self.assertIn(
+                "RAD_BAT_MODE set to spack, HOST_CONFIG set, SPEC set "
+                "=> Spack mode selected",
+                output,
+            )
+            host_config.assert_not_called()
+            spack.assert_called_once()
+
+    def test_rejects_environment_without_mode_inputs(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_config(root)
+            status, output, host_config, spack = self._run_with_mocked_workflows(
+                {"RAD_BAT_SOURCE_DIR": str(root)}
+            )
+            self.assertEqual(status, 2)
+            self.assertIn(
+                "RAD_BAT_MODE unset, HOST_CONFIG unset, SPEC unset "
+                "=> mode selection failed",
+                output,
+            )
+            host_config.assert_not_called()
+            spack.assert_not_called()
+
     def test_bare_command_maps_host_config_name_and_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
