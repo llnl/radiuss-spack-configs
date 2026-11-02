@@ -6,16 +6,14 @@ Sphinx guide. The implementation uses the supplied plan and locally available
 repository snapshots; it does not establish that any untested upstream update
 is ready to adopt.
 
-Publication review for Adrien
------------------------------
+Publication review
+------------------
 
-* Review ``user_guide/releases.rst``, especially future-version matching,
-  development versus intended-release semantics, and preservation of older
-  releases' dependency series. The published draft includes an explicit review
-  note beside the examples.
-* Review the historical examples together: #5716 illustrates early preparation;
-  #5961 and #6652 illustrate a compatibility mistake and its correction. They
-  are not a catalog of changes to copy into new recipes.
+Adrien approved the future-version and older-release compatibility guidance.
+The published section now uses self-contained source snippets with neutral
+descriptions, without a review reminder or links to specific PRs and discussions.
+The source-history references below remain background audit evidence only.
+
 * Review the usefulness, terminology, and accessibility of the five figures:
   component responsibilities, developer loop, consumer CI composition, release
   coordination, and repository CI storage.

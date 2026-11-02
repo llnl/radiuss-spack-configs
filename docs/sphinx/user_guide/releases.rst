@@ -49,49 +49,39 @@ publish the final source identity in the upstream recipe afterward.
 Prepare future behavior and preserve older releases
 ---------------------------------------------------
 
-.. important::
-
-   Adrien review before publication: carefully review the future-version and
-   previous-release compatibility guidance below, including the selected
-   historical examples and their applicability to the intended release round.
-
 A condition can mention a future version without a corresponding
 ``version(...)`` entry. This lets a recipe prepare new requirements before the
 source release exists. It does not make an unavailable release downloadable.
 
-For example, `spack-packages #5716
-<https://github.com/spack/spack-packages/pull/5716>`_ prepared RAJAPerf's C++
-standard behavior using this condition:
+For example, a recipe can prepare a C++ standard requirement for an upcoming
+release:
 
 .. code-block:: python
 
    conflicts("cxxstd=17", when="@2026.07.0:")
 
-This rule rejects C++17 for RAJAPerf 2026.07.0 and later. Its open-ended
+This rule rejects C++17 for package versions 2026.07.0 and later. Its open-ended
 condition also matches ``develop``. In contrast, a bounded release series
 such as ``@2025.12`` does not match ``develop``. Choose the version range
 according to which releases and development builds need the new behavior.
 
 Restricting a rule to one version of a package does not limit the versions of
-its dependencies.
-`#5961 <https://github.com/spack/spack-packages/pull/5961>`_ introduced release
-updates that left CARE's older release dependency ranges open-ended;
-`#6652 <https://github.com/spack/spack-packages/pull/6652>`_ corrected them.
-The distinction highlighted in `Adrien's review
-<https://github.com/spack/spack-packages/pull/5961#discussion_r3950488022>`_ is:
+its dependencies. For a package at version 0.15.3, these two constraints allow
+different Umpire versions:
 
 .. code-block:: python
 
-   # Historical mistake: the parent is restricted, the dependency is not.
+   # Allow Umpire 2025.12 and later.
    depends_on("umpire@2025.12:", when="@0.15.3")
 
-   # Corrected: preserve the older release's compatible dependency series.
+   # Limit Umpire to the 2025.12 series.
    depends_on("umpire@2025.12", when="@0.15.3")
 
 These are alternatives, not two declarations to add together. The first allows
 Umpire 2026.07 and ``develop``; the second excludes them and permits the
-2025.12 series. Apply the same compatibility review to RAJA, CHAI, and any
-other affected dependencies when introducing a release.
+2025.12 series. Use a bounded dependency series when newer versions are
+incompatible with an older release. Review RAJA, CHAI, and other affected
+dependencies in the same way when introducing a release.
 
 .. _validate-both-version-semantics:
 
