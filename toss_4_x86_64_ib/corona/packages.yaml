@@ -250,6 +250,9 @@
       prefix: /opt/rocm-6.0.2/
     - spec: rocprim@6.4.3%llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3/
+    # Match hipCUB's explicit target; keep entries defaulting to amdgpu_target=auto.
+    - spec: rocprim@6.4.3 amdgpu_target=gfx906 %llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3/
   rocprofiler-sdk:
     version: [6.4.3]
     buildable: false
@@ -388,7 +391,8 @@
   hwloc:
     buildable: false
     externals:
-    - spec: hwloc@2.11.2
+    # Host RPM hwloc-2.14.0-2.t4 links ROCm SMI and registers the rsmi backend.
+    - spec: hwloc@2.14.0+rocm amdgpu_target=gfx906
       prefix: /usr
   libepoxy:
     buildable: false
