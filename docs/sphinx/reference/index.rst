@@ -24,10 +24,11 @@ References and their owners
      - ``spack_packages_commit`` in ``.uberenv_config.json``
      - Upstream recipes and build systems used by Spack
    * - Spack
-     - ``spack_commit`` or ``spack_branch`` in that JSON
+     - ``spack_commit`` or ``spack_branch`` in ``.uberenv_config.json``
      - Package manager, including the concretizer and installer
    * - Shared configuration
-     - RADIUSS Spack Configs submodule commit; ``spack_configs_path`` locates it
+     - RADIUSS Spack Configs submodule commit; ``spack_configs_path`` locates
+       the checkout
      - Machine settings and shared CI specifications
    * - Uberenv
      - Uberenv submodule commit
@@ -40,8 +41,9 @@ References and their owners
      - Output tied to a specification, machine, and dependency installation
 
 The generated host configuration is an initial CMake cache script, not the
-build directory's ``CMakeCache.txt``. It can contain absolute compiler and
-installation paths; keep the installations it references available.
+build directory's ``CMakeCache.txt``. Keep the compiler and dependency
+installations referenced by the host configuration available at the recorded
+paths.
 
 File responsibilities
 ---------------------
@@ -92,7 +94,7 @@ Essential precedence rules
   inferring the result from one file. See `Spack configuration scopes
   <https://spack.readthedocs.io/en/latest/configuration.html>`_.
 * RADIUSS Spack Configs CI selects an environment using GitLab's
-  ``MY_ENV_NAME`` variable. Its Spack checkout uses ``MY_SPACK_COMMIT`` when set,
+  ``MY_ENV_NAME`` variable. The CI Spack checkout uses ``MY_SPACK_COMMIT`` when set,
   otherwise ``MY_SPACK_BRANCH`` (which can name a tag). A project's
   ``.uberenv_config.json`` does not configure these pipelines.
 * Consumer CI combines shared jobs with project settings. Inspect the final

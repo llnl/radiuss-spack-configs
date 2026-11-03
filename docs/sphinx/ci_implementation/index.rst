@@ -15,8 +15,8 @@ environments on LC machines. These pipelines are separate from the
 Choose a validation environment
 -------------------------------
 
-Each run selects one environment using ``MY_ENV_NAME``. Its value must name a
-directory under ``.gitlab/spack/envs``.
+Each run selects the environment directory under ``.gitlab/spack/envs``
+named by ``MY_ENV_NAME``.
 
 .. list-table:: Environment purposes
    :header-rows: 1
@@ -27,15 +27,16 @@ directory under ``.gitlab/spack/envs``.
    * - ``shared-ci``
      - Validate the RADIUSS shared stack. This is the configured GitLab default.
    * - ``cached-cmake``
-     - Validate behavior involving CachedCMake packages. Its implementation is
-       currently being revised.
+     - Validate behavior involving CachedCMake packages. The ``cached-cmake``
+       implementation is currently being revised.
    * - Additional environments
      - Support other validation goals with their own specifications, recipe
        revision, Spack version, and machine coverage.
 
 The GitLab project settings define ``MY_ENV_NAME=shared-ci`` by default.
-``.gitlab-ci.yml`` uses this value to select an environment; if it is empty
-or unset, the pipeline displays instructions instead of building an environment.
+``.gitlab-ci.yml`` uses ``MY_ENV_NAME`` to select an environment. When the
+variable is empty or unset, the pipeline displays instructions instead of
+building an environment.
 
 .. important::
 
@@ -104,8 +105,9 @@ selection, and the fallback for other contexts is ``manual``.
 Spack can reuse packages already present in the install tree. The filesystem
 buildcache provides binaries and mirror metadata that Spack CI uses to prune
 already-built specifications during pipeline generation. A non-main pipeline
-writes its own namespace and reads the ``main`` buildcache; it also uses the
-``main`` install tree as an upstream when that tree has a Spack database.
+writes to the selected storage namespace and reads the ``main`` buildcache.
+The pipeline also uses the ``main`` install tree as an upstream when the tree
+contains a Spack database.
 Experimental binaries therefore stay in the branch namespace under the normal
 selection rules.
 
@@ -127,8 +129,8 @@ Cleanup
 
 The cleanup job scans all environments under the persistent storage root and
 removes stale ``ref-*`` targets associated with branches already merged into
-``main`` or no longer present remotely. It is opt-in: both ``MY_ENV_NAME=""``
+``main`` or no longer present remotely. Cleanup is opt-in: both ``MY_ENV_NAME=""``
 and ``RSC_CLEANUP="ON"`` are required, normally on a scheduled pipeline.
 Regular branch pipelines, including ``develop``, do not request cleanup by
-default. Review the cleanup script and selected storage root before scheduling
-it; this procedure deletes persistent build data.
+default. Before scheduling a cleanup job, review the cleanup script and
+selected storage root: cleanup deletes persistent build data.

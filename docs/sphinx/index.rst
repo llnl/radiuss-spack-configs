@@ -7,8 +7,8 @@ RADIUSS Spack Configs
 
 RADIUSS Spack Configs provides shared machine and toolchain configuration for
 Spack on Livermore Computing (LC) systems, plus specifications used by project
-CI. It helps developers prepare dependencies, generate a CMake host
-configuration, and return to their normal build and test loop.
+CI. Developers use these settings to prepare dependencies, generate a CMake
+host configuration, and return to their normal build and test loop.
 
 .. _overview:
 .. _radiuss-spack-configs-user-documentation:

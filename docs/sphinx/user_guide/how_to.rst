@@ -23,7 +23,8 @@ concretization alone does not show that a project builds or passes tests.
        the upstream package. Follow :doc:`changes`.
    * - Compiler/external missing or concretization fails
      - Confirm the machine and selected configuration, then inspect
-       ``spack config blame packages`` and the full spec in that environment.
+       ``spack config blame packages`` and the full spec in the generated
+       Spack environment.
    * - Setup fails after updating Spack or Uberenv
      - Check that the Spack, Uberenv, and recipe revisions are compatible;
        retry with a new ``--prefix`` directory to rule out stale setup files.
@@ -31,8 +32,8 @@ concretization alone does not show that a project builds or passes tests.
      - Check whether ``initconfig`` completed and select the intended output
        explicitly. Do not pick an arbitrary ``*.cmake`` file.
    * - CMake uses an old compiler or dependency path
-     - Verify the host configuration and its installations; configure a fresh
-       build directory using :doc:`build_and_test`.
+     - Verify the compiler and dependency paths in the host configuration;
+       configure a fresh build directory using :doc:`build_and_test`.
    * - Compilation or tests fail
      - Reuse the generated configuration to reproduce with CMake/CTest and
        inspect the compiler or test output for the first relevant failure.

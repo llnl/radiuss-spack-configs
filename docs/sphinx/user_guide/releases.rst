@@ -31,7 +31,8 @@ Joint release process
    to the **actual merged revision** before releases begin.
 #. Add final ``version(...)`` entries with tags, commit hashes, or archive
    checksums as source releases become available. Coordinate any necessary
-   recipe-pin updates among remaining participants and validate them.
+   recipe-pin updates among remaining participants and validate the updated
+   builds.
 #. Close the release round by updating participating development branches to
    the same tested ``spack-packages`` revision, including final version metadata.
 
@@ -39,10 +40,10 @@ Project ``develop`` branches and release tags must use upstream-merged recipe
 revisions. Published tags retain their tested pins; do not retag a source
 release simply to adopt a later recipe revision.
 
-A tagged project cannot embed a
-recipe revision already containing its own final commit hash: changing that
-embedded pin changes the project's hash. Prepare recipe behavior first, then
-publish the final source identity in the upstream recipe afterward.
+A source release cannot record a recipe revision that already contains the
+release's final commit hash: updating ``spack_packages_commit`` changes the
+source commit hash. Prepare recipe behavior first, then publish the final
+source identity in the upstream recipe afterward.
 
 .. _future-version-conditions:
 
@@ -52,27 +53,28 @@ Prepare future behavior and preserve older releases
 RADIUSS projects are tested together as coordinated sets of releases. Encode
 those relationships in the recipes so older releases keep using their tested
 dependency series, even when other combinations are not known to fail. The
-newest release series stays open-ended to support ongoing development; close
-it when a development incompatibility appears or the next release round begins.
+version ranges for the newest release stay open-ended to support ongoing
+development. Bound those ranges when a development incompatibility appears
+or the next release round begins.
 
 The following lifecycle uses RAJA's dependency on CAMP, with illustrative
 March and July release series. Apply the same review to other dependencies
 within the joint release; compatible series need not share version numbers.
 
-**After the March release**, allow the newest series and later versions:
+**After the March release**, allow RAJA to use CAMP from March onward:
 
 .. code-block:: python
 
    depends_on("camp@2026.03:", when="@2026.03:")
 
-This condition also applies to ``raja@develop``. With March as the latest
-available CAMP release, a fresh concretization normally selects it over
-``camp@develop``. Explicit specs, configured preferences, and reuse of
-existing concretizations can affect that selection.
+The ``when="@2026.03:"`` condition also matches ``raja@develop``. With March
+as the latest available CAMP release, a fresh concretization normally selects
+``camp@2026.03`` over ``camp@develop``. Explicit specs, configured preferences,
+and reuse of existing concretizations can affect that selection.
 
-**If RAJA development needs an unreleased CAMP feature**, keep March on its
-coordinated series and give development an explicit requirement. Replace the
-previous rule with:
+**If RAJA development needs an unreleased CAMP feature**, keep RAJA
+2026.03 on CAMP 2026.03 and give ``raja@develop`` an explicit requirement.
+Replace the previous rule with:
 
 .. code-block:: python
 
@@ -80,24 +82,25 @@ previous rule with:
    depends_on("camp@develop commit=<commit>", when="@develop")
 
 Replace ``<commit>`` with the full hash of a tested CAMP commit containing the
-feature. The ``commit`` constraint selects that exact commit of
-``camp@develop``. It does not mean "this commit or later."
-The bounded March rule permits patches in the 2026.03 series, but excludes
-July and ``develop``.
+feature. The ``commit`` constraint selects exactly one revision of
+``camp@develop``, rather than "this commit or later."
+The bounded ``camp@2026.03`` constraint permits patches in the March series,
+but excludes CAMP 2026.07 and ``camp@develop``.
 
-**When preparing July**, close the March rule even if no incompatibility was
-found. Replace the previous rules, including any temporary development pin,
-with:
+**When preparing July**, bound both March version ranges even if no
+incompatibility was found. Replace the previous rules, including any temporary
+development pin, with:
 
 .. code-block:: python
 
    depends_on("camp@2026.03", when="@2026.03")
    depends_on("camp@2026.07:", when="@2026.07:")
 
-The July condition applies to both ``raja@2026.07`` and ``raja@develop`` without
-requiring a July ``version(...)`` entry. If CAMP declares only March and
-``develop``, ``camp@2026.07:`` permits ``develop`` and excludes March. Once the
-July release is declared, Spack normally prefers it. The colon matters:
+The ``when="@2026.07:"`` condition matches both ``raja@2026.07`` and
+``raja@develop`` without requiring a July ``version(...)`` entry in RAJA's
+recipe. If CAMP declares only March and ``develop``, ``camp@2026.07:`` permits
+``camp@develop`` and excludes CAMP 2026.03. Once CAMP 2026.07 is declared,
+Spack normally prefers that release over ``camp@develop``. The colon matters:
 ``camp@2026.07`` excludes ``develop``; an unavailable numeric version is not
 an alias for a development branch. The open range also permits explicitly
 testing ``raja@develop ^camp@develop``.
@@ -107,7 +110,8 @@ release is available. Record the source commits tested, and validate again
 when adopting the published releases. Merge the tested recipe behavior before
 tagging projects, then add final ``version(...)`` metadata as the sources
 become available. Do not declare a tag or archive that does not yet exist:
-Spack can select it during concretization, but fetching it will fail.
+Spack can select the declared version during concretization, but fetching
+the unavailable source will fail.
 
 .. _validate-both-version-semantics:
 
@@ -116,9 +120,10 @@ Test development and release versions
 
 In RAJA's ``.uberenv_config.json``, ``package_version: develop`` selects the
 recipe conditions for development builds. Also test the release-staging source
-with ``package_version`` set to the planned release version, so Spack applies
-its release conditions. Use local source until the release is published, then
-test that Spack fetches and builds it using the final ``version(...)`` entry.
+with ``package_version`` set to the planned RAJA version, so Spack applies
+RAJA's release conditions. Use local source until the RAJA release is published, then
+check that Spack fetches and builds the released source using the final
+``version(...)`` entry.
 
 For each affected package, check that the candidate recipe permits compatible
 dependencies and rejects combinations outside the coordinated series for

@@ -22,9 +22,9 @@ root, run the following in a compute allocation on your LC machine:
    python3 scripts/uberenv/uberenv.py --spec="%gcc" --prefix="${PWD}/uberenv_libs"
 
 ``--spec`` takes a Spack spec **without the project name**. Here ``%gcc``
-selects GCC. To reproduce a CI build, use its compiler version, variants, and
-dependency constraints. For example, list the shared Dane specs in the
-RADIUSS Spack Configs submodule:
+selects GCC. To reproduce a CI build, use the compiler version, variants, and
+dependency constraints from the CI job. For example, list the shared Dane
+specs in the RADIUSS Spack Configs submodule:
 
 .. code-block:: bash
 
@@ -41,7 +41,7 @@ and runs the project recipe through ``initconfig``. Use the generated
 .. note::
 
    RAJAPerf gets Uberenv and RADIUSS Spack Configs through its ``tpl/RAJA``
-   submodule. Use RAJAPerf's build/test script: it calls that Uberenv checkout
+   submodule. RAJAPerf's build/test script calls the nested Uberenv checkout
    with RAJAPerf's own ``.uberenv_config.json``.
 
 .. _uberenv-guide:
@@ -75,7 +75,7 @@ In this layout ``package_source_dir`` is relative to the Uberenv script
 location, so ``../..`` selects the project source directory.
 ``spack_configs_path`` and ``spack_packages_path`` are relative to the directory
 containing ``.uberenv_config.json``. ``package_version`` determines which recipe
-conditions apply to the source; it does not change your Git checkout.
+conditions apply to the source without changing your Git checkout.
 
 The example uses upstream recipes. To test a project-local recipe, add
 ``spack_packages_path``; see :ref:`local-recipe-overrides`.

@@ -14,8 +14,9 @@ Build and test
    :alt: Uberenv runs Spack to concretize a spec, install dependencies, and generate a host configuration. CMake and CTest build and test the project. Source edits repeat builds; recipe, dependency, or toolchain changes require rerunning Uberenv.
 
 After :doc:`use_spack`, select the generated host configuration explicitly.
-Use the CMake executable recorded in it, or a compatible CMake on your PATH,
-on the same machine with the compiler modules used to install dependencies.
+Use the CMake executable recorded in the host configuration, or a compatible
+CMake on your PATH, on the same machine with the compiler modules used to
+install dependencies.
 From the RAJA checkout root, replace the filename below with the actual output:
 
 .. _using-configuration-files-to-build-the-project:
@@ -42,8 +43,8 @@ Writing a script for CI
 
 A project build/test script should accept ``SPEC`` without the project name,
 run dependency preparation, select the resulting host configuration, configure
-and build the project checkout, and report test failures. It should also run
-in an interactive compute allocation outside GitLab. For RAJA, run:
+and build the project checkout, and report test failures. The script should
+also run in an interactive compute allocation outside GitLab. For RAJA, run:
 
 .. code-block:: bash
 

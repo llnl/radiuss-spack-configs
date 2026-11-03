@@ -61,7 +61,7 @@ Reproduce a CI failure
 
 When reporting a failure, include the project commit,
 ``git submodule status --recursive`` output, ``.uberenv_config.json``, machine,
-expanded ``SPEC``, and failing command. These identify the source, tools, and
-settings needed to reproduce it. In a compute allocation, run the
+expanded ``SPEC``, and failing command. This information identifies the
+source, tools, and settings needed to reproduce the failure. In a compute allocation, run the
 :ref:`project build/test script <write-ci-script>` or the failing Uberenv, CMake,
 or CTest command. See :doc:`how_to` for narrowing the failure.

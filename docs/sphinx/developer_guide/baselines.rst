@@ -8,7 +8,7 @@ Publish tested baselines
 A tested baseline records the RADIUSS Spack Configs, Spack, and
 ``spack-packages`` revisions, along with the specs tested and their results.
 A RADIUSS Spack Configs tag identifies this combination; projects must
-explicitly update their references to adopt it.
+explicitly update their references to adopt the tested baseline.
 
 #. Review platform and shared-spec changes, and the complete impact of a
    recipe revision update. Check that projects' Uberenv versions support the changes.
@@ -33,7 +33,7 @@ release, not a declaration of the latest supported RAJA or Umpire version.
 Older tags use earlier naming conventions.
 
 A nearby ancestor tag is useful context, but is not proof that a later
-configuration commit was tested with the same inputs. Consult its validation
-record and the selected environment files. Record full hashes in validation
-evidence even when a tag abbreviates them. Preserve published tags and their
+configuration commit was tested with the same inputs. Consult the validation
+record and environment files for the commit you plan to adopt. Record full
+hashes in validation evidence even when a tag abbreviates them. Preserve published tags and their
 tested pins.

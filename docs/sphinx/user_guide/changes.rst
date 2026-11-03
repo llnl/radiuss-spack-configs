@@ -21,13 +21,14 @@ configuration syntax may require a newer Spack version.
      - Update the recipe as needed, adopt the appropriate recipe revision, and
        regenerate the configuration.
    * - Needed package version
-     - Update ``spack_packages_commit`` to a validated revision containing it.
+     - Update ``spack_packages_commit`` to a validated recipe revision
+       containing the required package version.
    * - Needed Spack capability
      - Update Spack and check compatibility with Uberenv, ``spack-packages``,
        and RADIUSS Spack Configs.
    * - Shared machine/toolchain change
-     - Update RADIUSS Spack Configs, validate it, and adopt that configuration
-       revision.
+     - Update RADIUSS Spack Configs, validate the changed configuration, and
+       adopt the tested revision.
 
 Preparing and adopting a recipe change
 --------------------------------------
@@ -45,8 +46,8 @@ Preparing and adopting a recipe change
 
 Use a new ``--prefix`` directory after updating Spack or Uberenv, or to check
 whether an existing installation causes a failure. Keep the old directory
-while other builds still use its dependencies. See :ref:`reference-ownership`
-for the revisions to compare and :doc:`releases` for updates across projects.
+while other builds still use dependencies installed there. See
+:ref:`reference-ownership` for the revisions to compare and :doc:`releases` for updates across projects.
 
 .. _local-recipe-overrides:
 

@@ -34,13 +34,14 @@ For a machine or toolchain update:
    ``gitlab/radiuss-jobs/<machine>.yml``. Check the project variant and dependency
    variables and job names, which projects may override.
 #. Keep the corresponding compiler/specification definitions in
-   ``.gitlab/spack/envs/shared-ci/spack.yaml`` consistent. These are maintained
-   separately; they are not automatically imported from the shared job files.
+   ``.gitlab/spack/envs/shared-ci/spack.yaml`` consistent. The environment
+   definitions are maintained separately, without automatic imports from the
+   shared job files.
 #. Validate the affected environments and representative consumer builds, then
    :doc:`publish a tested baseline <baselines>`.
 
-The ``darwin`` configuration is a development starting point. Adapt external
-paths and versions to the local installation; it is not an LC validation target.
+The ``darwin`` configuration is a development starting point, outside LC
+validation. Adapt external paths and versions to the local installation.
 
 Repository maintenance
 ----------------------
