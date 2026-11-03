@@ -45,6 +45,11 @@ release's final commit hash: updating ``spack_packages_commit`` changes the
 source commit hash. Prepare recipe behavior first, then publish the final
 source identity in the upstream recipe afterward.
 
+.. graphviz:: /figures/release-pins.dot
+   :align: center
+   :caption: The RAJA release records recipe revision R1. Only the later recipe revision R2 can record RAJA's final source commit S; the published RAJA tag keeps R1.
+   :alt: First merge recipe behavior as R1. Record R1 in RAJA's spack_packages_commit, test RAJA, and tag source commit S. Then add S to the upstream recipe's version metadata and merge as R2. R1, R2, and S are symbolic commit labels.
+
 .. _future-version-conditions:
 
 Prepare future behavior and preserve older releases
