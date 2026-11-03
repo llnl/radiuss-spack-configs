@@ -49,39 +49,65 @@ publish the final source identity in the upstream recipe afterward.
 Prepare future behavior and preserve older releases
 ---------------------------------------------------
 
-A condition can mention a future version without a corresponding
-``version(...)`` entry. This lets a recipe prepare new requirements before the
-source release exists. It does not make an unavailable release downloadable.
+RADIUSS projects are tested together as coordinated sets of releases. Encode
+those relationships in the recipes so older releases keep using their tested
+dependency series, even when other combinations are not known to fail. The
+newest release series stays open-ended to support ongoing development; close
+it when a development incompatibility appears or the next release round begins.
 
-For example, a recipe can prepare a C++ standard requirement for an upcoming
-release:
+The following lifecycle uses RAJA's dependency on CAMP, with illustrative
+March and July release series. Apply the same review to other dependencies
+within the joint release; compatible series need not share version numbers.
 
-.. code-block:: python
-
-   conflicts("cxxstd=17", when="@2026.07.0:")
-
-This rule rejects C++17 for package versions 2026.07.0 and later. Its open-ended
-condition also matches ``develop``. In contrast, a bounded release series
-such as ``@2025.12`` does not match ``develop``. Choose the version range
-according to which releases and development builds need the new behavior.
-
-Restricting a rule to one version of a package does not limit the versions of
-its dependencies. For a package at version 0.15.3, these two constraints allow
-different Umpire versions:
+**After the March release**, allow the newest series and later versions:
 
 .. code-block:: python
 
-   # Allow Umpire 2025.12 and later.
-   depends_on("umpire@2025.12:", when="@0.15.3")
+   depends_on("camp@2026.03:", when="@2026.03:")
 
-   # Limit Umpire to the 2025.12 series.
-   depends_on("umpire@2025.12", when="@0.15.3")
+This condition also applies to ``raja@develop``. With March as the latest
+available CAMP release, a fresh concretization normally selects it over
+``camp@develop``. Explicit specs, configured preferences, and reuse of
+existing concretizations can affect that selection.
 
-These are alternatives, not two declarations to add together. The first allows
-Umpire 2026.07 and ``develop``; the second excludes them and permits the
-2025.12 series. Use a bounded dependency series when newer versions are
-incompatible with an older release. Review RAJA, CHAI, and other affected
-dependencies in the same way when introducing a release.
+**If RAJA development needs an unreleased CAMP feature**, keep March on its
+coordinated series and give development an explicit requirement. Replace the
+previous rule with:
+
+.. code-block:: python
+
+   depends_on("camp@2026.03", when="@2026.03")
+   depends_on("camp@develop commit=<commit>", when="@develop")
+
+Replace ``<commit>`` with the full hash of a tested CAMP commit containing the
+feature. The ``commit`` constraint selects that exact commit of
+``camp@develop``. It does not mean "this commit or later."
+The bounded March rule permits patches in the 2026.03 series, but excludes
+July and ``develop``.
+
+**When preparing July**, close the March rule even if no incompatibility was
+found. Replace the previous rules, including any temporary development pin,
+with:
+
+.. code-block:: python
+
+   depends_on("camp@2026.03", when="@2026.03")
+   depends_on("camp@2026.07:", when="@2026.07:")
+
+The July condition applies to both ``raja@2026.07`` and ``raja@develop`` without
+requiring a July ``version(...)`` entry. If CAMP declares only March and
+``develop``, ``camp@2026.07:`` permits ``develop`` and excludes March. Once the
+July release is declared, Spack normally prefers it. The colon matters:
+``camp@2026.07`` excludes ``develop``; an unavailable numeric version is not
+an alias for a development branch. The open range also permits explicitly
+testing ``raja@develop ^camp@develop``.
+
+Removing the commit pin makes CAMP a moving dependency until a suitable
+release is available. Record the source commits tested, and validate again
+when adopting the published releases. Merge the tested recipe behavior before
+tagging projects, then add final ``version(...)`` metadata as the sources
+become available. Do not declare a tag or archive that does not yet exist:
+Spack can select it during concretization, but fetching it will fail.
 
 .. _validate-both-version-semantics:
 
@@ -95,6 +121,6 @@ its release conditions. Use local source until the release is published, then
 test that Spack fetches and builds it using the final ``version(...)`` entry.
 
 For each affected package, check that the candidate recipe permits compatible
-dependencies and rejects incompatible newer series for supported older
-releases. Concretize specs to check dependency selection, then build and test
-to check compatibility. Include both results in the release review.
+dependencies and rejects combinations outside the coordinated series for
+supported older releases. Concretize specs to check dependency selection, then
+build and test to check compatibility. Include both results in the release review.

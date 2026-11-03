@@ -138,3 +138,52 @@ and build/test script. Removed the editorial instruction about staggered release
 The follow-up passed strict Sphinx HTML/LaTeX builds and checked 578 local
 references, including the retained release-section anchor. External URLs were
 unchanged. The HTML and PDF outputs were regenerated for review.
+
+Joint-release policy verification (2026-11-03)
+---------------------------------------------
+
+The release guide now explains the deliberate policy: older release series
+retain coordinated dependencies; the newest series remains open-ended until
+a development incompatibility or the next release round. The illustrative
+lifecycle uses RAJA and CAMP. Their dependency relationship was checked in the
+local RAJA recipe; the March/July examples are not a record of actual releases.
+The user confirmed that recipe behavior merges before project tags, followed
+by final release metadata once source identities are available.
+
+Concretization checks used isolated synthetic bundle recipes, a local Git
+source, disabled reuse/bootstrap, and Clingo 5.8.0. Spack 1.2.2 was archived
+from the local ``spack`` checkout; the builtin build system came from the local
+``spack-packages`` revision ``e3fe9dd313e926d98f174d725edde3dba8bf6b90``.
+The fixture exercised these twelve cases:
+
+* Newest open range: development defaults to March; explicitly selecting the
+  dependency's development version also succeeds.
+* Development incompatibility: March remains on March; development selects
+  the exact commit given by ``depends_on("...@develop commit=<hash>", ...)``.
+* Future July range: both development and a Git commit assigned July version
+  semantics select the dependency's development version while July is absent.
+* Older bounded release: explicitly selecting a development dependency fails.
+* Bounded July dependency without a July release: both default selection and
+  an explicit development dependency fail.
+* Declared July release: development selects July; March still selects March;
+  explicitly combining March with July fails.
+
+All twelve cases passed on both Spack 1.1.1 (used by the local RAJA checkout)
+and Spack 1.2.2. An additional local-source environment on Spack 1.2.2 using ``develop:`` with ``@=2026.07.0`` confirmed that release conditions can be
+tested before a corresponding ``version(...)`` entry exists, as in Uberenv's
+local-source workflow. Concretization does not verify tag availability: the
+fixture's deliberately absent July tag did not prevent version selection.
+
+The initial ``depends_on("...@git.<hash>=develop", ...)`` experiment failed
+because that directive alone did not introduce the ad hoc version as a
+candidate. The documented ``commit=`` constraint passed, including an assertion
+that the concretized dependency retained the exact requested hash. A commit
+constraint does not express Git ancestry or "this commit or later."
+
+The fixture and logs are local review artifacts in
+``/tmp/rsc-release-semantics``. No production recipe, source repository,
+installation, or CI configuration was changed, and no package builds ran.
+
+Strict Sphinx 6.2.1 HTML and LaTeX builds passed after the rewrite. The PDF
+was regenerated, and all 578 local references across 15 HTML pages resolved,
+including retained page URLs and explicit anchors.
