@@ -1,61 +1,45 @@
-.. ##
-.. ## Copyright (c) 2022-2025, Lawrence Livermore National Security, LLC and
-.. ## other RADIUSS Project Developers. See the top-level COPYRIGHT file for
-.. ## details.
-.. ##
-.. ## SPDX-License-Identifier: (MIT)
-.. ##
+.. Copyright (c) 2026, Lawrence Livermore National Security, LLC and
+.. other RADIUSS Project Developers. See the top-level COPYRIGHT file.
+.. SPDX-License-Identifier: (MIT)
 
 .. _User Guide:
 
-##########
-User Guide
-##########
+Understand the components
+=========================
 
-The RADIUSS Spack Configs projects provides a *coherent set of Spack
-configuration files* targetting Livermore Computing systems. The goal is to
-enable any Spack user to quickly reproduce the exact same configuration RADIUSS
-projects are vetted with.
+The recommended workflow is **specification → dependency preparation →
+generated host configuration → repeated CMake builds and tests**. This guide
+uses RAJA as an example: its Uberenv submodule is at ``scripts/uberenv``,
+and its RADIUSS Spack Configs submodule is at ``scripts/radiuss-spack-configs``.
 
-RADIUSS Spack Configs can be used to provide the `RADIUSS Shared CI`_
-infrastructure with a build and test process and a proposed list of Spack
-specs. In practice, sharing that list of Specs helps Umpire, RAJA, CHAI,
-Caliper and other projects to ensure, in their CI, that they keep running
-correctly with toolchains of interest.
-
-.. figure:: images/Shared-Build-Infrastructure.png
-   :scale: 36 %
+.. graphviz:: /figures/components.dot
    :align: center
+   :caption: Components that turn project requirements into a generated host configuration.
+   :alt: Uberenv configures Spack with the project's selected package recipes and machine settings. Spack concretizes the spec, installs dependencies, and generates a CMake host configuration.
 
-   RADIUSS Spack Configs provides Spack configuration files tuned for Livermore
-   Computing (LC) machines. It is also possible to create a local set of Spack
-   packages. Uberenv can leverage these shared configuration to ease the use of
-   Spack on LC systems. Using the CachedCMakePackages allows us to only install
-   a project dependencies and generate a CMakeCache file to proceed with the
-   project build manually.
+Responsibilities
+----------------
 
-The figure illustrates the setup of a project using the RADIUSS Spack Configs,
-Uberenv and Spack as a build infrastructure.
+* The project repository contains source code, tests, and the selected
+  versions of its build tools.
+* Spack, developed in ``spack/spack``, is a package manager. Its concretizer
+  turns a spec into a concrete dependency graph, which Spack then installs.
+* ``spack/spack-packages`` owns the upstream ``package.py`` recipes and build
+  system implementations, including ``CachedCMakePackage``.
+* RADIUSS Spack Configs provides shared machine configuration and CI specs.
+* Uberenv sets up and drives Spack using the project's
+  ``.uberenv_config.json``. The recipe's ``initconfig`` phase produces the host
+  configuration that CMake consumes.
+* RADIUSS Shared CI supplies GitLab execution components. Projects provide the
+  command that prepares dependencies, builds their checkout, and runs tests.
 
-Both `RADIUSS Spack Configs`_ and `Uberenv`_ are to be set as submodules.
+Developers can use a package repository inside their project to test recipe
+changes. Keep these overrides temporary to avoid maintaining duplicate recipes;
+the preferred approach is a pull request in ``spack/spack-packages``. See
+:ref:`local-recipe-overrides`.
 
-We will describe how to set up RADIUSS Spack Configs to build your project and
-its dependencies with Spack. We identified two key steps:
+Next, :doc:`prepare dependencies <use_spack>` and :doc:`build and test
+<build_and_test>`. Later sections cover :doc:`recipe and dependency changes
+<changes>`, :doc:`release coordination <releases>`, and :doc:`CI integration <ci>`.
 
-.. toctree::
-   :maxdepth: 2
-
-   use_spack
-   build_and_test
-
-We also provide "How To" sections to perform various usage tasks.
-
-.. toctree::
-   :maxdepth: 2
-
-   how_to
-
-.. _RADIUSS Shared CI: https://radiuss-shared-ci.readthedocs.io/en/latest/index.html
-.. _RADIUSS Spack Configs: https://github.com/LLNL/radiuss-spack-configs
-.. _Uberenv: <https://github.com/LLNL/uberenv>
-.. _Spack: <https://github.com/Spack/Spack>
+See :doc:`../reference/index` for file ownership and reference selection.

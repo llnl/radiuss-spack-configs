@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: MIT
+digraph repository_storage {
+  rankdir=TB;
+  pipeline [label="Run selected environment\nMY_ENV_NAME", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  subgraph cluster_temporary {
+    label="Temporary: /dev/shm";
+    color="#8295a8";
+    checkout [label="spack/spack checkout\nper machine + pipeline", shape=folder, fillcolor="#e3edf7"];
+    cache [label="Job cache\nstage / test / misc\nper pipeline + job ID", shape=parallelogram, fillcolor="#dcf2f4"];
+  }
+  subgraph cluster_persistent {
+    label="Persistent: SPACK_CI_STORAGE_ROOT / environment / machine / target";
+    color="#8295a8";
+    main [label="main namespace\ninstall / buildcache", shape=parallelogram, fillcolor="#dcf2f4"];
+    branch [label="ref-<slug> namespace\ninstall / buildcache", shape=parallelogram, fillcolor="#dcf2f4"];
+  }
+  checkout -> pipeline [style=dashed, arrowhead=empty, label="Spack version"];
+  cache -> pipeline [style=dashed, arrowhead=empty, label="isolated work area"];
+  pipeline -> branch [label="branch writes"];
+  pipeline -> main [label="default branch writes"];
+  main -> pipeline [style=dashed, arrowhead=empty, label="branch reads mirror\nand available upstream"];
+}
