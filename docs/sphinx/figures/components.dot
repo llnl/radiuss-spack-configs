@@ -62,24 +62,13 @@ digraph components {
     fillcolor="#e1f2e8",
     group=workflow
   ];
-  // Route project ownership around the workflow without shifting semantic nodes.
-  project_owner_route [
-    label="",
-    shape=point,
-    width=0,
-    height=0,
-    style=invis,
-    group=project
-  ];
   { rank=same; project; configs; recipes; }
   { rank=same; settings; machine; recipe; }
-  { rank=same; project_owner_route; radbat; spack; }
+  { rank=same; radbat; spack; }
   project -> configs -> recipes [style=invis, weight=100];
   settings -> machine -> recipe [style=invis, weight=100];
-  project -> settings [style=dashed, arrowhead=empty, label="owns", weight=100];
-  project -> project_owner_route [style=dashed, arrowhead=none, label="owns", weight=100];
-  project_owner_route -> driver [style=dashed, arrowhead=empty];
-  project_owner_route -> radbat [style=invis, weight=100];
+  project -> settings [style=dashed, arrowhead=empty, label="owns"];
+  project -> driver [style=dashed, arrowhead=empty, label="owns"];
   settings -> radbat [style=dashed, arrowhead=empty, label="configures"];
   recipes -> recipe [style=dashed, arrowhead=empty, label="provides", weight=100];
   configs -> machine [style=dashed, arrowhead=empty, label="provides", weight=10];
@@ -89,6 +78,6 @@ digraph components {
   radbat -> spack [label="spack mode"];
   radbat -> host [label="host-config mode"];
   spack -> host [label="generates through initconfig"];
-  radbat -> driver [label="invokes", weight=10];
+  radbat -> driver [label="invokes"];
   host -> driver [style=dashed, arrowhead=empty, label="host-config input"];
 }
