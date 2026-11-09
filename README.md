@@ -14,13 +14,13 @@ This project requires no installation.
 
 ## Contributing
 
-Propose changes through a GitHub pull request. For configuration and validation changes, follow the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/index.html); for documentation changes, see [docs/README.rst](docs/README.rst).
+Propose changes through a GitHub pull request. For configuration and validation changes, follow the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/maintainer_guide/index.html); for documentation changes, see [docs/README.rst](docs/README.rst).
 
 ## Versioning
 
-Tags identify tested configuration releases and, in recent tags, the Spack and spack-packages revisions used for validation. See [tested baselines](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/baselines.html) for the naming convention and adoption process.
+Tags identify tested configuration releases and, in recent tags, the Spack and spack-packages revisions used for validation. See [tested baselines](https://radiuss-spack-configs.readthedocs.io/en/latest/maintainer_guide/baselines.html) for the naming convention and adoption process.
 
-Start with the [developer workflow](https://radiuss-spack-configs.readthedocs.io/en/latest/user_guide/index.html), or use the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_guide/index.html). Documentation build instructions are in [docs/README.rst](docs/README.rst).
+Start with the [developer workflow](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_workflow/index.html), or use the [maintainer guide](https://radiuss-spack-configs.readthedocs.io/en/latest/maintainer_guide/index.html). Documentation build instructions are in [docs/README.rst](docs/README.rst).
 
 ## Authors
 

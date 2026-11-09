@@ -39,7 +39,7 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 autosectionlabel_prefix_document = True
 
-templates_path = []
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 source_suffix = '.rst'
@@ -86,6 +86,18 @@ else:
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+
+# Keep links to the former audience directories working without duplicate docs.
+guide_redirects = {
+    'user_guide/' + page: 'developer_workflow/' + page
+    for page in ('index', 'use_spack', 'build_and_test', 'changes', 'releases', 'ci', 'how_to')
+}
+guide_redirects.update({
+    'developer_guide/' + page: 'maintainer_guide/' + page
+    for page in ('index', 'track_spack_packages', 'baselines')
+})
+html_additional_pages = {page: 'redirect.html' for page in guide_redirects}
+html_context = {'guide_redirects': guide_redirects}
 
 
 # -- Options for HTMLHelp output ------------------------------------------

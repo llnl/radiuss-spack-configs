@@ -19,7 +19,7 @@ explicitly update their references to adopt the tested baseline.
 #. Merge the validated changes and tag the tested configuration commit.
 #. Have projects update their RADIUSS Spack Configs submodule and any required
    Spack and ``spack-packages`` revisions together, then build and test.
-   Follow :doc:`../user_guide/releases` for coordinated project releases.
+   Follow :doc:`../developer_workflow/releases` for coordinated project releases.
 
 Tag naming
 ----------

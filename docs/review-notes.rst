@@ -187,3 +187,27 @@ installation, or CI configuration was changed, and no package builds ran.
 Strict Sphinx 6.2.1 HTML and LaTeX builds passed after the rewrite. The PDF
 was regenerated, and all 578 local references across 15 HTML pages resolved,
 including retained page URLs and explicit anchors.
+
+
+Review follow-up (2026-11-09)
+-----------------------------
+
+Addressed tdrwenski's repository-link and directory-naming feedback. The
+optional ``spack_repo/llnl_radiuss`` repository is documented as local testing
+only, as confirmed by Adrien in the review. This supersedes the earlier
+interpretation that the optional repository also served shared custom recipes.
+Shared recipes belong upstream in ``spack/spack-packages``.
+
+Canonical source and HTML paths now use ``developer_workflow`` and
+``maintainer_guide``. Sphinx's additional-page templates redirect all ten former
+``user_guide`` and ``developer_guide`` URLs. The renamed guides retain all
+previous HTML anchors; browser checks confirmed that redirects preserve query
+strings and fragments, and that the no-JavaScript fallback reaches the new
+page. The new-project quickstart suggestion remains outside this PR.
+
+Strict HTML and LaTeX generation passed with the pinned documentation
+requirements. All 600 local references across 25 HTML pages (including ten
+redirects) passed checks. The developer, maintainer, and release pages were
+inspected in a browser and fit without horizontal overflow.
+The complete PDF compiled successfully, and the updated maintainer section
+was inspected in the PDF.

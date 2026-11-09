@@ -52,7 +52,7 @@ Integrating the same workflow in a project
 
 Add Uberenv at ``scripts/uberenv`` and RADIUSS Spack Configs at
 ``scripts/radiuss-spack-configs`` as submodules. Select compatible revisions
-following :doc:`../developer_guide/baselines` and commit the submodule references.
+following :doc:`../maintainer_guide/baselines` and commit the submodule references.
 In this JSON **template**, replace both placeholders with tested commit hashes
 and set your project's Spack package name:
 
@@ -95,7 +95,7 @@ Uberenv selects configuration files for the platform and machine, using LC's
 RADIUSS Spack Configs provides ``spack.yaml``, ``config.yaml``, and
 ``packages.yaml`` files for supported platforms and machines. Compiler
 externals and named toolchains are defined in ``packages.yaml``. See
-:doc:`../developer_guide/index` for maintenance and :doc:`../reference/index`
+:doc:`../maintainer_guide/index` for maintenance and :doc:`../reference/index`
 for file responsibilities.
 
 .. _generate-config-file:

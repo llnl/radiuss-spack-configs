@@ -17,29 +17,29 @@ host configuration, and return to their normal build and test loop.
 .. _ci-implementation-for-radiuss-spack-configs:
 .. _custom-ci-pipelines:
 
-Start with :doc:`user_guide/index`. Infrastructure maintainers should use
-:doc:`developer_guide/index` for platform changes and validation procedures.
+Start with :doc:`developer_workflow/index`. Infrastructure maintainers should use
+:doc:`maintainer_guide/index` for platform changes and validation procedures.
 
 .. toctree::
    :maxdepth: 1
    :caption: Developer workflow
 
-   user_guide/index
-   user_guide/use_spack
-   user_guide/build_and_test
-   user_guide/changes
-   user_guide/releases
-   user_guide/ci
-   user_guide/how_to
+   developer_workflow/index
+   developer_workflow/use_spack
+   developer_workflow/build_and_test
+   developer_workflow/changes
+   developer_workflow/releases
+   developer_workflow/ci
+   developer_workflow/how_to
 
 .. toctree::
    :maxdepth: 1
    :caption: Maintainer guide
 
-   developer_guide/index
+   maintainer_guide/index
    ci_implementation/index
-   developer_guide/track_spack_packages
-   developer_guide/baselines
+   maintainer_guide/track_spack_packages
+   maintainer_guide/baselines
 
 .. toctree::
    :maxdepth: 1

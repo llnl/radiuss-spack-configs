@@ -10,7 +10,7 @@ Validation environments and storage
 This repository uses `Spack pipelines
 <https://spack.readthedocs.io/en/latest/pipelines.html>`_ to validate Spack
 environments on LC machines. These pipelines are separate from the
-:doc:`consumer build/test workflow <../user_guide/ci>`.
+:doc:`consumer build/test workflow <../developer_workflow/ci>`.
 
 Choose a validation environment
 -------------------------------

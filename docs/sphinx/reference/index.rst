@@ -97,11 +97,11 @@ Essential precedence rules
   otherwise ``MY_SPACK_BRANCH`` (which can name a tag). A project's
   ``.uberenv_config.json`` does not configure these pipelines.
 * Consumer CI combines shared jobs with project settings. Inspect the final
-  merged GitLab configuration when names collide; see :doc:`../user_guide/ci`.
+  merged GitLab configuration when names collide; see :doc:`../developer_workflow/ci`.
 
 See the `Uberenv guide <https://uberenv.readthedocs.io/en/latest/>`_ for setup
 options and their mechanics. For release selection, use
-:doc:`../user_guide/releases`.
+:doc:`../developer_workflow/releases`.
 
 Figure vocabulary
 -----------------

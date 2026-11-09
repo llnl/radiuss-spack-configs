@@ -8,7 +8,7 @@ Maintain platforms and shared specifications
 ============================================
 
 This is the maintainer guide for RADIUSS Spack Configs. Project developers
-should start with :doc:`../user_guide/index`.
+should start with :doc:`../developer_workflow/index`.
 
 Platform configuration
 ----------------------

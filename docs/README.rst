@@ -72,11 +72,17 @@ readable at normal page width and inspect the HTML and PDF renderings.
 Editorial maintenance
 ---------------------
 
-Keep the ordinary workflow in ``user_guide``, infrastructure procedures in
-``developer_guide`` and ``ci_implementation``, and ownership/precedence in
-``reference``. Preserve existing page paths and useful explicit anchors when
-moving content. Use document-prefixed automatic section labels to avoid label
+Keep the ordinary workflow in ``developer_workflow``, infrastructure procedures
+in ``maintainer_guide`` and ``ci_implementation``, and ownership/precedence in
+``reference``. Use document-prefixed automatic section labels to avoid label
 collisions, and explicit labels for stable cross-page references.
+
+The former ``user_guide`` and ``developer_guide`` URLs redirect to
+``developer_workflow`` and ``maintainer_guide``, respectively. Edit the new
+directories and link directly to the new pages. ``guide_redirects`` in
+``conf.py`` maps old pages to their replacements; the shared redirect template
+preserves URL fragments in browsers with JavaScript enabled. Keep useful
+explicit anchors when moving content, and add redirects for renamed pages.
 
 Dated audit evidence, publication review items, and engineering follow-ups are
 in ``docs/review-notes.rst`` outside the published Sphinx tree. They are not
