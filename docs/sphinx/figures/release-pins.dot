@@ -8,11 +8,37 @@ digraph release_pins {
 
   merge [label="1. Merge tested recipe behavior", shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=recipes];
   r1 [label="recipe revision R1", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4", group=recipes];
-  adopt [label=<2. Set recipe repository pin = R1<BR/><FONT POINT-SIZE="10"><I>test RAJA</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=project];
+  adopt [
+    label=<2. Set recipe repository pin = R1<BR/><FONT POINT-SIZE="10"><I>test RAJA</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8",
+    group=project
+  ];
   tag [label="3. Tag the tested RAJA source", shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=project];
-  source [label=<source commit S<BR/><FONT POINT-SIZE="9"><I>release still records R1</I></FONT>>, shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4", group=project];
-  metadata [label=<4. Add version(..., commit=S)<BR/><FONT POINT-SIZE="10"><I>merge upstream</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=recipes];
-  r2 [label=<later recipe revision R2<BR/><FONT POINT-SIZE="9"><I>records source commit S</I></FONT>>, shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4", group=recipes];
+  source [
+    label=<source commit S<BR/><FONT POINT-SIZE="9"><I>release still records R1</I></FONT>>,
+    shape=box,
+    fontsize=10,
+    margin="0.08,0.04",
+    fillcolor="#f7e4e4",
+    group=project
+  ];
+  metadata [
+    label=<4. Add version(..., commit=S)<BR/><FONT POINT-SIZE="10"><I>merge upstream</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8",
+    group=recipes
+  ];
+  r2 [
+    label=<later recipe revision R2<BR/><FONT POINT-SIZE="9"><I>records source commit S</I></FONT>>,
+    shape=box,
+    fontsize=10,
+    margin="0.08,0.04",
+    fillcolor="#f7e4e4",
+    group=recipes
+  ];
 
   recipes -> merge [style=invis];
   project -> adopt [style=invis];

@@ -1,18 +1,39 @@
 // SPDX-License-Identifier: MIT
 digraph repository_storage {
   rankdir=TB;
-  pipeline [label=<Run selected environment<BR/><FONT POINT-SIZE="10"><I>MY_ENV_NAME</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  pipeline [
+    label=<Run selected environment<BR/><FONT POINT-SIZE="10"><I>MY_ENV_NAME</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
   subgraph cluster_temporary {
     label="Temporary: /dev/shm";
     color="#8295a8";
-    checkout [label=<spack/spack checkout<BR/><FONT POINT-SIZE="10"><I>per machine + pipeline</I></FONT>>, shape=folder, fillcolor="#e3edf7"];
-    cache [label=<Job cache<BR/><FONT POINT-SIZE="10"><I>stage / test / misc<BR/>per pipeline + job ID</I></FONT>>, shape=parallelogram, fillcolor="#dcf2f4"];
+    checkout [
+      label=<spack/spack checkout<BR/><FONT POINT-SIZE="10"><I>per machine + pipeline</I></FONT>>,
+      shape=folder,
+      fillcolor="#e3edf7"
+    ];
+    cache [
+      label=<Job cache<BR/><FONT POINT-SIZE="10"><I>stage / test / misc<BR/>per pipeline + job ID</I></FONT>>,
+      shape=parallelogram,
+      fillcolor="#dcf2f4"
+    ];
   }
   subgraph cluster_persistent {
     label="Persistent: SPACK_CI_STORAGE_ROOT / environment / machine / target";
     color="#8295a8";
-    main [label=<main namespace<BR/><FONT POINT-SIZE="10"><I>install / buildcache</I></FONT>>, shape=parallelogram, fillcolor="#dcf2f4"];
-    branch [label=<ref-&lt;slug&gt; namespace<BR/><FONT POINT-SIZE="10"><I>install / buildcache</I></FONT>>, shape=parallelogram, fillcolor="#dcf2f4"];
+    main [
+      label=<main namespace<BR/><FONT POINT-SIZE="10"><I>install / buildcache</I></FONT>>,
+      shape=parallelogram,
+      fillcolor="#dcf2f4"
+    ];
+    branch [
+      label=<ref-&lt;slug&gt; namespace<BR/><FONT POINT-SIZE="10"><I>install / buildcache</I></FONT>>,
+      shape=parallelogram,
+      fillcolor="#dcf2f4"
+    ];
   }
   checkout -> pipeline [style=dashed, arrowhead=empty, label="Spack version"];
   cache -> pipeline [style=dashed, arrowhead=empty, label="isolated work area"];

@@ -1,14 +1,44 @@
 // SPDX-License-Identifier: MIT
 digraph release_coordination {
   rankdir=TB;
-  agree [label=<Agree on release scope<BR/><FONT POINT-SIZE="10"><I>participants, versions, owners, and completion date</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  prepare [label=<Prepare one upstream recipe PR<BR/><FONT POINT-SIZE="10"><I>future behavior + older-release compatibility</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  validate [label=<Validate candidate commits in parallel<BR/><FONT POINT-SIZE="10"><I>project feature / release-staging branches</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  agree [
+    label=<Agree on release scope<BR/><FONT POINT-SIZE="10"><I>participants, versions, owners, and completion date</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
+  prepare [
+    label=<Prepare one upstream recipe PR<BR/><FONT POINT-SIZE="10"><I>future behavior + older-release compatibility</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
+  validate [
+    label=<Validate candidate commits in parallel<BR/><FONT POINT-SIZE="10"><I>project feature / release-staging branches</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
   merge [label="Merge recipes upstream", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   pin [label="actual merged recipe revision", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4"];
-  converge [label=<Use the same recipe revision<BR/><FONT POINT-SIZE="10"><I>before releases begin</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  publish [label=<Publish source releases<BR/><FONT POINT-SIZE="10"><I>then add final recipe metadata</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  close [label=<Close the release round<BR/><FONT POINT-SIZE="10"><I>update development recipe revisions</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  converge [
+    label=<Use the same recipe revision<BR/><FONT POINT-SIZE="10"><I>before releases begin</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
+  publish [
+    label=<Publish source releases<BR/><FONT POINT-SIZE="10"><I>then add final recipe metadata</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
+  close [
+    label=<Close the release round<BR/><FONT POINT-SIZE="10"><I>update development recipe revisions</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
   agree -> prepare -> validate -> merge;
   merge -> pin;
   pin -> converge [style=dotted, arrowhead=vee, color="#874e69", label="replace candidate pins"];
