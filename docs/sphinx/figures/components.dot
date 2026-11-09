@@ -34,8 +34,7 @@ digraph components {
   configs [
     label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>shared configuration and tools</I></FONT>>,
     shape=folder,
-    fillcolor="#e3edf7",
-    group=workflow
+    fillcolor="#e3edf7"
   ];
   machine [
     label=<packages.yaml / spack.yaml<BR/><FONT POINT-SIZE="10"><I>selected machine configuration</I></FONT>>,
@@ -71,9 +70,9 @@ digraph components {
   project -> settings [style=dashed, arrowhead=empty, label="owns"];
   project -> driver [style=dashed, arrowhead=empty, label="owns"];
   settings -> radbat [style=dashed, arrowhead=empty, label="configures"];
-  recipes -> recipe [style=dashed, arrowhead=empty, label="provides"];
-  configs -> machine [style=dashed, arrowhead=empty, label="provides"];
-  configs -> radbat [style=dashed, arrowhead=empty, label="provides", weight=100];
+  recipes -> recipe [style=dashed, arrowhead=empty, label="provides", weight=100];
+  configs -> machine [style=dashed, arrowhead=empty, label="provides", weight=10];
+  configs -> radbat [style=dashed, arrowhead=empty, label="provides", weight=10];
   recipe -> spack [style=dashed, arrowhead=empty, label="recipe input"];
   machine -> spack [style=dashed, arrowhead=empty, label="machine input"];
   radbat -> spack [label="spack mode"];
