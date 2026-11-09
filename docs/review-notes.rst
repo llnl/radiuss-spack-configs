@@ -199,15 +199,14 @@ interpretation that the optional repository also served shared custom recipes.
 Shared recipes belong upstream in ``spack/spack-packages``.
 
 Canonical source and HTML paths now use ``developer_workflow`` and
-``maintainer_guide``. Sphinx's additional-page templates redirect all ten former
-``user_guide`` and ``developer_guide`` URLs. The renamed guides retain all
-previous HTML anchors; browser checks confirmed that redirects preserve query
-strings and fragments, and that the no-JavaScript fallback reaches the new
-page. The new-project quickstart suggestion remains outside this PR.
+``maintainer_guide``. Following review with Adrien, the directories are renamed
+without redirects from the former ``user_guide`` and ``developer_guide`` URLs.
+The renamed guides retain their previous section anchors at the new paths.
+The new-project quickstart suggestion remains outside this PR.
 
 Strict HTML and LaTeX generation passed with the pinned documentation
-requirements. All 600 local references across 25 HTML pages (including ten
-redirects) passed checks. The developer, maintainer, and release pages were
-inspected in a browser and fit without horizontal overflow.
+requirements. All 580 local references across 15 HTML pages passed checks.
+A clean HTML build confirmed that no legacy pages or redirects are generated.
+The developer, maintainer, and release pages were inspected in a browser and fit without horizontal overflow.
 The complete PDF compiled successfully, and the updated maintainer section
 was inspected in the PDF.

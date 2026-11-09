@@ -77,12 +77,10 @@ in ``maintainer_guide`` and ``ci_implementation``, and ownership/precedence in
 ``reference``. Use document-prefixed automatic section labels to avoid label
 collisions, and explicit labels for stable cross-page references.
 
-The former ``user_guide`` and ``developer_guide`` URLs redirect to
-``developer_workflow`` and ``maintainer_guide``, respectively. Edit the new
-directories and link directly to the new pages. ``guide_redirects`` in
-``conf.py`` maps old pages to their replacements; the shared redirect template
-preserves URL fragments in browsers with JavaScript enabled. Keep useful
-explicit anchors when moving content, and add redirects for renamed pages.
+The former ``user_guide`` and ``developer_guide`` directories were renamed to
+``developer_workflow`` and ``maintainer_guide``, respectively. The old URLs are
+not redirected; update links in consuming projects to use the new paths.
+Existing section anchors remain available at the new URLs.
 
 Dated audit evidence, publication review items, and engineering follow-ups are
 in ``docs/review-notes.rst`` outside the published Sphinx tree. They are not
