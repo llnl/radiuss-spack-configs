@@ -4,65 +4,81 @@ digraph components {
   project [
     label=<RAJA<BR/><FONT POINT-SIZE="10"><I>project source and tests</I></FONT>>,
     shape=folder,
-    fillcolor="#e3edf7"
+    fillcolor="#e3edf7",
+    group=project
   ];
   settings [
     label=<.rad-bat.json<BR/><FONT POINT-SIZE="10"><I>select tools and recipes</I></FONT>>,
     shape=tab,
-    fillcolor="#eee8f5"
+    fillcolor="#eee8f5",
+    group=project
   ];
   spack [
     label=<spack/spack<BR/><FONT POINT-SIZE="10"><I>package manager</I></FONT>>,
     shape=folder,
-    fillcolor="#e3edf7"
+    fillcolor="#e3edf7",
+    group=spack
   ];
   recipes [
     label=<spack/spack-packages<BR/><FONT POINT-SIZE="10"><I>upstream recipes</I></FONT>>,
     shape=folder,
-    fillcolor="#e3edf7"
+    fillcolor="#e3edf7",
+    group=recipes
   ];
   recipe [
     label=<package.py<BR/><FONT POINT-SIZE="10"><I>versions and build behavior</I></FONT>>,
     shape=note,
-    fillcolor="#fff2cf"
+    fillcolor="#fff2cf",
+    group=recipes
   ];
   configs [
     label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>shared configuration and tools</I></FONT>>,
     shape=folder,
-    fillcolor="#e3edf7"
+    fillcolor="#e3edf7",
+    group=workflow
   ];
   machine [
     label=<packages.yaml / spack.yaml<BR/><FONT POINT-SIZE="10"><I>selected machine configuration</I></FONT>>,
     shape=tab,
-    fillcolor="#eee8f5"
+    fillcolor="#eee8f5",
+    group=machine
   ];
   radbat [
     label=<rad-bat<BR/><FONT POINT-SIZE="10"><I>select or prepare dependencies</I></FONT>>,
     shape=box,
     style="rounded,filled",
-    fillcolor="#e1f2e8"
+    fillcolor="#e1f2e8",
+    group=workflow
   ];
   host [
-    label=<Generated host configuration<BR/><FONT POINT-SIZE="10"><I>.cmake</I></FONT>>,
+    label=<Host configuration<BR/><FONT POINT-SIZE="10"><I>maintained or generated .cmake</I></FONT>>,
     shape=parallelogram,
-    fillcolor="#dcf2f4"
+    fillcolor="#dcf2f4",
+    group=workflow
   ];
   driver [
     label=<Run project build/test driver<BR/><FONT POINT-SIZE="10"><I>project-local Python script</I></FONT>>,
     shape=box,
     style="rounded,filled",
-    fillcolor="#e1f2e8"
+    fillcolor="#e1f2e8",
+    group=workflow
   ];
+  { rank=same; project; configs; recipes; }
+  { rank=same; settings; machine; recipe; }
+  { rank=same; radbat; spack; }
+  project -> configs -> recipes [style=invis, weight=100];
+  settings -> machine -> recipe [style=invis, weight=100];
   project -> settings [style=dashed, arrowhead=empty, label="owns"];
   project -> driver [style=dashed, arrowhead=empty, label="owns"];
   settings -> radbat [style=dashed, arrowhead=empty, label="configures"];
   recipes -> recipe [style=dashed, arrowhead=empty, label="provides"];
   configs -> machine [style=dashed, arrowhead=empty, label="provides"];
-  configs -> radbat [style=dashed, arrowhead=empty, label="provides"];
-  spack -> radbat [style=dashed, arrowhead=empty, label="concretizes and installs"];
-  recipe -> radbat [style=dashed, arrowhead=empty, label="recipe input"];
-  machine -> radbat [style=dashed, arrowhead=empty, label="machine input"];
-  radbat -> host [label="selects or runs initconfig"];
+  configs -> radbat [style=dashed, arrowhead=empty, label="provides", weight=100];
+  recipe -> spack [style=dashed, arrowhead=empty, label="recipe input"];
+  machine -> spack [style=dashed, arrowhead=empty, label="machine input"];
+  radbat -> spack [label="spack mode"];
+  radbat -> host [label="host-config mode"];
+  spack -> host [label="generates through initconfig"];
   radbat -> driver [label="invokes"];
   host -> driver [style=dashed, arrowhead=empty, label="host-config input"];
 }
