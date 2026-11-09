@@ -27,7 +27,7 @@ digraph components {
     fillcolor="#fff2cf"
   ];
   configs [
-    label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>machines and shared specs</I></FONT>>,
+    label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>shared configuration and tools</I></FONT>>,
     shape=folder,
     fillcolor="#e3edf7"
   ];
@@ -47,12 +47,22 @@ digraph components {
     shape=parallelogram,
     fillcolor="#dcf2f4"
   ];
+  driver [
+    label=<Run project build/test driver<BR/><FONT POINT-SIZE="10"><I>project-local Python script</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8"
+  ];
   project -> settings [style=dashed, arrowhead=empty, label="owns"];
+  project -> driver [style=dashed, arrowhead=empty, label="owns"];
   settings -> radbat [style=dashed, arrowhead=empty, label="configures"];
   recipes -> recipe [style=dashed, arrowhead=empty, label="provides"];
   configs -> machine [style=dashed, arrowhead=empty, label="provides"];
+  configs -> radbat [style=dashed, arrowhead=empty, label="provides"];
   spack -> radbat [style=dashed, arrowhead=empty, label="concretizes and installs"];
   recipe -> radbat [style=dashed, arrowhead=empty, label="recipe input"];
   machine -> radbat [style=dashed, arrowhead=empty, label="machine input"];
   radbat -> host [label="selects or runs initconfig"];
+  radbat -> driver [label="invokes"];
+  host -> driver [style=dashed, arrowhead=empty, label="host-config input"];
 }

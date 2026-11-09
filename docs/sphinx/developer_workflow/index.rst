@@ -14,8 +14,8 @@ RADIUSS Spack Configs checkout at ``scripts/radiuss-spack-configs``.
 
 .. graphviz:: /figures/components.dot
    :align: center
-   :caption: Components that turn project requirements into a generated host configuration.
-   :alt: rad-bat configures Spack with the project's selected package recipes and machine settings. Spack concretizes the spec, installs dependencies, and generates a CMake host configuration.
+   :caption: RADIUSS Spack Configs provides rad-bat, which prepares a host configuration and invokes the project's build/test driver.
+   :alt: The project owns its rad-bat settings and Python build/test driver. RADIUSS Spack Configs provides rad-bat and machine settings. rad-bat uses Spack and package recipes to select or generate a host configuration, then invokes the project driver.
 
 Responsibilities
 ----------------
