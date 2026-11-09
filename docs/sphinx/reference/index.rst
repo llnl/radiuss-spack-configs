@@ -18,23 +18,18 @@ References and their owners
      - Consumer selection
      - Meaning
    * - Project source
-     - Project checkout; ``package_version`` selects applicable recipe conditions
+     - Project checkout developed as ``<package>@develop`` by rad-bat
      - Source being built; ``develop`` is not a recipe-repository revision
    * - Recipe repository
-     - ``spack_packages_commit`` in ``.uberenv_config.json`` or a pinned remote
-       repository in ``.rad-bat.json``
+     - Pinned remote repository in ``.rad-bat.json``
      - Upstream recipes and build systems used by Spack
    * - Spack
-     - ``spack_commit`` or ``spack_branch`` in ``.uberenv_config.json``;
-       ``spack.commit`` in ``.rad-bat.json``
+     - ``spack.commit`` in ``.rad-bat.json``
      - Package manager, including the concretizer and installer
    * - Shared configuration
-     - RADIUSS Spack Configs submodule commit; ``spack_configs_path`` locates
-       the checkout
+     - RADIUSS Spack Configs submodule commit; ``spack.environment`` selects
+       the machine environment
      - Machine settings and shared CI specifications
-   * - Uberenv
-     - Uberenv submodule commit
-     - Setup and dependency preparation driver
    * - rad-bat
      - RADIUSS Spack Configs submodule commit and project ``.rad-bat.json``
      - Host-config selection or native-Spack dependency preparation followed
@@ -89,19 +84,10 @@ File responsibilities
 Essential precedence rules
 --------------------------
 
-* In Uberenv, ``spack_commit`` takes precedence over ``spack_branch``.
-  ``spack_packages_commit`` takes precedence over ``spack_packages_branch``,
-  which takes precedence over ``spack_packages_tag``. Remove obsolete selectors
-  when changing selection strategy. To use a new package version, normally
-  update ``spack_packages_commit``; Spack itself may not need an update.
 * In ``rad-bat``, ``.rad-bat.json`` records full Spack and remote repository
   commits. Repository array order defines precedence, and conditional spec
   fragments apply only when their declared environment variable is non-empty.
   See :doc:`rad_bat` for the complete schema and CI variables.
-* ``spack_packages_path`` selects optional local recipe directories; it does
-  not pin the upstream recipe repository. Each ``packages`` directory needs
-  a ``repo.yaml`` in its parent directory. In a list, the rightmost local
-  repository has highest priority; local recipes can hide upstream fixes.
 * Configuration includes, scopes, and override keys affect the effective Spack
   settings. Inspect ``spack config blame packages`` and
   ``spack config blame repos`` in the generated environment rather than
@@ -110,13 +96,11 @@ Essential precedence rules
 * RADIUSS Spack Configs CI selects an environment using GitLab's
   ``MY_ENV_NAME`` variable. The CI Spack checkout uses ``MY_SPACK_COMMIT`` when set,
   otherwise ``MY_SPACK_BRANCH`` (which can name a tag). A project's
-  ``.uberenv_config.json`` does not configure these pipelines.
+  ``.rad-bat.json`` does not configure these repository-validation pipelines.
 * Consumer CI combines shared jobs with project settings. Inspect the final
   merged GitLab configuration when names collide; see :doc:`../developer_workflow/ci`.
 
-See the `Uberenv guide <https://uberenv.readthedocs.io/en/latest/>`_ for setup
-options and their mechanics. For release selection, use
-:doc:`../developer_workflow/releases`.
+For release selection, use :doc:`../developer_workflow/releases`.
 
 Figure vocabulary
 -----------------

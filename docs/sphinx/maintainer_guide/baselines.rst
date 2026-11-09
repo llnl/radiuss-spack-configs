@@ -11,8 +11,8 @@ A RADIUSS Spack Configs tag identifies this combination; projects must
 explicitly update their references to adopt the tested baseline.
 
 #. Review platform and shared-spec changes, and the complete impact of a
-   recipe revision update. Check that projects' selected Uberenv or rad-bat
-   revisions support the changes.
+   recipe revision update. Check that projects' selected rad-bat revisions
+   support the changes.
 #. Run the relevant :doc:`validation environments
    <../ci_implementation/index>` and representative consumer build/test jobs.
    Record the commit hashes, machines, specs, and results in

@@ -130,9 +130,9 @@ Reproduce a CI failure
 ----------------------
 
 When reporting a failure, include the project commit,
-``git submodule status --recursive`` output, ``.uberenv_config.json`` or
-``.rad-bat.json``, machine, selected mode, expanded ``SPEC``, host-config name,
+``git submodule status --recursive`` output, ``.rad-bat.json``, machine,
+selected mode, expanded ``SPEC``, host-config name,
 and failing command. This information identifies the
 source, tools, and settings needed to reproduce the failure. In a compute allocation, run the
 :ref:`project build/test script <write-ci-script>` or the failing rad-bat,
-Uberenv, CMake, or CTest command. See :doc:`how_to` for narrowing the failure.
+Spack, CMake, or CTest command. See :doc:`how_to` for narrowing the failure.

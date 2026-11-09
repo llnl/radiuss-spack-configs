@@ -9,13 +9,13 @@ Understand the components
 
 The recommended workflow is **specification → dependency preparation →
 generated host configuration → repeated CMake builds and tests**. This guide
-uses RAJA as an example: its Uberenv submodule is at ``scripts/uberenv``,
-and its RADIUSS Spack Configs submodule is at ``scripts/radiuss-spack-configs``.
+uses ``rad-bat`` (RADIUSS Builds And Tests), distributed by a project's
+RADIUSS Spack Configs checkout at ``scripts/radiuss-spack-configs``.
 
 .. graphviz:: /figures/components.dot
    :align: center
    :caption: Components that turn project requirements into a generated host configuration.
-   :alt: Uberenv configures Spack with the project's selected package recipes and machine settings. Spack concretizes the spec, installs dependencies, and generates a CMake host configuration.
+   :alt: rad-bat configures Spack with the project's selected package recipes and machine settings. Spack concretizes the spec, installs dependencies, and generates a CMake host configuration.
 
 Responsibilities
 ----------------
@@ -29,12 +29,10 @@ Responsibilities
   upstream ``package.py`` recipes and build system implementations, including
   ``CachedCMakePackage``.
 * RADIUSS Spack Configs provides shared machine configuration and CI specs.
-* Uberenv sets up and drives Spack using the project's
-  ``.uberenv_config.json``. The recipe's ``initconfig`` phase produces the host
-  configuration that CMake consumes.
-* ``rad-bat`` (RADIUSS Builds And Tests) can instead reuse a maintained host
-  configuration or drive pinned native Spack from ``.rad-bat.json``, then call
-  the project's independently runnable build/test driver.
+* ``rad-bat`` reuses a maintained host configuration or drives pinned native
+  Spack from ``.rad-bat.json``. The recipe's ``initconfig`` phase produces the
+  host configuration that CMake consumes. Both paths then call the project's
+  independently runnable build/test driver.
 * RADIUSS Shared CI supplies GitLab execution components. Projects provide the
   command that prepares dependencies, builds their checkout, and runs tests.
 
@@ -43,10 +41,9 @@ changes. Keep these overrides temporary to avoid maintaining duplicate recipes;
 the preferred approach is a pull request in ``spack/spack-packages``. See
 :ref:`local-recipe-overrides`.
 
-Use the preparation tool selected by the project: :doc:`prepare dependencies
-with Uberenv <use_spack>` or :doc:`run rad-bat <rad_bat>`, then :doc:`build and
-test <build_and_test>`. Later sections cover :doc:`recipe and dependency
-changes <changes>`, :doc:`release coordination <releases>`, and :doc:`CI
-integration <ci>`.
+Start by :doc:`running rad-bat <rad_bat>`, then :doc:`build and test
+<build_and_test>`. Later sections cover :doc:`recipe and dependency changes
+<changes>`, :doc:`release coordination <releases>`, and :doc:`CI integration
+<ci>`.
 
 See :doc:`../reference/index` for file ownership and reference selection.

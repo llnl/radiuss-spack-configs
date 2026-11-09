@@ -11,13 +11,14 @@ Build and test
 .. graphviz:: /figures/developer-loop.dot
    :align: center
    :caption: Prepare once for a specification, then repeat the source build and test loop.
-   :alt: Uberenv runs Spack to concretize a spec, install dependencies, and generate a host configuration. CMake and CTest build and test the project. Source edits repeat builds; recipe, dependency, or toolchain changes require rerunning Uberenv.
+   :alt: rad-bat uses a maintained host configuration or runs Spack to concretize a spec, install dependencies, and generate one. CMake and CTest build and test the project. Source edits repeat builds; recipe, dependency, or toolchain changes require a rad-bat refresh.
 
-After :doc:`use_spack`, select the generated host configuration explicitly.
-Use the CMake executable recorded in the host configuration, or a compatible
+``rad-bat`` selects the maintained or newly generated host configuration and
+passes it to the project build/test driver. To run the same steps manually,
+use the CMake executable recorded in the host configuration, or a compatible
 CMake on your PATH, on the same machine with the compiler modules used to
-install dependencies.
-From the RAJA checkout root, replace the filename below with the actual output:
+install dependencies. From the project checkout root, replace the filename
+below with the selected file:
 
 .. _using-configuration-files-to-build-the-project:
 
@@ -27,8 +28,8 @@ From the RAJA checkout root, replace the filename below with the actual output:
    cmake --build build --parallel
    ctest --test-dir build --output-on-failure
 
-For ordinary source edits, repeat only the build and test commands. Spack and
-Uberenv are not needed for each edit.
+For ordinary source edits, repeat only the build and test commands. Spack is
+not needed for each edit.
 
 Use a separate build directory for each host configuration. When changing the
 compiler, variants, dependencies, or ``spack-packages`` revision, follow
@@ -46,14 +47,6 @@ allocation outside GitLab. In a ``rad-bat`` integration, keep dependency
 preparation outside that driver: accept an explicit host configuration and
 work directory, then configure, build, install, and test the project. Record
 the command as an argument array in ``.rad-bat.json``; see :doc:`rad_bat`.
-
-An Uberenv-based project may instead keep dependency preparation in its script,
-accepting ``SPEC`` without the project name and explicitly selecting the
-resulting host configuration. For RAJA's existing Uberenv workflow, run:
-
-.. code-block:: bash
-
-   SPEC="%gcc" ./scripts/gitlab/build_and_test.sh
 
 Each project maintains its driver and documents its options and required
 compute resources. It should exit on failure and require a filename if several

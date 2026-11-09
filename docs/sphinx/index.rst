@@ -25,7 +25,6 @@ Start with :doc:`developer_workflow/index`. Infrastructure maintainers should us
    :caption: Developer workflow
 
    developer_workflow/index
-   developer_workflow/use_spack
    developer_workflow/rad_bat
    developer_workflow/build_and_test
    developer_workflow/changes
@@ -49,6 +48,12 @@ Start with :doc:`developer_workflow/index`. Infrastructure maintainers should us
 
    reference/index
    reference/rad_bat
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Legacy workflows
+
+   legacy/uberenv
 
 Background and motivation
 -------------------------

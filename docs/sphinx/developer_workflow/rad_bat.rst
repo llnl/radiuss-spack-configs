@@ -19,8 +19,7 @@ repository at ``scripts/radiuss-spack-configs`` runs:
    scripts/radiuss-spack-configs/bin/rad-bat --help
 
 No installation is required. The runtime uses Python 3.8 or newer and the
-standard library. Use the revisions and workflow committed by the project;
-projects that still select Uberenv should follow :doc:`use_spack`.
+standard library. Use the revisions and workflow committed by the project.
 
 Choose a mode
 -------------

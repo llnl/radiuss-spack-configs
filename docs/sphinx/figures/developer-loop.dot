@@ -2,7 +2,7 @@
 digraph developer_loop {
   rankdir=TB;
   spec [label="Specification\ncompiler, variants, dependencies", shape=tab, fillcolor="#eee8f5"];
-  prepare [label="Run Uberenv / Spack\nconcretize spec and install dependencies", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  prepare [label="Run rad-bat spack\nconcretize spec and install dependencies", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   host [label="Generated host configuration\n.cmake", shape=parallelogram, fillcolor="#dcf2f4"];
   configure [label="Configure CMake\nselect host configuration", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   build [label="Build and test\nCMake / CTest", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
