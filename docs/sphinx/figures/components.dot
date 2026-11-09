@@ -67,8 +67,7 @@ digraph components {
   { rank=same; radbat; spack; }
   project -> configs -> recipes [style=invis, weight=100];
   settings -> machine -> recipe [style=invis, weight=100];
-  project -> settings [style=dashed, arrowhead=empty, label="owns"];
-  project -> driver [style=dashed, arrowhead=empty, label="owns"];
+  project -> settings [style=dashed, arrowhead=empty, label="owns", weight=100];
   settings -> radbat [style=dashed, arrowhead=empty, label="configures"];
   recipes -> recipe [style=dashed, arrowhead=empty, label="provides", weight=100];
   configs -> machine [style=dashed, arrowhead=empty, label="provides", weight=10];
