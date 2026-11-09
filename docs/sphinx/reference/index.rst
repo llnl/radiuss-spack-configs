@@ -58,8 +58,7 @@ File responsibilities
      - Upstream versions, variants, dependencies, and build behavior;
        package directory names replace hyphens with underscores
    * - ``spack_repo/llnl_radiuss/repo.yaml`` and adjacent ``packages/``
-     - Custom packages shared among projects, or recipes tested in
-       RADIUSS Spack Configs itself
+     - Local recipe testing in RADIUSS Spack Configs
    * - Platform/machine ``spack.yaml``
      - Environment settings and configuration includes
    * - Platform/machine ``packages.yaml``

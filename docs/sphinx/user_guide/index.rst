@@ -22,10 +22,12 @@ Responsibilities
 
 * The project repository contains source code, tests, and the selected
   versions of its build tools.
-* Spack, developed in ``spack/spack``, is a package manager. Its concretizer
-  turns a spec into a concrete dependency graph, which Spack then installs.
-* ``spack/spack-packages`` owns the upstream ``package.py`` recipes and build
-  system implementations, including ``CachedCMakePackage``.
+* Spack, developed in `spack/spack <https://github.com/spack/spack>`_, is a
+  package manager. Its concretizer turns a spec into a concrete dependency
+  graph, which Spack then installs.
+* `spack/spack-packages <https://github.com/spack/spack-packages>`_ owns the
+  upstream ``package.py`` recipes and build system implementations, including
+  ``CachedCMakePackage``.
 * RADIUSS Spack Configs provides shared machine configuration and CI specs.
 * Uberenv sets up and drives Spack using the project's
   ``.uberenv_config.json``. The recipe's ``initconfig`` phase produces the host

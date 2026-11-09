@@ -46,9 +46,10 @@ validation. Adapt external paths and versions to the local installation.
 Repository maintenance
 ----------------------
 
-The optional ``spack_repo/llnl_radiuss`` repository holds custom packages
-that need to be shared among projects, or recipes tested in RADIUSS Spack
-Configs itself. For project-local experiments, use :ref:`local-recipe-overrides`.
+The optional ``spack_repo/llnl_radiuss`` repository is for local recipe testing
+in RADIUSS Spack Configs. Shared recipes belong upstream in
+`spack/spack-packages <https://github.com/spack/spack-packages>`_. For testing
+inside a consuming project, use :ref:`local-recipe-overrides`.
 
 * :doc:`../ci_implementation/index` describes validation purposes, manual
   environment selection, and storage lifetimes.
