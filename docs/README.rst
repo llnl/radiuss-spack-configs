@@ -82,6 +82,6 @@ The former ``user_guide`` and ``developer_guide`` directories were renamed to
 not redirected; update links in consuming projects to use the new paths.
 Existing section anchors remain available at the new URLs.
 
-Dated audit evidence, publication review items, and engineering follow-ups are
-in ``docs/review-notes.rst`` outside the published Sphinx tree. They are not
-claims about the permanently recommended tool revisions.
+Record design rationale, dated audit evidence, validation results, and
+engineering follow-ups in the pull request description. Keep the published
+guide focused on the maintained workflows and reference material.
