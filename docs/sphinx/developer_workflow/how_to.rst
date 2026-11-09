@@ -19,15 +19,16 @@ concretization alone does not show that a project builds or passes tests.
    * - Symptom
      - Next action
    * - Package version or variant unavailable
-     - Check ``spack_packages_commit`` and whether a local recipe overrides
-       the upstream package. Follow :doc:`changes`.
+     - Check the pinned recipe-repository commit in ``.rad-bat.json`` and
+       whether a local recipe overrides the upstream package. Follow
+       :doc:`changes`.
    * - Compiler/external missing or concretization fails
      - Confirm the machine and selected configuration, then inspect
        ``spack config blame packages`` and the full spec in the generated
        Spack environment.
-   * - Setup fails after updating Spack or Uberenv
-     - Check that the Spack, Uberenv, and recipe revisions are compatible;
-       retry with a new ``--prefix`` directory to rule out stale setup files.
+   * - Setup fails after updating Spack or recipes
+     - Check that the Spack and recipe revisions are compatible; retry with a
+       new rad-bat work/install generation to rule out stale setup files.
    * - Host configuration missing or ambiguous
      - Check whether ``initconfig`` completed and select the intended output
        explicitly. Do not pick an arbitrary ``*.cmake`` file.
@@ -45,7 +46,6 @@ concretization alone does not show that a project builds or passes tests.
 .. _compare-the-build-and-ci-configurations-of-two-projects:
 
 .. _reference-used-to-import-radiuss-spack-configs:
-.. _reference-used-by-uberenv-to-clone-spack:
 .. _reference-used-to-import-radiuss-shared-ci:
 .. _local-jobs-defined-by-the-projects:
 
@@ -53,7 +53,7 @@ Compare two configurations
 --------------------------
 
 Compare the project commits, ``git submodule status --recursive`` output,
-Spack and recipe revisions in ``.uberenv_config.json``, machine configuration,
+Spack and recipe revisions in ``.rad-bat.json``, machine configuration,
 expanded spec, and generated host configuration. Also compare Shared CI component references, project
 variables, and local job overrides. :ref:`reference-ownership` lists the owner
 of each component.
@@ -63,11 +63,8 @@ Earlier how-to sections
 
 The following entry points retain links from the previous guide.
 
-.. _update_spack_uberenv_rsc:
-.. _update-spack-uberenv-or-radiuss-spack-configs:
 .. _updating-radiuss-spack-configs:
 .. _updating-spack:
-.. _updating-uberenv:
 .. _choose-a-spack-reference-commit-or-branch:
 .. _limiting-local-patching-of-spack-packages:
 
@@ -89,18 +86,14 @@ Use :doc:`changes` to identify the component to update and
 Shared jobs and project overrides
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use :doc:`ci` for composition, variants, and failure exceptions, and
-:doc:`use_spack` to list shared specs from **RADIUSS Spack Configs**.
+Use :doc:`ci` for composition, variants, failure exceptions, and shared specs
+from **RADIUSS Spack Configs**.
 
-.. _use-uberenv:
-
-.. _some-options:
-
-Run Uberenv
+Run rad-bat
 ~~~~~~~~~~~
 
-Follow :doc:`use_spack` for the Uberenv command and :doc:`build_and_test`
-for the repeated source-edit loop.
+Follow :doc:`rad_bat` for the maintained-host-config and native-Spack commands,
+and :doc:`ci` for mode selection in project pipelines.
 
 .. _spack-reference-during-the-release-process:
 

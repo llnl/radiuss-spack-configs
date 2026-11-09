@@ -4,13 +4,16 @@ The RADIUSS project promotes and supports key High Performance Computing (HPC) o
 
 RADIUSS Spack Configs shares machine and toolchain configurations and CI specifications across projects. Upstream package recipes live in [spack-packages](https://github.com/spack/spack-packages).
 
+The repository also provides [`rad-bat`](https://radiuss-spack-configs.readthedocs.io/en/latest/developer_workflow/rad_bat.html), a repository-local tool that reuses maintained CMake host configurations or prepares dependencies with pinned native Spack before invoking a project's build/test driver.
+
 ## Getting Started
 
 This project may be used as a submodule.
 
 ### Installing
 
-This project requires no installation.
+This project requires no installation. Projects can run `bin/rad-bat` directly
+from a pinned submodule checkout.
 
 ## Contributing
 
@@ -43,5 +46,4 @@ SPDX-License-Identifier: (MIT)
 LLNL-CODE-793462
 
 ## Acknowledgments
-
 

@@ -53,5 +53,7 @@ inside a consuming project, use :ref:`local-recipe-overrides`.
 
 * :doc:`../ci_implementation/index` describes validation purposes, manual
   environment selection, and storage lifetimes.
+* :doc:`rad_bat` describes the native-Spack driver boundary, persistent
+  consumer storage, and scheduler descriptor handling.
 * :doc:`track_spack_packages` describes automated recipe revision proposals.
 * :doc:`baselines` describes recording and publishing tested combinations.

@@ -1,4 +1,5 @@
 *.pyc
+.rad-bat-work/
 
 # Local documentation builds
 .venv-docs/
