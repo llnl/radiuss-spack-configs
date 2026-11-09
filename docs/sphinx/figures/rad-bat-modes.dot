@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 digraph rad_bat_modes {
   rankdir=TB;
-  inputs [label="Job or command inputs\nSPEC / host-config selector", shape=tab, fillcolor="#eee8f5"];
-  select [label="rad-bat\nselect explicit workflow", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  maintained [label="Maintained host configuration\n.cmake", shape=parallelogram, fillcolor="#dcf2f4"];
-  spack [label="Pinned native Spack\nconcretize and install dependencies", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  generated [label="Generated host configuration\n.cmake artifact", shape=parallelogram, fillcolor="#dcf2f4"];
+  inputs [label=<Job or command inputs<BR/><FONT POINT-SIZE="10"><I>SPEC / host-config selector</I></FONT>>, shape=tab, fillcolor="#eee8f5"];
+  select [label=<rad-bat<BR/><FONT POINT-SIZE="10"><I>select explicit workflow</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  maintained [label=<Maintained host configuration<BR/><FONT POINT-SIZE="10"><I>.cmake</I></FONT>>, shape=parallelogram, fillcolor="#dcf2f4"];
+  spack [label=<Pinned native Spack<BR/><FONT POINT-SIZE="10"><I>concretize and install dependencies</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  generated [label=<Generated host configuration<BR/><FONT POINT-SIZE="10"><I>.cmake artifact</I></FONT>>, shape=parallelogram, fillcolor="#dcf2f4"];
   driver [label="Project build/test driver", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
   inputs -> select;
   select -> maintained [label="host-config mode"];
