@@ -77,6 +77,16 @@ and artifacts as well as its YAML. The current generation script still copies
 some configuration inputs from ``shared-ci``; do not assume a new environment
 is fully independent simply because it has a new directory.
 
+An opt-in :doc:`parallel backend <parallel>` builds entire environments through
+Jacamar batch runners using Spack's native parallel installer. It is experimental
+and uses separate persistent storage; the generated Spack CI backend remains
+the default.
+
+.. toctree::
+   :hidden:
+
+   parallel
+
 Storage lifetimes and reuse
 ---------------------------
 
