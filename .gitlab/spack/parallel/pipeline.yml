@@ -28,7 +28,7 @@ parallel-configuration:
   stage: build
   timeout: 4 hours
   needs: [parallel-configuration]
-  resource_group: parallel-${MY_ENV_NAME}-${RSC_MACHINE}-${SPACK_TARGET}-${CACHE_TARGET}-${RSC_PARALLEL_CASE}-${RSC_PARALLEL_NODES}
+  resource_group: parallel-${MY_ENV_NAME}-${RSC_MACHINE}-${SPACK_TARGET}-${CACHE_TARGET}-${RSC_PARALLEL_CASE}
   script:
     - python3 .gitlab/spack/parallel/build.py run
   after_script:

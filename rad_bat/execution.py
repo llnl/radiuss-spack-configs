@@ -20,6 +20,23 @@ def request_stop(signum, frame):
     STOP_REQUESTED = True
 
 
+@contextlib.contextmanager
+def interruptible():
+    """Restore process signal state even when finalization fails."""
+    global STOP_REQUESTED
+    previous = STOP_REQUESTED
+    handlers = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
+    STOP_REQUESTED = False
+    try:
+        for sig in handlers:
+            signal.signal(sig, request_stop)
+        yield
+    finally:
+        for sig, handler in handlers.items():
+            signal.signal(sig, handler)
+        STOP_REQUESTED = previous
+
+
 def terminate(process):
     # SIGINT lets Spack stop its own build process groups and release prefix locks.
     for sig, grace in ((signal.SIGINT, 30), (signal.SIGTERM, 10), (signal.SIGKILL, 5)):
@@ -35,9 +52,9 @@ def terminate(process):
     raise RuntimeError("Worker launcher did not terminate")
 
 
-def command(argv, log, deadline, env=None, honor_stop=True, on_interrupt=None, cwd=None):
+def command(argv, log, deadline, env=None, on_interrupt=None, cwd=None):
     """Tee output without a blocking read; all subprocesses have bounded lifetimes."""
-    if time.monotonic() >= deadline or (honor_stop and STOP_REQUESTED):
+    if time.monotonic() >= deadline or STOP_REQUESTED:
         raise TimeoutError("No remaining time for {}".format(argv[0]))
     Path(log).parent.mkdir(parents=True, exist_ok=True)
     logs.command(list(map(str, argv)))
@@ -50,7 +67,7 @@ def command(argv, log, deadline, env=None, honor_stop=True, on_interrupt=None, c
             with selectors.DefaultSelector() as selector:
                 selector.register(process.stdout, selectors.EVENT_READ)
                 while selector.get_map():
-                    if time.monotonic() >= deadline or (honor_stop and STOP_REQUESTED):
+                    if time.monotonic() >= deadline or STOP_REQUESTED:
                         interrupted = True
                         if on_interrupt:
                             on_interrupt()

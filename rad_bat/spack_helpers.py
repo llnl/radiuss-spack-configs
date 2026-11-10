@@ -12,6 +12,29 @@ def write_manifest(path, data, yaml):
     temporary.replace(path)
 
 
+def override(mapping, name, value):
+    import spack.util.spack_yaml as sy
+
+    mapping.pop(name, None)
+    key = sy.syaml_str(name)
+    key.override = True
+    mapping[key] = value
+
+
+def repositories(options):
+    import spack.util.spack_yaml as sy
+
+    manifest = Path(options['environment']) / 'spack.yaml'
+    with manifest.open() as stream:
+        data = sy.load_config(stream)
+    # JSON entries take precedence, retaining repositories from the machine manifest.
+    configured = dict(options['repos'])
+    for name, repo in data['spack'].get('repos', {}).items():
+        configured.setdefault(name, repo)
+    data['spack']['repos'] = configured
+    write_manifest(manifest, data, sy)
+
+
 def prepare(options):
     import spack.util.spack_yaml as sy
 
@@ -20,19 +43,10 @@ def prepare(options):
         data = sy.load_config(stream)
     config = data['spack']
 
-    def override(mapping, name, value):
-        mapping.pop(name, None)
-        key = sy.syaml_str(name)
-        key.override = True
-        mapping[key] = value
-
     # CI generation is replaced by the environment install workflow.
     config['include'] = [x for x in config.get('include', []) if x != 'ci.yaml']
     config.pop('ci', None)
     config['view'] = False
-    override(config, 'upstreams', {})
-    # Both imported and inherited mirrors are replaced. No package autopush.
-    override(config, 'mirrors', {})
     override(config, 'repos', config.get('repos', {}))
     if not config['repos']:
         raise ValueError('Supply pinned package repositories in spack.yaml')
@@ -40,7 +54,6 @@ def prepare(options):
         if isinstance(repo, dict) and 'git' in repo and not repo.get('commit'):
             raise ValueError('Pin package repository {} by commit'.format(name))
     cfg = config.setdefault('config', {})
-    cfg.setdefault('install_tree', {})['root'] = options['install_tree']
     override(cfg, 'build_stage', ['$user_cache_path/stage'])
     cfg['test_stage'] = '$user_cache_path/test'
     cfg['misc_cache'] = '$user_cache_path/misc'
@@ -67,10 +80,7 @@ def disable_autopush():
     manifest = Path(ev.active_environment().path) / 'spack.yaml'
     with manifest.open() as stream:
         data = sy.load_config(stream)
-    data['spack'].pop('mirrors', None)
-    key = sy.syaml_str('mirrors')
-    key.override = True
-    data['spack'][key] = mirrors
+    override(data['spack'], 'mirrors', mirrors)
     write_manifest(manifest, data, sy)
 
 
@@ -82,14 +92,11 @@ def freeze():
     manifest = Path(ev.active_environment().path) / 'spack.yaml'
     with manifest.open() as stream:
         data = sy.load_config(stream)
-    data['spack'].pop('repos', None)
-    key = sy.syaml_str('repos')
-    key.override = True
-    data['spack'][key] = {r.namespace: r.root for r in spack.repo.PATH.repos}
+    override(data['spack'], 'repos', {r.namespace: r.root for r in spack.repo.PATH.repos})
     write_manifest(manifest, data, sy)
 
 
-def installed(verify=False):
+def installed():
     import spack.environment as ev
     import spack.store
 
@@ -101,29 +108,34 @@ def installed(verify=False):
             str(s) for s, _ in environment.concretized_specs()):
         raise ValueError('Concrete lock does not match the selected root specs')
     with spack.store.STORE.db.read_transaction():
-        if verify:
-            # Cached packages can legitimately omit their build-only dependencies.
-            for root in roots:
-                for spec in root.traverse(deptype=('link', 'run')):
-                    if not spec.external and not spec.installed:
-                        raise ValueError('Required installation missing: {}'.format(spec))
+        # Cached packages can legitimately omit their build-only dependencies.
+        for root in roots:
+            for spec in root.traverse(deptype=('link', 'run')):
+                if not spec.external and not spec.installed:
+                    raise ValueError('Required installation missing: {}'.format(spec))
         return ['/' + spec.dag_hash() for spec in environment.all_specs()
                 if spec.installed and not spec.external]
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('prepare', 'freeze', 'verify', 'disable-autopush'))
-    parser.add_argument('path', nargs='?')
+    actions = parser.add_subparsers(dest='action', required=True)
+    actions.add_parser('prepare').add_argument('path', type=Path)
+    actions.add_parser('repositories').add_argument('options', type=json.loads)
+    actions.add_parser('verify').add_argument('path', type=Path)
+    actions.add_parser('freeze')
+    actions.add_parser('disable-autopush')
     args = parser.parse_args()
     if args.action == 'prepare':
-        prepare(json.loads(Path(args.path).read_text()))
+        prepare(json.loads(args.path.read_text()))
+    elif args.action == 'repositories':
+        repositories(args.options)
     elif args.action == 'disable-autopush':
         disable_autopush()
     elif args.action == 'freeze':
         freeze()
     else:
-        Path(args.path).write_text(json.dumps(installed(verify=True)))
+        args.path.write_text(json.dumps(installed()))
 
 
 if __name__ == '__main__':

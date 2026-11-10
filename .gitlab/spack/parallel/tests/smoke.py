@@ -86,6 +86,18 @@ def main():
     assert all(p.stat().st_mtime_ns == stamp for p, stamp in times.items())
     assert all(cached(s) for s in specs), 'Successful environment not fully published'
     assert run(3) == 0, 'Warm retry failed'
+    # Reuse an upstream without copying prefixes into the new local install tree.
+    # Remove the success marker so a source rebuild would fail.
+    marker.unlink()
+    upstream_args = list(base)
+    upstream_args[upstream_args.index('--work-dir') + 1] = str(root / 'upstream-work')
+    upstream_args[upstream_args.index('--install-tree') + 1] = str(root / 'upstream-install')
+    with (root / 'upstream.log').open('w') as output:
+        status = subprocess.run(upstream_args + ['--output-dir', str(root / 'upstream-attempt'),
+            '--upstream', str(root / 'install'), '--lockfile', str(concrete_dir / 'spack.lock')],
+            stdout=output, stderr=subprocess.STDOUT, timeout=300).returncode
+    assert status == 0, 'Upstream reuse failed; inspect upstream.log'
+    assert not list((root / 'upstream-install').rglob('installed.txt')), 'Upstream prefixes were copied'
     # Two native installers restoring the same DAG into a fresh shared prefix.
     # This checks Spack coordination locally; LC placement/cancellation remain separate.
     restore = root / 'restore'
@@ -112,7 +124,7 @@ def main():
                     process.terminate()
                     process.wait(timeout=10)
     assert len(list((root / 'restored-install').rglob('installed.txt'))) == 3
-    print('Native failure, no premature publication, persistent retry, warm retry and concurrent binary restore passed:', root)
+    print('Native failure, no premature publication, persistent retry, warm retry, upstream reuse and concurrent binary restore passed:', root)
 
 
 if __name__ == '__main__':

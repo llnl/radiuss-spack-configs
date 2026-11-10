@@ -8,18 +8,18 @@ import subprocess
 from .execution import command
 
 
-def launch_command(scheduler, nodes, worker):
+def launcher_prefix(scheduler, nodes):
     if scheduler == "local":
         if nodes != 1:
             raise ValueError("Multiple nodes require a Slurm or Flux allocation")
-        return worker
+        return []
     if scheduler == "flux":
         if not os.environ.get("FLUX_URI"):
             raise ValueError("Flux workers require Jacamar's active Flux allocation")
         # Exclusive nodes belong to this job; disabling per-task affinity lets a
         # single installer use every CPU permitted by the allocation's cpuset.
-        return ["flux", "run", "--nodes={}".format(nodes), "--ntasks={}".format(nodes),
-                "--exclusive", "--label-io", "-o", "cpu-affinity=off"] + worker
+        return ["flux", "submit", "--nodes={}".format(nodes), "--ntasks={}".format(nodes),
+                "--exclusive", "-o", "cpu-affinity=off"]
     if scheduler == "slurm":
         if not os.environ.get("SLURM_JOB_ID"):
             raise ValueError("Slurm workers require Jacamar's active Slurm allocation")
@@ -30,7 +30,7 @@ def launch_command(scheduler, nodes, worker):
         cpus = min(int(part.split("(")[0]) for part in parts)
         return ["srun", "--nodes={}".format(nodes), "--ntasks={}".format(nodes),
                 "--ntasks-per-node=1", "--cpus-per-task={}".format(cpus),
-                "--cpu-bind=cores", "--kill-on-bad-exit=0", "--export=ALL"] + worker
+                "--cpu-bind=cores", "--kill-on-bad-exit=0", "--export=ALL"]
     raise ValueError("Unsupported scheduler: {}".format(scheduler))
 
 
@@ -50,12 +50,11 @@ def stop_flux(jobid):
                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, timeout=10, check=False)
 
 
-def launch_workers(launcher, attempt, deadline):
+def launch_workers(launcher, attempt, deadline, env=None):
     if launcher[0] != "flux":
-        return command(launcher, attempt / "workers.log", deadline)
-    submit = ["flux", "submit"] + [arg for arg in launcher[2:] if arg != "--label-io"]
+        return command(launcher, attempt / "workers.log", deadline, env=env)
     submission_log = attempt / "submit.log"
-    command(submit, submission_log, deadline)
+    command(launcher, submission_log, deadline, env=env)
     jobid = submission_log.read_text().strip().splitlines()[-1]
     if not re.fullmatch(r"(?:[fƒ][1-9A-HJ-NP-Za-km-z]+|[0-9]+)", jobid):
         raise ValueError("Flux submission returned an invalid job id: {}".format(jobid))
@@ -70,7 +69,7 @@ def launch_workers(launcher, attempt, deadline):
 
     try:
         return command(["flux", "job", "attach", "--label-io", "--wait-event=clean", jobid],
-                       attempt / "workers.log", deadline, on_interrupt=cleanup)
+                       attempt / "workers.log", deadline, on_interrupt=cleanup, env=env)
     except BaseException:
         cleanup()
         raise

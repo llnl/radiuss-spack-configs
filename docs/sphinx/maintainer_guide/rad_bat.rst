@@ -13,7 +13,7 @@ installation. RADIUSS Shared CI is not a distribution source for the tool.
 Keep the generic and project-specific boundaries explicit. ``rad-bat`` owns:
 
 * CLI and ``.rad-bat.json`` validation;
-* pinned Spack and package-repository checkouts;
+* the pinned Spack checkout and translation of project JSON repository pins;
 * Spack isolation, environments, repositories, upstreams, install trees, and
   buildcache configuration;
 * dependency installation, generated host-config discovery, and safe project
@@ -32,8 +32,11 @@ Native Spack lifecycle
 
 Spack mode never selects an executable from ``PATH``. It checks out the URL and
 full commit recorded by the project, runs ``spack isolate`` in the managed
-checkout, copies the selected RADIUSS machine environment, and registers local
-or commit-pinned remote repositories in configured precedence order. It then:
+checkout, and copies the selected RADIUSS machine environment. It writes the
+local paths and commit-pinned remote repositories from ``.rad-bat.json`` into
+that intermediate environment in configured precedence order. Spack owns the
+package-repository clones and checkouts, including monorepo subdirectory
+selection. Developers continue to edit their pins in the JSON. It then:
 
 #. adds the explicit ``<package>@develop`` root and project spec fragment;
 #. runs ``spack develop --no-clone`` against the source checkout;
@@ -118,7 +121,10 @@ Shared environment workflow
 
 The ``env`` workflow shares pinned-checkout, isolation, storage configuration,
 publication and section-logging helpers with the project workflows. Its prepared
-state is persistent. Package repositories declared in the environment are
+state is persistent for retries within the same pipeline/job workspace. A new
+job workspace prepares new inputs; no file hashes or automatic invalidation
+are maintained. Upstreams and read mirrors are preserved, with autopush disabled.
+Package repositories declared in the environment are
 resolved by Spack and frozen to shared paths before installation workers start.
 
 ``rad_bat.environment`` owns preparation, installation and success-gated

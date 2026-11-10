@@ -76,6 +76,8 @@ def build_parser() -> argparse.ArgumentParser:
     env.add_argument("--lockfile")
     env.add_argument("--group")
     env.add_argument("--buildcache")
+    env.add_argument("--upstream", action="append", default=[])
+    env.add_argument("--read-buildcache", action="append", default=[])
     env.add_argument("--buildcache-username-variable")
     env.add_argument("--buildcache-password-variable")
     env.add_argument("--push-to-buildcache", action="store_true")
@@ -156,7 +158,7 @@ def _select_environment_mode(
     )
 
 
-def _run_environment() -> None:
+def _run_from_environment_variables() -> None:
     explicit_mode = _ci_value("RAD_BAT_MODE")
     direct_host_config = _ci_value("RAD_BAT_HOST_CONFIG", "HOST_CONFIG")
     host_config_name = _ci_value("RAD_BAT_HOST_CONFIG_NAME")
@@ -196,20 +198,20 @@ def _run_environment() -> None:
     upstream_value = _ci_value("RAD_BAT_UPSTREAMS") or ""
     upstreams = [value for value in upstream_value.split(os.pathsep) if value]
     run_spack(
-        config,
-        _required_ci("RAD_BAT_SPEC", "SPEC"),
-        _required_ci("RAD_BAT_WORK_DIR"),
-        _ci_value("RAD_BAT_SPACK_ENV"),
-        _required_ci("RAD_BAT_INSTALL_TREE"),
-        _ci_value("RAD_BAT_OUTPUT_DIR"),
-        upstreams,
-        _ci_value("RAD_BAT_BUILDCACHE"),
-        _ci_value("RAD_BAT_BUILDCACHE_USERNAME_VARIABLE"),
-        _ci_value("RAD_BAT_BUILDCACHE_PASSWORD_VARIABLE"),
-        _truth(_ci_value("RAD_BAT_PUSH_TO_BUILDCACHE", "PUSH_TO_REGISTRY")),
-        _ci_value("RAD_BAT_HOST_CONFIG_NAME"),
-        jobs,
-        None,
+        config=config,
+        spec=_required_ci("RAD_BAT_SPEC", "SPEC"),
+        work_dir=_required_ci("RAD_BAT_WORK_DIR"),
+        spack_env=_ci_value("RAD_BAT_SPACK_ENV"),
+        install_tree_path=_required_ci("RAD_BAT_INSTALL_TREE"),
+        output_dir_path=_ci_value("RAD_BAT_OUTPUT_DIR"),
+        upstreams=upstreams,
+        buildcache=_ci_value("RAD_BAT_BUILDCACHE"),
+        buildcache_username_variable=_ci_value("RAD_BAT_BUILDCACHE_USERNAME_VARIABLE"),
+        buildcache_password_variable=_ci_value("RAD_BAT_BUILDCACHE_PASSWORD_VARIABLE"),
+        push_to_buildcache=_truth(_ci_value("RAD_BAT_PUSH_TO_BUILDCACHE", "PUSH_TO_REGISTRY")),
+        host_config_name=_ci_value("RAD_BAT_HOST_CONFIG_NAME"),
+        jobs=jobs,
+        command=None,
     )
 
 
@@ -217,16 +219,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     arguments_list = list(sys.argv[1:] if argv is None else argv)
     try:
         if not arguments_list:
-            _run_environment()
+            _run_from_environment_variables()
             return 0
         parser = build_parser()
         arguments = parser.parse_args(arguments_list)
         if arguments.mode == "env":
-            from .config import FULL_COMMIT
-            from .environment import run_environment
-            if not FULL_COMMIT.fullmatch(arguments.spack_commit):
-                raise RadBatError("--spack-commit must be a full Git commit")
-            return run_environment(arguments)
+            from .environment import EnvironmentOptions, run_environment
+            options = vars(arguments).copy()
+            options.pop('mode')
+            return run_environment(EnvironmentOptions(**options))
         config = load_project_config(Path(arguments.source))
         if arguments.mode == "host-config":
             run_host_config(
@@ -238,20 +239,20 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
         else:
             run_spack(
-                config,
-                arguments.spec,
-                arguments.work_dir,
-                arguments.spack_env,
-                arguments.install_tree,
-                arguments.output_dir,
-                arguments.upstream,
-                arguments.buildcache,
-                arguments.buildcache_username_variable,
-                arguments.buildcache_password_variable,
-                arguments.push_to_buildcache,
-                arguments.host_config_name,
-                arguments.jobs,
-                _command(arguments.command),
+                config=config,
+                spec=arguments.spec,
+                work_dir=arguments.work_dir,
+                spack_env=arguments.spack_env,
+                install_tree_path=arguments.install_tree,
+                output_dir_path=arguments.output_dir,
+                upstreams=arguments.upstream,
+                buildcache=arguments.buildcache,
+                buildcache_username_variable=arguments.buildcache_username_variable,
+                buildcache_password_variable=arguments.buildcache_password_variable,
+                push_to_buildcache=arguments.push_to_buildcache,
+                host_config_name=arguments.host_config_name,
+                jobs=arguments.jobs,
+                command=_command(arguments.command),
             )
         return 0
     except RadBatError as error:

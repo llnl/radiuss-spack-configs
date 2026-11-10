@@ -96,7 +96,9 @@ values; a real configuration records full tested commits.
    * - ``spack.repositories``
      - Ordered local repositories, or remote repositories pinned by URL and
        full commit. ``subdirectory`` selects a repository inside a remote
-       monorepo. Earlier entries have higher Spack precedence.
+       monorepo. Earlier entries have higher Spack precedence. rad-bat writes
+       these entries into the copied Spack environment; Spack performs the
+       repository cloning and commit checkout. The JSON remains authoritative.
    * - ``spack.spec_fragments``
      - Optional environment-controlled dependency constraints.
 
@@ -198,12 +200,18 @@ publication only after the whole environment installation succeeds. OCI
 credential-variable flags have the same meaning as in project mode. Publication
 includes installed non-external roots and dependencies. Failed attempts leave
 progress in ``--install-tree`` and publish nothing.
+Existing upstreams and mirrors are retained, with autopush disabled. Repeat
+``--upstream PATH`` or ``--read-buildcache URL`` to add reuse sources without
+changing the publication destination. Spack handles package selection, skipping
+existing cache entries and updating the index after publication.
 
 For retries, reuse ``--work-dir`` and ``--install-tree`` and choose a new
-``--output-dir`` and short filesystem ``--temp-dir``. Unchanged inputs reuse the
-concrete lock. Changed input files, revisions or recorded machine settings
-select a new prepared environment. ``--lockfile`` explicitly supplies a previous
-lock, useful for controlled comparisons. ``--group`` sets package installation
+``--output-dir`` and short filesystem ``--temp-dir``. Once preparation succeeds,
+``<work-dir>/environment`` and its concrete lock are reused as a fixed snapshot.
+There is no file hashing or automatic invalidation: use a new workspace when
+changing inputs. In CI the workspace is identified by pipeline and job name,
+and only retries within that pipeline resume it. ``--lockfile`` supplies a
+previous lock during initial preparation, useful for controlled comparisons. ``--group`` sets package installation
 permissions; CI also creates group-writable parent directories.
 
 Timed collapsible sections are built in. Optional dependency reporting is a

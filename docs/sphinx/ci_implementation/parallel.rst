@@ -87,32 +87,52 @@ socket paths use the shorter ``<storage-root>/tmp/<CI_JOB_ID>/<rank>``.
 
 .. code-block:: text
 
-   <storage-root>/<environment>/<machine>/<target>/<CACHE_TARGET>/<case>/nodes-<N>/
+   <storage-root>/<environment>/<machine>/<target>/<CACHE_TARGET>/<case>/
      install/                     # incomplete and completed installations
      buildcache/                  # publication after environment success
-     pipelines/<CI_PIPELINE_ID>/
+     pipelines/<CI_PIPELINE_ID>/jobs/<CI_JOB_NAME>/
        spack/<commit>/checkout/
        spack/<commit>/isolation/
        sources/
        bootstrap/
        cache/                     # package repository checkouts
-       environments/<input-digest>/environment/
+       environment/               # prepared manifest and concrete lock
+       prepared                   # successful preparation marker
        attempts/<CI_JOB_ID>/workers/<rank>/
 
-A retry reuses the prepared concrete environment and completed installations.
-The preparation identity includes input YAML/recipe files (following machine
-symlinks), selected revisions, storage configuration, explicit lock file, and
-``LCSCHEDCLUSTER``, ``SYS_TYPE`` and ``SPACK_TARGET``. Changed inputs create a new
-prepared environment; installed packages remain available to Spack. Additional
-site-specific environment-variable inputs require a new work directory or case.
-Package repositories are frozen to shared paths before workers start.
+The job name identifies its workspace within a pipeline. Unsafe characters are
+percent-encoded without truncating or hashing the name. GitLab assigns a new
+``CI_JOB_ID`` on retry, so each attempt gets separate logs while reusing the
+same concrete environment and completed installations. A new pipeline prepares
+a new environment; installed packages remain available across pipelines.
+
+There is no input fingerprint or automatic refresh. Changes to source files
+are not applied to an already prepared workspace: generate a new pipeline/job
+to change its inputs. A preparation interrupted before the ``prepared`` marker
+is written can be repeated. Keep the job's inputs fixed across retries.
+Node count is execution metadata and never partitions storage. Package
+repositories are frozen to shared paths before workers start.
 
 There is **no autopush**. Failed and interrupted environments retain progress
 in the install tree, with no publication. After every worker succeeds, rad-bat
 verifies the roots and runtime dependency closure, then publishes installed,
 non-external packages from the environment. Cached packages need not have
-local build-only dependencies. Production mirrors and upstreams are replaced
-by the pilot mirror.
+local build-only dependencies. Spack selects the environment's packages,
+skips missing build-only dependencies and existing cache entries, and updates
+the mirror index. rad-bat does not enumerate or batch packages for publication.
+
+Configured upstreams and read mirrors are preserved. The adapter also supplies
+the usual main-generation install tree (when its database exists) and binary
+cache under ``SPACK_CI_STORAGE_ROOT/<environment>/<machine>/<target>/main``.
+New installations and cache publication still use the pilot storage above.
+Autopush is disabled on every effective mirror; only the explicit rad-bat
+publication destination is written after successful installation.
+
+The prepared copy removes the legacy ``ci.yaml`` include and top-level ``ci``
+section, disables views to avoid concurrent worker updates, and configures its
+persistent install tree, stages, bootstrap/cache paths and group permissions.
+Specs, compiler settings, concretizer policy and other configuration includes
+are retained. Source manifests are never modified.
 
 Publication failures fail the job. A retry reuses the completed installation
 and retries publication, skipping complete cache entries. A multi-package push
@@ -156,12 +176,15 @@ Run the project/environment unit tests and CI adapter tests locally:
 
 The native smoke uses local fixture recipes and a local Spack checkout. It
 checks intentional partial failure with no cache publication, persistent retry,
-successful publication, warm retry, and two concurrent installers restoring
+successful publication, warm retry, upstream reuse, and two concurrent installers restoring
 binaries into a fresh shared install tree. It retains diagnostics.
 
 LC validation must still check Jacamar placement, CPU budgets and cancellation:
-start with ``shared-ci`` on one node, then compare two nodes using the same lock
-and separate cold case namespaces. Retry failed/interrupted jobs and confirm
+start with ``shared-ci`` on one node, then exercise two nodes using the same lock
+in another pipeline. Retry failed/interrupted jobs and confirm
 cache publication waits for success. After that baseline works, compare shared
-memory for disposable work while keeping installs persistent. Apply PR 210's
+memory for disposable work while keeping installs persistent. For cold timing
+comparisons, explicitly disable upstream and binary reuse and select fresh
+installation storage in each pipeline; ordinary pilot jobs retain reuse.
+Apply PR 210's
 cached-cmake changes as the final scenario. No shared-memory mode is enabled yet.

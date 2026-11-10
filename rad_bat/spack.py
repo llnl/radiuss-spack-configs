@@ -1,12 +1,11 @@
 """Shared pinned Spack setup for project and environment workflows."""
 
-import hashlib
 import json
 import os
 from pathlib import Path
 from typing import List, Optional
 
-from .config import ProjectConfig, RepositoryConfig
+from .config import ProjectConfig
 from .errors import RadBatError
 from .runner import capture_command, run_command
 
@@ -75,47 +74,36 @@ def _prepare_isolation(checkout: Path, isolation: Path, commit: str, run=None) -
     state_path.write_text(json.dumps(expected, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _repository_checkout_name(repository: RepositoryConfig) -> str:
-    assert repository.url is not None and repository.commit is not None
-    identity = repository.url + "\0" + repository.commit
-    return hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
-
-
 def _prepare_repositories(
     config: ProjectConfig, spack: Path, environment: Path, managed_root: Path
 ) -> None:
+    """Translate developer JSON pins into native Spack repository configuration."""
     assert config.spack is not None
-    # Add in reverse because ``spack repo add`` gives the newly added repository
-    # highest precedence.
-    for repository in reversed(config.spack.repositories):
+    repositories = {}
+    for index, repository in enumerate(config.spack.repositories):
+        name = "rad_bat_{}".format(index)
         if repository.path:
             path = _resolve_from_root(config.root, repository.path)
             if not path.is_dir():
                 raise RadBatError("local Spack repository does not exist: {}".format(path))
+            repositories[name] = str(path)
         else:
-            assert repository.url is not None and repository.commit is not None
-            checkout = managed_root / "repositories" / _repository_checkout_name(repository)
-            _git_checkout(repository.url, repository.commit, checkout)
-            path = checkout / repository.subdirectory if repository.subdirectory else checkout
-            if not path.is_dir():
-                raise RadBatError("remote Spack repository path does not exist: {}".format(path))
-        _run_spack(
-            spack,
-            [
-                "-e",
-                str(environment),
-                "repo",
-                "add",
-                "--scope",
-                "env:{}".format(environment),
-                str(path),
-            ],
-        )
-
+            entry = {
+                "git": repository.url,
+                "commit": repository.commit,
+                "destination": str(managed_root / "repositories" / name / repository.commit),
+            }
+            if repository.subdirectory:
+                entry["paths"] = [repository.subdirectory]
+            repositories[name] = entry
+    if repositories:
+        options = json.dumps({"environment": str(environment), "repos": repositories})
+        _run_spack(spack, ["python", str(Path(__file__).with_name("spack_helpers.py")),
+                          "repositories", options])
 
 
 def configure_storage(spack, environment, install_tree, buildcache=None,
-                      username=None, password=None, run=None):
+                      username=None, password=None, upstreams=(), read_buildcaches=(), run=None):
     """Configure a durable install tree and an optional binary mirror without autopush."""
     _run_spack(spack, ['-e', str(environment), 'config', 'add',
                       'config:install_tree:root:{}'.format(install_tree)], run=run)
@@ -127,11 +115,21 @@ def configure_storage(spack, environment, install_tree, buildcache=None,
         if password:
             arguments += ['--oci-password-variable', password]
         _run_spack(spack, arguments + ['rad-bat', buildcache], run=run)
+    for index, upstream in enumerate(upstreams):
+        _run_spack(spack, ['-e', str(environment), 'config', 'add',
+                          'upstreams:rad_bat_{}:install_tree:{}'.format(index, upstream)], run=run)
+    for index, url in enumerate(read_buildcaches):
+        _run_spack(spack, ['-e', str(environment), 'mirror', 'add', '--scope',
+                          'env:{}'.format(environment), '--type', 'binary', '--unsigned',
+                          'rad-bat-read-{}'.format(index), url], run=run)
     _run_spack(spack, ['-e', str(environment), 'python',
                       str(Path(__file__).with_name('spack_helpers.py')), 'disable-autopush'], run=run)
 
 
-def publish(spack, environment, only='dependencies', specs=(), run=None):
-    """Publish after the calling workflow has confirmed installation success."""
-    _run_spack(spack, ['-e', str(environment), 'buildcache', 'push', '--only', only,
-                      '--unsigned', 'rad-bat'] + list(specs), run=run)
+def publish(spack, environment, only=None, run=None):
+    """Let Spack select packages and skip existing entries after workflow success."""
+    arguments = ['-e', str(environment), 'buildcache', 'push', '--unsigned',
+                 '--allow-missing', '--update-index']
+    if only:
+        arguments += ['--only', only]
+    _run_spack(spack, arguments + ['rad-bat'], run=run)

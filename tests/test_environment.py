@@ -1,4 +1,4 @@
-"""Regression checks for publication, retry identity, and allocation boundaries."""
+"""Regression checks for publication, workspace reuse, and allocation boundaries."""
 
 import contextlib
 import io
@@ -56,7 +56,7 @@ class EnvironmentTests(unittest.TestCase):
         if 'push' in argv and self.upload_failure:
             raise subprocess.CalledProcessError(1, argv)
 
-    def launch(self, launcher, attempt, deadline):
+    def launch(self, launcher, attempt, deadline, env=None):
         self.calls.append(['workers'])
         worker = attempt / 'workers/0'
         worker.mkdir(parents=True)
@@ -78,7 +78,10 @@ class EnvironmentTests(unittest.TestCase):
         push = next(i for i, c in enumerate(self.calls) if 'push' in c)
         self.assertLess(workers, verify)
         self.assertLess(verify, push)
-        self.assertIn('/installed-hash', self.calls[push])
+        self.assertIn('--allow-missing', self.calls[push])
+        self.assertIn('--update-index', self.calls[push])
+        self.assertNotIn('/installed-hash', self.calls[push])
+        self.assertNotIn('--only', self.calls[push])
         self.assertNotIn('--force', self.calls[push])
 
     def test_failed_workers_keep_progress_and_never_publish(self):
@@ -96,15 +99,6 @@ class EnvironmentTests(unittest.TestCase):
             self.assertEqual(environment.run_environment(self.args), 1)
         self.assertFalse(any('push' in c for c in self.calls))
 
-    def test_changed_symlinked_machine_config_invalidates_preparation(self):
-        machine = self.root / 'machine'
-        machine.mkdir()
-        (machine / 'packages.yaml').write_text('packages: {}')
-        (self.source / 'machine').symlink_to(machine, target_is_directory=True)
-        first = environment.input_identity(self.args)
-        (machine / 'packages.yaml').write_text('packages: {all: {target: [zen3]}}')
-        self.assertNotEqual(environment.input_identity(self.args), first)
-
     def test_failed_publication_retries_without_reconcretizing(self):
         self.upload_failure = True
         self.assertEqual(environment.run_environment(self.args), 1)
@@ -120,18 +114,35 @@ class EnvironmentTests(unittest.TestCase):
         self.assertEqual(environment.run_environment(self.args), 0)
         self.assertFalse(any('push' in c for c in self.calls))
 
-    def test_configuration_change_creates_new_concrete_state(self):
+    def test_retry_uses_snapshot_even_if_source_changes(self):
         self.assertEqual(environment.run_environment(self.args), 0)
+        snapshot = Path(self.args.work_dir) / 'environment/spack.yaml'
+        original = snapshot.read_bytes()
         (self.source / 'spack.yaml').write_text('spack: {specs: [different]}\n')
         self.assertEqual(self.retry(), 0)
-        self.assertTrue(any('concretize' in c for c in self.calls))
-        self.assertEqual(len(list((self.root / 'work/environments').iterdir())), 2)
+        self.assertFalse(any('concretize' in c for c in self.calls))
+        self.assertEqual(snapshot.read_bytes(), original)
 
-    def test_node_count_and_attempt_do_not_change_concrete_identity(self):
-        before = environment.input_identity(self.args)
-        self.args.nodes = 2
-        self.args.output_dir = 'another-attempt'
-        self.assertEqual(environment.input_identity(self.args), before)
+    def test_new_workspace_prepares_a_new_environment(self):
+        self.assertEqual(environment.run_environment(self.args), 0)
+        self.args.work_dir = str(self.root / 'another-job')
+        self.assertEqual(self.retry(), 0)
+        self.assertTrue(any('concretize' in c for c in self.calls))
+        self.assertTrue((Path(self.args.work_dir) / 'environment/spack.lock').exists())
+
+    def test_failed_finalization_restores_signals_without_mutating_environment(self):
+        handlers = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
+        before = dict(os.environ)
+        original = environment.write_json
+        def write(path, value):
+            if 'elapsed_seconds' in value:
+                raise OSError('artifact unavailable')
+            original(path, value)
+        with patch.object(environment, 'write_json', side_effect=write):
+            with self.assertRaisesRegex(OSError, 'artifact unavailable'):
+                environment.run_environment(self.args)
+        self.assertEqual(dict(os.environ), before)
+        self.assertEqual({sig: signal.getsignal(sig) for sig in handlers}, handlers)
 
     def test_empty_verification_failure_prevents_publication(self):
         original = self.command
@@ -154,14 +165,14 @@ class EnvironmentTests(unittest.TestCase):
 class AllocationTests(unittest.TestCase):
     def test_existing_allocations_and_one_node_default(self):
         with patch.dict(os.environ, {}, clear=True):
-            self.assertEqual(allocation.launch_command('local', 1, ['worker']), ['worker'])
+            self.assertEqual(allocation.launcher_prefix('local', 1), [])
             for scheduler in ('flux', 'slurm'):
                 with self.assertRaises(ValueError):
-                    allocation.launch_command(scheduler, 2, ['worker'])
+                    allocation.launcher_prefix(scheduler, 2)
             with self.assertRaises(ValueError):
-                allocation.launch_command('local', 2, ['worker'])
+                allocation.launcher_prefix('local', 2)
         with patch.dict(os.environ, {'SLURM_JOB_ID': '1', 'SLURM_JOB_CPUS_PER_NODE': '8(x2)'}):
-            command = allocation.launch_command('slurm', 2, ['worker'])
+            command = allocation.launcher_prefix('slurm', 2)
         self.assertIn('--cpus-per-task=8', command)
         self.assertIn('--ntasks-per-node=1', command)
         self.assertNotIn('sbatch', command)
@@ -177,7 +188,7 @@ class AllocationTests(unittest.TestCase):
                     kwargs['on_interrupt']()
             with patch.dict(os.environ, {'FLUX_URI': 'local://test'}), patch.object(
                     allocation, 'command', side_effect=command), patch.object(allocation, 'stop_flux') as stop:
-                allocation.launch_workers(allocation.launch_command('flux', 2, ['worker']), root, time.monotonic() + 5)
+                allocation.launch_workers(allocation.launcher_prefix('flux', 2) + ['worker'], root, time.monotonic() + 5)
             stop.assert_called_once_with('f123abc')
 
     def test_worker_caps_cpu_budget_and_starts_its_own_jobserver(self):

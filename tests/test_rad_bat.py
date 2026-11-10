@@ -320,12 +320,10 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn("CI_REGISTRY_USER", mirror_command)
             self.assertIn("--oci-password-variable", mirror_command)
             self.assertIn("CI_JOB_TOKEN", mirror_command)
-            repo_command = next(command for command in commands if "repo" in command)
-            self.assertEqual(
-                repo_command[1:3],
-                ["-e", str(destination.resolve() / ".rad-bat" / "spack-env")],
-            )
-            self.assertEqual(repo_command[3:5], ["repo", "add"])
+            repo_command = next(command for command in commands if "repositories" in command)
+            repo_options = json.loads(repo_command[-1])
+            self.assertEqual(repo_options["environment"], str(destination.resolve() / ".rad-bat/spack-env"))
+            self.assertEqual(repo_options["repos"]["rad_bat_0"], str((root / "local-repo").resolve()))
             self.assertIn("oci://registry.invalid/project", mirror_command)
             self.assertEqual(commands[-1][0], "project-driver")
             self.assertIn(str(destination.resolve()), commands[-1])
@@ -544,12 +542,12 @@ class EnvironmentTests(unittest.TestCase):
                 "rad_bat.cli.run_spack"
             ) as workflow:
                 self.assertEqual(cli.main([]), 0)
-            self.assertEqual(workflow.call_args.args[4], str(root / "persistent"))
-            self.assertEqual(workflow.call_args.args[2], str(root / "work"))
-            self.assertEqual(workflow.call_args.args[5], str(root / "artifacts"))
-            self.assertEqual(workflow.call_args.args[7], "oci://registry.invalid/project")
-            self.assertEqual(workflow.call_args.args[8], "CI_REGISTRY_USER")
-            self.assertEqual(workflow.call_args.args[9], "CI_JOB_TOKEN")
+            self.assertEqual(workflow.call_args.kwargs["install_tree_path"], str(root / "persistent"))
+            self.assertEqual(workflow.call_args.kwargs["work_dir"], str(root / "work"))
+            self.assertEqual(workflow.call_args.kwargs["output_dir_path"], str(root / "artifacts"))
+            self.assertEqual(workflow.call_args.kwargs["buildcache"], "oci://registry.invalid/project")
+            self.assertEqual(workflow.call_args.kwargs["buildcache_username_variable"], "CI_REGISTRY_USER")
+            self.assertEqual(workflow.call_args.kwargs["buildcache_password_variable"], "CI_JOB_TOKEN")
 
 
 if __name__ == "__main__":

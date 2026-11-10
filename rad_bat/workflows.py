@@ -208,20 +208,11 @@ def run_spack(
         _reset_environment(_render_machine_environment(config), environment)
         _prepare_repositories(config, spack, environment, managed_root)
 
-        configure_storage(spack, environment, install_tree, buildcache,
-                          buildcache_username_variable, buildcache_password_variable)
-        for index, upstream in enumerate(upstreams):
-            upstream_path = _resolve_from_root(config.root, upstream)
-            _run_spack(
-                spack,
-                [
-                    "-e",
-                    str(environment),
-                    "config",
-                    "add",
-                    "upstreams:rad_bat_{}:install_tree:{}".format(index, upstream_path),
-                ],
-            )
+        configure_storage(
+            spack, environment, install_tree, buildcache,
+            buildcache_username_variable, buildcache_password_variable,
+            upstreams=[_resolve_from_root(config.root, path) for path in upstreams],
+        )
 
     with logs.sections.section(
         "dependencies", "Concretizing and installing dependencies", collapsed=False
@@ -254,7 +245,7 @@ def run_spack(
                 with logs.sections.section(
                     "buildcache", "Publishing dependencies to buildcache"
                 ):
-                    publish(spack, environment)
+                    publish(spack, environment, only="dependencies")
         generated = _find_generated_host_config(config.root, before)
         output_name = host_config_name or generated.name
         if Path(output_name).name != output_name or not output_name.endswith(".cmake"):

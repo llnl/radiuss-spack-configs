@@ -11,10 +11,11 @@ import shutil
 import stat
 import sys
 import xml.etree.ElementTree as ET
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
-from rad_bat.cli import main as rad_bat
+from rad_bat.environment import EnvironmentOptions, run_environment
 
 MACHINES = ("corona", "dane", "tioga", "tuolumne")
 
@@ -75,12 +76,22 @@ def paths(config):
     store = root / config["environment"] / machine
     for name, default in (("SPACK_TARGET", None), ("CACHE_TARGET", "manual"), ("RSC_PARALLEL_CASE", "pilot")):
         store /= segment(os.environ.get(name, default), name)
-    store /= "nodes-{}".format(config["nodes"])
     pipeline = store / "pipelines" / segment(os.environ["CI_PIPELINE_ID"], "CI_PIPELINE_ID")
-    attempt = pipeline / "attempts" / segment(os.environ["CI_JOB_ID"], "CI_JOB_ID")
+    # GitLab keeps the job name on retries, but assigns a new CI_JOB_ID.
+    job_name = os.environ["CI_JOB_NAME"]
+    if not job_name or job_name in (".", ".."):
+        raise ValueError("CI_JOB_NAME must identify a job")
+    workspace = pipeline / "jobs" / quote(job_name, safe="")
+    attempt = workspace / "attempts" / segment(os.environ["CI_JOB_ID"], "CI_JOB_ID")
     return {"machine": machine, "store": store, "pipeline": pipeline,
-            "attempt": attempt, "temporary": root / "tmp" / os.environ["CI_JOB_ID"],
+            "workspace": workspace, "attempt": attempt, "temporary": root / "tmp" / os.environ["CI_JOB_ID"],
             "results": config["project"] / "parallel-results" / machine / os.environ["CI_JOB_ID"]}
+
+
+def main_storage(config, machine):
+    """Use the same main-generation reuse sources as configure-storage.sh."""
+    root = Path(os.environ.get("SPACK_CI_STORAGE_ROOT", "/usr/workspace/radiuss/rsc-ci"))
+    return root / config["environment"] / machine / os.environ["SPACK_TARGET"] / "main"
 
 
 def run():
@@ -96,21 +107,22 @@ def run():
     for target in (p["attempt"], p["temporary"]):
         for path in [storage] + list(reversed([x for x in target.parents if storage in x.parents])) + [target]:
             ensure_directory(path, group)
-    args = ["env", "--environment", str(config["source"]),
-            "--work-dir", str(p["pipeline"]), "--install-tree", str(p["store"] / "install"),
-            "--output-dir", str(p["attempt"]), "--temp-dir", str(p["temporary"]),
-            "--spack-url", os.environ["MY_SPACK_REPO"], "--spack-commit", os.environ["MY_SPACK_COMMIT"],
-            "--scheduler", os.environ["RSC_SCHEDULER"], "--nodes", str(config["nodes"]),
-            "--packages", str(config["packages"]), "--stop-after", str(config["stop_minutes"] * 60),
-            "--finish-after", str(config["wall_minutes"] * 60 - 30), "--group", group,
-            "--buildcache", (p["store"] / "buildcache").as_uri(), "--push-to-buildcache"]
-    for variable, flag in (("RSC_PARALLEL_JOBS", "--jobs"), ("RSC_PARALLEL_LOCKFILE", "--lockfile")):
-        if os.environ.get(variable):
-            args += [flag, os.environ[variable]]
-    try:
-        return rad_bat(args)
-    finally:
-        collect()
+    options = EnvironmentOptions(
+        environment=str(config["source"]), work_dir=str(p["workspace"]),
+        install_tree=str(p["store"] / "install"), output_dir=str(p["attempt"]),
+        temp_dir=str(p["temporary"]), spack_url=os.environ["MY_SPACK_REPO"],
+        spack_commit=os.environ["MY_SPACK_COMMIT"], scheduler=os.environ["RSC_SCHEDULER"],
+        nodes=config["nodes"], packages=config["packages"],
+        stop_after=config["stop_minutes"] * 60, finish_after=config["wall_minutes"] * 60 - 30,
+        group=group, buildcache=(p["store"] / "buildcache").as_uri(), push_to_buildcache=True,
+        jobs=positive("RSC_PARALLEL_JOBS", "1") if os.environ.get("RSC_PARALLEL_JOBS") else None,
+        lockfile=os.environ.get("RSC_PARALLEL_LOCKFILE"),
+    )
+    main = main_storage(config, p["machine"])
+    if (main / "install/.spack-db/index.json").is_file():
+        options.upstream = [str(main / "install")]
+    options.read_buildcache = [(main / "buildcache").as_uri()]
+    return run_environment(options)
 
 
 def collect():
@@ -147,7 +159,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("check", "run", "collect"))
     try:
-        sys.exit(globals()[parser.parse_args().action]() or 0)
+        actions = {"check": check, "run": run, "collect": collect}
+        sys.exit(actions[parser.parse_args().action]() or 0)
     except Exception as error:
         print("[Error] {}".format(error), file=sys.stderr)
         sys.exit(1)
