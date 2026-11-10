@@ -75,5 +75,3 @@ def command(argv, log, deadline, env=None, honor_stop=True, on_interrupt=None, c
         raise TimeoutError("Interrupted {}".format(argv[0]))
     if code:
         raise subprocess.CalledProcessError(code, argv)
-
-

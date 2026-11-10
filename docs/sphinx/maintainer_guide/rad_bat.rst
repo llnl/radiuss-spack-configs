@@ -112,3 +112,23 @@ For workflow changes, also validate representative consumer jobs in both modes
 on affected CPU and accelerator platforms. Confirm that host-config mode never
 starts Spack, refresh artifacts use the requested stable names, project drivers
 run independently, and buildcache writes remain explicitly opt-in.
+
+Shared environment workflow
+---------------------------
+
+The ``env`` workflow shares pinned-checkout, isolation, storage configuration,
+publication and section-logging helpers with the project workflows. Its prepared
+state is persistent. Package repositories declared in the environment are
+resolved by Spack and frozen to shared paths before installation workers start.
+
+``rad_bat.environment`` owns preparation, installation and success-gated
+publication. ``rad_bat.allocation`` only launches, waits and signals workers in
+an existing allocation; Jacamar owns the allocation lifecycle. Each worker uses
+Spack's prefix locks and its own POSIX jobserver. The workspace lock protects
+coordinator state and is not an install-tree lock. Project locking and project
+retry policy are unchanged pending their separate review.
+
+``rad_bat.spack_helpers`` contains the small helpers that require the pinned
+Spack interpreter. ``rad_bat.report`` only reads saved artifacts and is optional;
+keep it independent of installation and publication decisions. The RADIUSS CI
+adapter maps machine/storage variables to the tool and collects artifacts.

@@ -94,3 +94,13 @@ The project driver owns configure, build, install, test, benchmark, and
 project-specific artifacts. It should also run independently from ``rad-bat``.
 See :doc:`../reference/rad_bat` for the complete command and configuration
 contract, and :doc:`ci` for the maintained-host-configuration CI workflow.
+
+Install a complete environment
+------------------------------
+
+For an existing ``spack.yaml``, use the explicit ``rad-bat env`` workflow.
+It prepares pinned Spack, retains the concrete environment and installations
+across retries, and publishes only after successful installation when requested.
+It defaults to one node and can run native installers on multiple nodes of an
+existing allocation. See :doc:`../reference/rad_bat` for its command line and
+:doc:`../ci_implementation/parallel` for the environment CI pilot.

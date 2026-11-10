@@ -8,8 +8,8 @@ rad-bat reference
 Command line
 ------------
 
-The repository-local entry point supports two subcommands. With no arguments,
-it translates environment variables into one of the same workflows.
+The repository-local entry point supports three subcommands. With no arguments,
+it translates environment variables into one of the two project workflows.
 
 .. code-block:: text
 
@@ -161,3 +161,51 @@ back to Spack.
 ``RAD_BAT_LOG_START_TIME`` and ``RAD_BAT_LOG_DEPTH`` are internal logging
 context propagated to project drivers that use ``rad_bat.logs``. Projects
 should not set them as workflow inputs.
+
+Whole-environment installation
+------------------------------
+
+``env`` is a third, explicit workflow. It accepts a normal Spack environment;
+it does not read ``.rad-bat.json`` or require a project package/command.
+Keep relative configuration includes inside the supplied environment directory
+(symlinks are copied with their contents), or use absolute include paths.
+Use Spack 1.2.2 for the pilot. A direct one-node invocation is:
+
+.. code-block:: bash
+
+   bin/rad-bat env \
+     --environment .gitlab/spack/envs/shared-ci \
+     --spack-url git@github.com:spack/spack.git \
+     --spack-commit 3e19345b6e12f5ff1b874f4059622fc6a1fd804a \
+     --work-dir /usr/workspace/$USER/rad-bat/pilot/work \
+     --install-tree /usr/workspace/$USER/rad-bat/pilot/install \
+     --output-dir /usr/workspace/$USER/rad-bat/pilot/attempt-1 \
+     --temp-dir /usr/workspace/$USER/rad-bat/tmp/attempt-1
+
+Run this on allocated compute resources with the environment's machine variables
+set. The default ``--scheduler local --nodes 1`` runs on the current node.
+``--scheduler slurm`` or ``--scheduler flux`` launches one installer per node
+inside an existing allocation. ``--nodes`` defaults to one; ``--jobs`` caps
+per-node CPUs and ``--packages`` defaults to two concurrent packages per node.
+The tool neither acquires an allocation nor implements dependency scheduling.
+
+``--stop-after`` and ``--finish-after`` are seconds from invocation, defaulting
+to 3300 and 3570. Configure them within the allocation's remaining time, leaving
+time to stop processes and publish after successful installation.
+
+``--buildcache URL`` enables binary reuse; ``--push-to-buildcache`` opts into
+publication only after the whole environment installation succeeds. OCI
+credential-variable flags have the same meaning as in project mode. Publication
+includes installed non-external roots and dependencies. Failed attempts leave
+progress in ``--install-tree`` and publish nothing.
+
+For retries, reuse ``--work-dir`` and ``--install-tree`` and choose a new
+``--output-dir`` and short filesystem ``--temp-dir``. Unchanged inputs reuse the
+concrete lock. Changed input files, revisions or recorded machine settings
+select a new prepared environment. ``--lockfile`` explicitly supplies a previous
+lock, useful for controlled comparisons. ``--group`` sets package installation
+permissions; CI also creates group-writable parent directories.
+
+Timed collapsible sections are built in. Optional dependency reporting is a
+separate read-only command, ``python3 -m rad_bat.report OUTPUT_DIR``. See
+:doc:`../ci_implementation/parallel` for storage details and LC validation.
