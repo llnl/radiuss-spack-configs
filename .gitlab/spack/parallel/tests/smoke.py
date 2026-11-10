@@ -1,132 +1,119 @@
 #!/usr/bin/env python3
-"""Offline native Spack integration check; run with ``spack python``.
+"""Native offline fixtures: partial failure, persistent retry, publication, and concurrency.
 
-Creates only disposable fixture packages and isolated filesystem installations.
-No cluster scheduler or production cache is used.
+Run with Spack 1.2.2's `spack python`. Creates a fresh directory and retains logs.
+No scheduler, production storage or remote repository is used.
 """
-# Copyright (c) 2026, Lawrence Livermore National Security, LLC and
-# RADIUSS project contributors. SPDX-License-Identifier: (MIT)
 
 import argparse
-import importlib.util
+import contextlib
+import json
 import os
 from pathlib import Path
 import subprocess
 import sys
-import time
+import tempfile
 
 import spack.paths
 import spack.environment as ev
 import spack.util.spack_yaml as sy
+from spack.url_buildcache import URLBuildcacheEntry, BuildcacheComponent
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument('--out', required=True, type=Path)
     args = parser.parse_args()
     root = args.out.resolve()
     root.mkdir(parents=True, exist_ok=False)
-    script = Path(__file__).resolve().parents[1] / "build.py"
-    loader = importlib.util.spec_from_file_location("parallel_build", script)
-    build = importlib.util.module_from_spec(loader)
-    loader.loader.exec_module(build)
-    fixture = root / "repos/spack_repo/parallel_fixture"
+    project = Path(__file__).resolve().parents[4]
+    spack_source = Path(spack.paths.prefix)
+    pin = subprocess.check_output(['git', '-C', str(spack_source), 'rev-parse', 'HEAD'], text=True).strip()
+    fixture = root / 'repos/spack_repo/env_fixture'
     fixture.mkdir(parents=True)
-    (fixture / "repo.yaml").write_text("repo:\n  api: v2.1\n")
-    for name in ("parallel_leaf", "parallel_root", "parallel_independent"):
-        package = fixture / "packages" / name
+    (fixture / 'repo.yaml').write_text('repo:\n  api: v2.1\n')
+    marker = root / 'allow-success'
+    for name in ('env_leaf', 'env_root', 'env_independent'):
+        package = fixture / 'packages' / name
         package.mkdir(parents=True)
-        cls = "".join(part.capitalize() for part in name.split("_"))
-        dependency = '\n    depends_on("parallel-leaf", type=("link", "run"))\n' if name == "parallel_root" else ""
-        (package / "package.py").write_text(
-            "from spack_repo.builtin_mock.build_systems.bundle import BundlePackage\n"
-            "from spack.package import version, depends_on\n\n"
-            "class {}(BundlePackage):\n    version('1.0')\n{}".format(cls, dependency)
-        )
-    environment = root / "environment"
-    environment.mkdir()
-    mock = Path(spack.paths.prefix) / "var/spack/test_repos/spack_repo/builtin_mock"
-    data = {"spack": {"repos": {"parallel_fixture": str(fixture), "builtin_mock": str(mock)},
-                      "specs": ["parallel-root", "parallel-independent"], "view": False,
-                      "concretizer": {"reuse": False, "unify": False}}}
-    with (environment / "spack.yaml").open("w") as stream:
-        sy.dump_config(data, stream)
-    build.prepare(argparse.Namespace(environment=str(environment), store=str(root / "store"),
-                                     group=__import__("grp").getgrgid(os.getgid()).gr_name, cpus=2))
-    spack_executable = str(Path(spack.paths.prefix) / "bin/spack")
-    env = os.environ.copy()
-    env.update(SPACK_DISABLE_LOCAL_CONFIG="true", SPACK_USER_CACHE_PATH=str(root / "cache"), TMPDIR=str(root / "tmp"))
-    Path(env["TMPDIR"]).mkdir()
-
-    def run(arguments, log):
-        with (root / log).open("w") as output:
-            subprocess.run([spack_executable, "-e", str(environment)] + arguments, env=env,
-                           stdout=output, stderr=subprocess.STDOUT, timeout=120, check=True)
-
-    run(["concretize", "--fresh"], "concretize.log")
-    run(["python", str(script), "freeze"], "freeze.log")
-    run(["python", str(script), "snapshot", "--out", str(root / "before.json")], "snapshot-before.log")
-    before = build.load_json(root / "before.json")
-    assert len(before["nodes"]) == 3, before
+        cls = ''.join(p.capitalize() for p in name.split('_'))
+        dependency = '    depends_on("env-leaf", type=("link", "run"))\n' if name == 'env_root' else ''
+        failure = ('        if not Path({!r}).exists():\n'
+                   '            raise RuntimeError("intentional smoke failure")\n').format(str(marker)) if name == 'env_root' else ''
+        (package / 'package.py').write_text(
+            'from pathlib import Path\nfrom spack.package import Package, version, depends_on\n\n'
+            'class {}(Package):\n    has_code = False\n    version("1.0")\n{}\n'
+            '    def install(self, spec, prefix):\n{}'
+            '        Path(str(prefix)).mkdir(parents=True, exist_ok=True)\n'
+            '        Path(str(prefix), "installed.txt").write_text("installed")\n'.format(cls, dependency, failure))
+    source = root / 'source'
+    source.mkdir()
+    with (source / 'spack.yaml').open('w') as stream:
+        sy.dump_config({'spack': {'repos': {'env_fixture': str(fixture), 'builtin_mock':
+            str(spack_source / 'var/spack/test_repos/spack_repo/builtin_mock')},
+            'specs': ['env-root', 'env-independent'], 'view': False,
+            'concretizer': {'reuse': False, 'unify': False}}}, stream)
+    # Short filesystem path for multiprocessing Unix sockets.
+    temporary = tempfile.mkdtemp(prefix='rad-bat-smoke-', dir='/private/tmp' if sys.platform == 'darwin' else '/tmp')
+    base = [sys.executable, str(project / 'bin/rad-bat'), 'env', '--environment', str(source),
+            '--work-dir', str(root / 'work'), '--install-tree', str(root / 'install'),
+            '--temp-dir', temporary, '--spack-url', str(spack_source), '--spack-commit', pin,
+            '--buildcache', (root / 'buildcache').as_uri(), '--push-to-buildcache', '--jobs', '2',
+            '--stop-after', '240', '--finish-after', '270']
+    def run(number):
+        with (root / ('attempt-{}.log'.format(number))).open('w') as output:
+            return subprocess.run(base + ['--output-dir', str(root / ('attempt-' + str(number)))],
+                                  stdout=output, stderr=subprocess.STDOUT, timeout=300).returncode
+    assert run(1) != 0, 'Expected intentional installation failure'
+    state = json.loads((root / 'attempt-1/status.json').read_text())
+    concrete_dir = Path(state['environment'])
+    assert (concrete_dir / 'spack.lock').exists(), 'Preparation failed; inspect attempt-1.log'
+    concrete = ev.Environment(concrete_dir)
+    specs = list(concrete.all_specs())
+    cache = (root / 'buildcache').as_uri()
+    def cached(spec):
+        return URLBuildcacheEntry(cache, spec=spec, allow_unsigned=True).exists(
+            [BuildcacheComponent.SPEC, BuildcacheComponent.TARBALL])
+    assert not any(cached(s) for s in specs), 'Failed environment published packages'
+    # Record completed packages before retry; these files must survive unchanged.
+    successes = list((root / 'install').rglob('installed.txt'))
+    assert len(successes) == 2, successes
+    times = {p: p.stat().st_mtime_ns for p in successes}
+    lock = (concrete_dir / 'spack.lock').read_bytes()
+    marker.touch()
+    assert run(2) == 0, 'Retry failed; inspect attempt-2.log'
+    assert (concrete_dir / 'spack.lock').read_bytes() == lock
+    assert all(p.stat().st_mtime_ns == stamp for p, stamp in times.items())
+    assert all(cached(s) for s in specs), 'Successful environment not fully published'
+    assert run(3) == 0, 'Warm retry failed'
+    # Two native installers restoring the same DAG into a fresh shared prefix.
+    # This checks Spack coordination locally; LC placement/cancellation remain separate.
+    restore = root / 'restore'
+    restore.mkdir()
+    with (concrete_dir / 'spack.yaml').open() as stream:
+        manifest = sy.load_config(stream)
+    manifest['spack']['config']['install_tree']['root'] = str(root / 'restored-install')
+    with (restore / 'spack.yaml').open('w') as stream:
+        sy.dump_config(manifest, stream)
+    (restore / 'spack.lock').write_bytes(lock)
+    executable = root / 'work/spack' / pin / 'checkout/bin/spack'
     processes = []
-    outputs = []
-    # Two real installers share the same concrete environment and prefix locks.
-    for rank in range(2):
-        worker_env = dict(env, SPACK_USER_CACHE_PATH=str(root / ("worker-cache-" + str(rank))))
-        output = (root / ("worker-{}.log".format(rank))).open("w")
-        outputs.append(output)
-        processes.append(subprocess.Popen([spack_executable, "-e", str(environment), "install", "--only-concrete", "-j2", "-p2",
-                         "--log-format", "junit", "--log-file", str(root / ("worker-{}.xml".format(rank)))],
-                         env=worker_env, stdout=output, stderr=subprocess.STDOUT))
-    try:
-        for process in processes:
-            assert process.wait(timeout=120) == 0, "Inspect worker logs under {}".format(root)
-    finally:
-        for process in processes:
-            if process.poll() is None:
-                process.terminate()
-        for output in outputs:
-            output.close()
-    run(["python", str(script), "snapshot", "--out", str(root / "after.json")], "snapshot-after.log")
-    after = build.load_json(root / "after.json")
-    assert all(n["installed"] for n in after["nodes"].values()), after
-    # Autopush should already have published each source installation.
-    from spack.url_buildcache import URLBuildcacheEntry, BuildcacheComponent
-    concrete = ev.Environment(environment)
-    for h in after["nodes"]:
-        spec = concrete.specs_by_hash.get(h)
-        if spec is None:
-            spec = next(s for s in concrete.all_specs() if s.dag_hash() == h)
-        entry = URLBuildcacheEntry((root / "store/buildcache").as_uri(), spec=spec, allow_unsigned=True)
-        assert entry.exists([BuildcacheComponent.SPEC, BuildcacheComponent.TARBALL]), h
-    # Reconciliation is a no-op for complete uploads, and native retry reuses them.
-    os.environ.update(env)
-    build.reconcile(spack_executable, str(environment), root / "after.json", root, "after", time.monotonic() + 120)
-    run(["install", "--only-concrete", "-j2", "-p2"], "retry.log")
-    # Simulate missing uploads with an empty destination, retaining the original
-    # buildcache. Reconciliation must publish already-installed packages.
-    with (environment / "spack.yaml").open() as stream:
-        recovered = sy.load_config(stream)
-    mirror = recovered["spack"]["mirrors"]["parallel-pilot"]
-    mirror["url"] = (root / "recovered-buildcache").as_uri()
-    build.write_manifest(environment / "spack.yaml", recovered, sy)
-    build.reconcile(spack_executable, str(environment), root / "after.json", root, "recovered", time.monotonic() + 120)
-    for h in after["nodes"]:
-        spec = next(s for s in concrete.all_specs() if s.dag_hash() == h)
-        entry = URLBuildcacheEntry(mirror["url"], spec=spec, allow_unsigned=True)
-        assert entry.exists([BuildcacheComponent.SPEC, BuildcacheComponent.TARBALL]), h
-    # Restore into a new install tree entirely from binaries; no removal of the
-    # original prefixes or source-build fallback is necessary.
-    recovered["spack"]["config"]["install_tree"]["root"] = str(root / "restored-install")
-    build.write_manifest(environment / "spack.yaml", recovered, sy)
-    run(["install", "--only-concrete", "--use-buildcache", "only", "-j2", "-p2"], "restore.log")
-    run(["python", str(script), "snapshot", "--out", str(root / "restored.json")], "snapshot-restored.log")
-    restored = build.load_json(root / "restored.json")
-    assert all(n["installed"] and n["prefix"].startswith(str(root / "restored-install")) for n in restored["nodes"].values()), restored
-    states = build.classify(before, after, {}, False)
-    (root / "tree.txt").write_text(build.dependency_tree(after["roots"], states))
-    print("Native concurrent installation, autopush, missing-upload recovery, retry and binary restore passed: {}".format(root))
+    with contextlib.ExitStack() as stack:
+        for rank in range(2):
+            output = stack.enter_context((root / ('restore-{}.log'.format(rank))).open('w'))
+            env = dict(os.environ, TMPDIR=temporary, SPACK_USER_CACHE_PATH=str(root / ('restore-cache-' + str(rank))))
+            processes.append(subprocess.Popen([str(executable), '-e', str(restore), 'install', '--only-concrete',
+                '--use-buildcache', 'only', '-j2', '-p2'], env=env, stdout=output, stderr=subprocess.STDOUT))
+        try:
+            assert all(p.wait(timeout=120) == 0 for p in processes), 'Concurrent binary restore failed'
+        finally:
+            for process in processes:
+                if process.poll() is None:
+                    process.terminate()
+                    process.wait(timeout=10)
+    assert len(list((root / 'restored-install').rglob('installed.txt'))) == 3
+    print('Native failure, no premature publication, persistent retry, warm retry and concurrent binary restore passed:', root)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

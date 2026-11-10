@@ -282,7 +282,9 @@ class WorkflowTests(unittest.TestCase):
             output_dir = root / "artifacts"
             with mock.patch.dict(os.environ, {"SYS_TYPE": "test-system"}, clear=False), mock.patch(
                 "rad_bat.workflows._git_checkout", side_effect=fake_checkout
-            ), mock.patch("rad_bat.workflows.run_command", side_effect=fake_command):
+            ), mock.patch("rad_bat.workflows.run_command", side_effect=fake_command), mock.patch(
+                "rad_bat.spack.run_command", side_effect=fake_command
+            ):
                 run_spack(
                     config,
                     "+tools",

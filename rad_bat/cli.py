@@ -63,6 +63,23 @@ def build_parser() -> argparse.ArgumentParser:
     spack.add_argument("--host-config-name")
     _add_common(spack)
 
+    env = subparsers.add_parser("env", help="install a complete persistent Spack environment")
+    for name in ("environment", "work-dir", "install-tree", "output-dir", "temp-dir",
+                 "spack-url", "spack-commit"):
+        env.add_argument("--" + name, required=True)
+    env.add_argument("--scheduler", choices=("local", "slurm", "flux"), default="local")
+    env.add_argument("--nodes", type=_positive_integer, default=1)
+    env.add_argument("--jobs", type=_positive_integer)
+    env.add_argument("--packages", type=_positive_integer, default=2)
+    env.add_argument("--stop-after", type=_positive_integer, default=3300, help="seconds from start")
+    env.add_argument("--finish-after", type=_positive_integer, default=3570, help="seconds from start")
+    env.add_argument("--lockfile")
+    env.add_argument("--group")
+    env.add_argument("--buildcache")
+    env.add_argument("--buildcache-username-variable")
+    env.add_argument("--buildcache-password-variable")
+    env.add_argument("--push-to-buildcache", action="store_true")
+
     return parser
 
 
@@ -204,6 +221,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 0
         parser = build_parser()
         arguments = parser.parse_args(arguments_list)
+        if arguments.mode == "env":
+            from .config import FULL_COMMIT
+            from .environment import run_environment
+            if not FULL_COMMIT.fullmatch(arguments.spack_commit):
+                raise RadBatError("--spack-commit must be a full Git commit")
+            return run_environment(arguments)
         config = load_project_config(Path(arguments.source))
         if arguments.mode == "host-config":
             run_host_config(
