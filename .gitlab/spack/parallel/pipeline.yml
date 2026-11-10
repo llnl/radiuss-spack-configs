@@ -1,0 +1,90 @@
+# Copyright (c) 2026, Lawrence Livermore National Security, LLC and
+# RADIUSS project contributors. SPDX-License-Identifier: (MIT)
+
+variables:
+  MY_SPACK_REPO: https://github.com/spack/spack.git
+  # Spack v1.2.2, including its native jobserver and multi-process installer.
+  MY_SPACK_COMMIT: 3e19345b6e12f5ff1b874f4059622fc6a1fd804a
+  RSC_PARALLEL_STORAGE_ROOT: /usr/workspace/radiuss/rsc-ci-parallel-pilot
+  RSC_PARALLEL_CASE: pilot
+  RSC_PARALLEL_NODES: "2"
+  RSC_PARALLEL_TIME_MINUTES: "60"
+  RSC_PARALLEL_STOP_MINUTES: "55"
+  RSC_PARALLEL_PACKAGES: "2"
+  RSC_DANE_PARALLEL_ALLOC: "--exclusive --reservation=ci --time=${RSC_PARALLEL_TIME_MINUTES} --nodes=${RSC_PARALLEL_NODES}"
+  RSC_TIOGA_PARALLEL_ALLOC: "--queue=pci --exclusive --time-limit=${RSC_PARALLEL_TIME_MINUTES}m --nodes=${RSC_PARALLEL_NODES}"
+  RSC_TUOLUMNE_PARALLEL_ALLOC: "--queue=pci --exclusive --time-limit=${RSC_PARALLEL_TIME_MINUTES}m --nodes=${RSC_PARALLEL_NODES}"
+  # Corona's CI queue must be confirmed. Supply full Flux allocation arguments,
+  # or set ON_CORONA=OFF until its CI queue is known.
+  RSC_CORONA_PARALLEL_ALLOC: ""
+
+parallel-configuration:
+  stage: setup
+  tags: [shell, oslic]
+  script:
+    - python3 .gitlab/spack/parallel/build.py check
+
+.parallel-build:
+  stage: build
+  timeout: 4 hours
+  needs: [parallel-configuration]
+  resource_group: parallel-${MY_ENV_NAME}-${RSC_MACHINE}-${SPACK_TARGET}-${CACHE_TARGET}-${RSC_PARALLEL_CASE}-${RSC_PARALLEL_NODES}
+  script:
+    - python3 .gitlab/spack/parallel/build.py run
+  after_script:
+    # Runs outside the build script too, so hard allocation failures can still
+    # publish the retained logs and an interruption report from the filesystem.
+    - python3 .gitlab/spack/parallel/build.py collect
+  artifacts:
+    when: always
+    paths: [parallel-results/]
+    reports:
+      junit: parallel-results/*/junit.xml
+
+parallel-dane:
+  extends: [.dane-variables, .parallel-build]
+  tags: [batch, dane]
+  variables:
+    RSC_MACHINE: dane
+    RSC_SCHEDULER: slurm
+    SCHEDULER_PARAMETERS: ${RSC_DANE_PARALLEL_ALLOC}
+  rules:
+    - if: '$ON_DANE == "OFF"'
+      when: never
+    - when: on_success
+
+parallel-corona:
+  extends: [.corona-variables, .parallel-build]
+  tags: [batch, corona]
+  variables:
+    RSC_MACHINE: corona
+    RSC_SCHEDULER: flux
+    SCHEDULER_PARAMETERS: ${RSC_CORONA_PARALLEL_ALLOC}
+  rules:
+    - if: '$ON_CORONA == "OFF" || $RSC_CORONA_PARALLEL_ALLOC == null || $RSC_CORONA_PARALLEL_ALLOC == ""'
+      when: never
+    - when: on_success
+
+parallel-tioga:
+  extends: [.tioga-variables, .parallel-build]
+  tags: [batch, tioga]
+  variables:
+    RSC_MACHINE: tioga
+    RSC_SCHEDULER: flux
+    SCHEDULER_PARAMETERS: ${RSC_TIOGA_PARALLEL_ALLOC}
+  rules:
+    - if: '$ON_TIOGA == "OFF"'
+      when: never
+    - when: on_success
+
+parallel-tuolumne:
+  extends: [.tuolumne-variables, .parallel-build]
+  tags: [batch, tuolumne]
+  variables:
+    RSC_MACHINE: tuolumne
+    RSC_SCHEDULER: flux
+    SCHEDULER_PARAMETERS: ${RSC_TUOLUMNE_PARALLEL_ALLOC}
+  rules:
+    - if: '$ON_TUOLUMNE == "OFF"'
+      when: never
+    - when: on_success

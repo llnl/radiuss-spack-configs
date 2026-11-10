@@ -1,4 +1,5 @@
 *.pyc
+parallel-results/
 .rad-bat-work/
 
 # Local documentation builds
