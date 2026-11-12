@@ -1,9 +1,7 @@
 """Persistent whole-environment installs using native Spack parallelism."""
 
-import contextlib
 from dataclasses import dataclass, field
 from typing import Optional
-import fcntl
 import json
 import os
 from pathlib import Path
@@ -17,7 +15,8 @@ from . import allocation, execution, logs
 from .errors import RadBatError
 from .config import FULL_COMMIT
 from .spack import (_git_checkout, _prepare_isolation, _spack_executable,
-                    configure_storage, publish)
+                    create_environment, workspace_lock, configure_storage, publish)
+from .runner import load_modules
 
 HELPER = Path(__file__).with_name('spack_helpers.py')
 
@@ -54,22 +53,8 @@ class EnvironmentOptions:
     read_buildcache: list = field(default_factory=list)
 
 
-@contextlib.contextmanager
-def workspace_lock(work):
-    """Protect preparation of one workspace, not the shared installation tree."""
-    work.mkdir(parents=True, exist_ok=True)
-    with (work / '.rad-bat-env.lock').open('a') as stream:
-        try:
-            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise RadBatError('Environment workspace is already in use: {}'.format(work))
-        try:
-            yield
-        finally:
-            fcntl.flock(stream, fcntl.LOCK_UN)
-
-
 def run_environment(args):
+    load_modules()
     if not FULL_COMMIT.fullmatch(args.spack_commit):
         raise RadBatError('--spack-commit must be a full Git commit')
     for name in ('nodes', 'packages', 'stop_after', 'finish_after', 'jobs'):
@@ -89,25 +74,18 @@ def run_environment(args):
 def prepare_environment(args, work, attempt, run):
     """Prepare once per workspace; later attempts use its concrete snapshot."""
     environment = work / 'environment'
-    checkout = work / 'spack' / args.spack_commit / 'checkout'
+    checkout = work / 'spack'
     _git_checkout(args.spack_url, args.spack_commit, checkout, run=run)
     spack = _spack_executable(checkout)
-    _prepare_isolation(checkout, checkout.parent / 'isolation',
-                       args.spack_commit, run=run)
+    _prepare_isolation(checkout, work / 'isolation', run=run)
     if not (work / 'prepared').exists():
         # A partial preparation can be repeated; workers start only after the prepared marker.
-        source = Path(args.environment).resolve()
-        source = source.parent if source.is_file() else source
-        if not (source / 'spack.yaml').is_file():
-            raise RadBatError('No spack.yaml in {}'.format(source))
-        if environment.exists():
-            shutil.rmtree(environment)
-        shutil.copytree(source, environment, symlinks=False,
-                        ignore=shutil.ignore_patterns('spack.lock', '.spack-env'))
-        bootstrap_scope = work / 'prepare-config'
-        bootstrap_scope.mkdir(exist_ok=True)
-        (bootstrap_scope / 'repos.yaml').write_text('repos:: {}\n')
-        run([spack, '-C', bootstrap_scope, 'python', HELPER, 'prepare', attempt / 'options.json'])
+        source = Path(args.environment).absolute()
+        source = source / 'spack.yaml' if source.is_dir() else source
+        if not source.is_file():
+            raise RadBatError('Environment file not found: {}'.format(source))
+        create_environment(spack, source, environment, run=run)
+        run([spack, 'python', '-m', 'rad_bat.spack_helpers', 'prepare', attempt / 'options.json'])
         configure_storage(spack, environment, str(Path(args.install_tree).resolve()), args.buildcache,
                           args.buildcache_username_variable, args.buildcache_password_variable,
                           upstreams=args.upstream, read_buildcaches=args.read_buildcache, run=run)
@@ -116,10 +94,10 @@ def prepare_environment(args, work, attempt, run):
         with logs.sections.section('concretize', 'Concretize environment'):
             if not args.lockfile:
                 run([spack, '-e', environment, 'concretize', '--fresh'])
-            run([spack, '-e', environment, 'python', HELPER, 'freeze'])
+            run([spack, '-e', environment, 'python', '-m', 'rad_bat.spack_helpers', 'freeze'])
         (work / 'prepared').touch()
     else:
-        logs.info('Reusing concrete environment: {}'.format(environment))
+        logs.info('Resuming concrete environment: {}. Inputs are not refreshed; use a new workspace for changes.'.format(environment))
     return spack
 
 
@@ -136,7 +114,7 @@ def _run(args, work, launcher):
     options = dict(vars(args), environment=str(environment), attempt=str(attempt), temp_dir=str(temporary),
                    source_cache=str(work / 'sources'), bootstrap=str(work / 'bootstrap'),
                    install_tree=str(Path(args.install_tree).resolve()),
-                   spack=str(work / 'spack' / args.spack_commit / 'checkout/bin/spack'),
+                   spack=str(work / 'spack/bin/spack'),
                    stop_epoch=time.time() + args.stop_after)
     write_json(attempt / 'options.json', options)
     state = {'complete': False, 'installed': False, 'published': False, 'error': None,
@@ -148,7 +126,9 @@ def _run(args, work, launcher):
         env.update(SPACK_USER_CACHE_PATH=str(work / 'cache'), TMPDIR=str(temporary),
                    PYTHONPATH=str(HELPER.parent.parent) + os.pathsep + env.get('PYTHONPATH', ''))
         # Enable the user scope prepared by spack isolate.
-        env.pop('SPACK_DISABLE_LOCAL_CONFIG', None)
+        env.pop('SPACK_ENV', None)
+        if base is None:
+            env.pop('SPACK_DISABLE_LOCAL_CONFIG', None)
         return env
 
     def run(argv, cwd=None, env=None):
@@ -161,13 +141,15 @@ def _run(args, work, launcher):
         worker_command = [sys.executable, '-m', 'rad_bat.environment', str(attempt / 'options.json')]
         launcher = launcher + worker_command
         with logs.sections.section('install', 'Install environment on {} node(s)'.format(args.nodes), collapsed=False):
-            allocation.launch_workers(launcher, attempt, stop, env=child_environment())
-            workers = [json.loads(p.read_text()) for p in attempt.glob('workers/*/status.json')]
-            if len(workers) != args.nodes or any(w['returncode'] != 0 for w in workers):
-                raise RadBatError('One or more installation workers did not complete successfully')
-            if len({w['host'] for w in workers}) != args.nodes:
-                raise RadBatError('Expected one installation worker per node')
-            run([spack, '-e', environment, 'python', HELPER, 'verify', attempt / 'installed.json'])
+            if not (work / 'installed').exists():
+                allocation.launch_workers(launcher, attempt, stop, env=child_environment())
+                workers = [json.loads(p.read_text()) for p in attempt.glob('workers/*/status.json')]
+                if len(workers) != args.nodes or any(w['returncode'] != 0 for w in workers):
+                    raise RadBatError('One or more installation workers did not complete successfully')
+                if len({w['host'] for w in workers}) != args.nodes:
+                    raise RadBatError('Expected one installation worker per node')
+            run([spack, '-e', environment, 'python', '-m', 'rad_bat.spack_helpers', 'verify', attempt / 'installed.json'])
+            (work / 'installed').touch()
             state['installed'] = True
             write_json(attempt / 'status.json', state)
         if args.push_to_buildcache:
@@ -205,6 +187,7 @@ def worker(options_path):
     if options['jobs']:
         cpus = min(cpus, options['jobs'])
     env = os.environ.copy()
+    env.pop('SPACK_DISABLE_LOCAL_CONFIG', None)
     env.update(SPACK_USER_CACHE_PATH=str(directory / 'cache'),
                TMPDIR=str(Path(options['temp_dir']) / rank))
     Path(env['TMPDIR']).mkdir(parents=True, exist_ok=True)

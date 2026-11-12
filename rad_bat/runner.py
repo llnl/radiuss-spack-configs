@@ -1,12 +1,47 @@
 """Command expansion and execution."""
 
 import os
+import json
+import shlex
 import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from .errors import RadBatError
 from . import logs
+
+
+def load_modules() -> None:
+    """Apply the documented MODULE_LIST to rad-bat and all its children."""
+    try:
+        modules = shlex.split(os.environ.get('MODULE_LIST', ''))
+    except ValueError as error:
+        raise RadBatError('Invalid quoting in MODULE_LIST: {}'.format(error))
+    if not modules:
+        return
+    script = r'''
+set -e
+if ! type module >/dev/null 2>&1; then
+    for init in /etc/profile.d/modules.sh /etc/profile.d/lmod.sh /usr/share/Modules/init/bash; do
+        if test -f "$init"; then source "$init" >&2; break; fi
+    done
+fi
+python_executable=$1
+shift
+module load "$@" >&2
+exec "$python_executable" -c 'import json, os; print(json.dumps(dict(os.environ)))'
+'''
+    with logs.sections.section('modules', 'Load requested modules'):
+        try:
+            result = subprocess.run(['bash', '-c', script, 'rad-bat-modules', sys.executable] + modules,
+                                    stdout=subprocess.PIPE, text=True, check=True,
+                                    pass_fds=scheduler_pass_fds())
+            updated = json.loads(result.stdout)
+        except (OSError, subprocess.CalledProcessError, ValueError) as error:
+            raise RadBatError('Could not load MODULE_LIST: {}'.format(error))
+        os.environ.clear()
+        os.environ.update(updated)
 
 
 def scheduler_pass_fds(environment: Optional[Dict[str, str]] = None) -> Tuple[int, ...]:

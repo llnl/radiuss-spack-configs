@@ -10,6 +10,7 @@ from . import logs
 from .config import load_project_config
 from .errors import RadBatError
 from .workflows import run_host_config, run_spack
+from .runner import load_modules
 
 
 def _positive_integer(value: str) -> int:
@@ -52,7 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     spack = subparsers.add_parser("spack", help="generate a host-config with native Spack")
     spack.add_argument("--spec", required=True)
     spack.add_argument("--work-dir", required=True)
-    spack.add_argument("--spack-env")
+    spack.add_argument("--spack-env", help="explicit source machine spack.yaml (overrides JSON selection)")
     spack.add_argument("--install-tree")
     spack.add_argument("--output-dir")
     spack.add_argument("--upstream", action="append", default=[])
@@ -64,9 +65,12 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(spack)
 
     env = subparsers.add_parser("env", help="install a complete persistent Spack environment")
-    for name in ("environment", "work-dir", "install-tree", "output-dir", "temp-dir",
-                 "spack-url", "spack-commit"):
+    for name in ("environment", "work-dir", "install-tree", "output-dir", "temp-dir"):
         env.add_argument("--" + name, required=True)
+    for name, variable in (("spack-url", "MY_SPACK_REPO"), ("spack-commit", "MY_SPACK_COMMIT")):
+        value = os.environ.get(variable)
+        env.add_argument("--" + name, default=value, required=not value,
+                         help="defaults to {}".format(variable))
     env.add_argument("--scheduler", choices=("local", "slurm", "flux"), default="local")
     env.add_argument("--nodes", type=_positive_integer, default=1)
     env.add_argument("--jobs", type=_positive_integer)
@@ -219,6 +223,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     arguments_list = list(sys.argv[1:] if argv is None else argv)
     try:
         if not arguments_list:
+            load_modules()
             _run_from_environment_variables()
             return 0
         parser = build_parser()
@@ -228,6 +233,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             options = vars(arguments).copy()
             options.pop('mode')
             return run_environment(EnvironmentOptions(**options))
+        load_modules()
         config = load_project_config(Path(arguments.source))
         if arguments.mode == "host-config":
             run_host_config(

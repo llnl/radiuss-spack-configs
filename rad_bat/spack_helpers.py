@@ -3,6 +3,26 @@
 import argparse
 import json
 from pathlib import Path
+import shutil
+
+
+def check():
+    import spack
+    if spack.spack_version_info[:2] < (1, 2):
+        raise ValueError('rad-bat requires Spack 1.2 or newer; found ' + spack.__version__)
+
+
+def create(source, destination):
+    import spack.environment as ev
+    import spack.config
+
+    # Only incomplete preparation is replaced. A prepared workspace is resumed.
+    if destination == source or destination in source.parents:
+        raise ValueError('The source environment must be outside the managed environment')
+    if destination.exists():
+        shutil.rmtree(destination)
+    with spack.config.override('repos', {}):
+        ev.create_in_dir(destination, init_file=source, with_view=False)
 
 
 def write_manifest(path, data, yaml):
@@ -31,7 +51,7 @@ def repositories(options):
     configured = dict(options['repos'])
     for name, repo in data['spack'].get('repos', {}).items():
         configured.setdefault(name, repo)
-    data['spack']['repos'] = configured
+    override(data['spack'], 'repos', configured)
     write_manifest(manifest, data, sy)
 
 
@@ -47,12 +67,6 @@ def prepare(options):
     config['include'] = [x for x in config.get('include', []) if x != 'ci.yaml']
     config.pop('ci', None)
     config['view'] = False
-    override(config, 'repos', config.get('repos', {}))
-    if not config['repos']:
-        raise ValueError('Supply pinned package repositories in spack.yaml')
-    for name, repo in config['repos'].items():
-        if isinstance(repo, dict) and 'git' in repo and not repo.get('commit'):
-            raise ValueError('Pin package repository {} by commit'.format(name))
     cfg = config.setdefault('config', {})
     override(cfg, 'build_stage', ['$user_cache_path/stage'])
     cfg['test_stage'] = '$user_cache_path/test'
@@ -87,11 +101,15 @@ def disable_autopush():
 def freeze():
     import spack.environment as ev
     import spack.repo
+    import spack.config
     import spack.util.spack_yaml as sy
 
     manifest = Path(ev.active_environment().path) / 'spack.yaml'
     with manifest.open() as stream:
         data = sy.load_config(stream)
+    for name, repo in spack.config.get('repos', {}).items():
+        if isinstance(repo, dict) and 'git' in repo and not repo.get('commit'):
+            raise ValueError('Pin package repository {} by commit'.format(name))
     override(data['spack'], 'repos', {r.namespace: r.root for r in spack.repo.PATH.repos})
     write_manifest(manifest, data, sy)
 
@@ -120,13 +138,21 @@ def installed():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     actions = parser.add_subparsers(dest='action', required=True)
+    actions.add_parser('check')
+    creation = actions.add_parser('create')
+    creation.add_argument('source', type=Path)
+    creation.add_argument('destination', type=Path)
     actions.add_parser('prepare').add_argument('path', type=Path)
     actions.add_parser('repositories').add_argument('options', type=json.loads)
     actions.add_parser('verify').add_argument('path', type=Path)
     actions.add_parser('freeze')
     actions.add_parser('disable-autopush')
     args = parser.parse_args()
-    if args.action == 'prepare':
+    if args.action == 'check':
+        check()
+    elif args.action == 'create':
+        create(args.source, args.destination)
+    elif args.action == 'prepare':
         prepare(json.loads(args.path.read_text()))
     elif args.action == 'repositories':
         repositories(args.options)

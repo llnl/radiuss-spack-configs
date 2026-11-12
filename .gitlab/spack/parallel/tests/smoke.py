@@ -20,6 +20,61 @@ import spack.util.spack_yaml as sy
 from spack.url_buildcache import URLBuildcacheEntry, BuildcacheComponent
 
 
+def project_retry(root, project, spack_source, pin):
+    """A real project host-config survives a failed push and is reused verbatim."""
+    source = root / 'project'
+    source.mkdir()
+    hostile = source / 'personal-config'
+    hostile.mkdir()
+    (hostile / 'config.yaml').write_text('config: [invalid personal configuration]\n')
+    child_env = dict(os.environ, SPACK_USER_CONFIG_PATH=str(hostile),
+                     SPACK_ENV=str(source / 'nonexistent-personal-environment'))
+    repo = source / 'repo/spack_repo/project_fixture'
+    package = repo / 'packages/host_project'
+    package.mkdir(parents=True)
+    (repo / 'repo.yaml').write_text('repo:\n  api: v2.1\n')
+    (package / 'package.py').write_text(
+        'from pathlib import Path\nfrom spack.package import Package, version, depends_on\n'
+        'class HostProject(Package):\n    has_code = False\n    version("develop")\n'
+        '    depends_on("env-leaf", type=("link", "run"))\n'
+        '    def install(self, spec, prefix):\n'
+        '        Path(str(prefix)).mkdir(parents=True, exist_ok=True)\n'
+        '        Path(str(prefix), "installed.txt").write_text("installed")\n'
+        '        Path({!r}).write_text("# host-config generated\\n")\n'.format(str(source / 'generated.cmake')))
+    machine = source / 'machine'
+    machine.mkdir()
+    (machine / 'spack.yaml').write_text('spack: {specs: [], concretizer: {reuse: false}}\n')
+    (source / '.rad-bat.json').write_text(json.dumps({
+        'schema_version': 1,
+        'project': {'package': 'host-project', 'command': [sys.executable, '-c',
+            'from pathlib import Path; Path("driver-ran").touch()']},
+        'spack': {'url': str(spack_source), 'commit': pin, 'environment': 'machine/spack.yaml',
+                  'until': 'install', 'repositories': [
+                      {'path': str(repo)}, {'path': str(root / 'repos/spack_repo/env_fixture')},
+                      {'path': str(spack_source / 'var/spack/test_repos/spack_repo/builtin_mock')}]}}))
+    cache = root / 'project-cache'
+    cache.write_text('block publication: cache destination is a file')
+    command = [sys.executable, str(project / 'bin/rad-bat'), 'spack', '--source', str(source),
+               '--spec', '', '--work-dir', str(source / 'work'), '--output-dir', str(source / 'artifacts'),
+               '--buildcache', cache.as_uri(), '--push-to-buildcache', '--jobs', '2']
+    def run(attempt):
+        with (root / ('project-{}.log'.format(attempt))).open('w') as output:
+            return subprocess.run(command, env=child_env, stdout=output, stderr=subprocess.STDOUT, timeout=180).returncode
+    assert run(1) != 0, 'Expected cache publication failure'
+    artifact = source / 'artifacts/generated.cmake'
+    assert artifact.is_file(), 'Host-config must be exported before publication; inspect project-1.log'
+    assert not (source / 'driver-ran').exists()
+    stamp = (source / 'generated.cmake').stat().st_mtime_ns
+    lock = source / 'work/.rad-bat/spack-env/spack.lock'
+    before = lock.read_bytes()
+    cache.unlink()
+    artifact.unlink()  # Simulate artifact cleanup between CI attempts.
+    assert run(2) == 0, 'Project retry failed; inspect project-2.log'
+    assert artifact.is_file() and (source / 'driver-ran').exists()
+    assert lock.read_bytes() == before
+    assert (source / 'generated.cmake').stat().st_mtime_ns == stamp
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', required=True, type=Path)
@@ -49,7 +104,7 @@ def main():
     source = root / 'source'
     source.mkdir()
     with (source / 'spack.yaml').open('w') as stream:
-        sy.dump_config({'spack': {'repos': {'env_fixture': str(fixture), 'builtin_mock':
+        sy.dump_config({'spack': {'repos:': {'env_fixture': str(fixture), 'builtin_mock':
             str(spack_source / 'var/spack/test_repos/spack_repo/builtin_mock')},
             'specs': ['env-root', 'env-independent'], 'view': False,
             'concretizer': {'reuse': False, 'unify': False}}}, stream)
@@ -108,7 +163,7 @@ def main():
     with (restore / 'spack.yaml').open('w') as stream:
         sy.dump_config(manifest, stream)
     (restore / 'spack.lock').write_bytes(lock)
-    executable = root / 'work/spack' / pin / 'checkout/bin/spack'
+    executable = root / 'work/spack/bin/spack'
     processes = []
     with contextlib.ExitStack() as stack:
         for rank in range(2):
@@ -124,7 +179,8 @@ def main():
                     process.terminate()
                     process.wait(timeout=10)
     assert len(list((root / 'restored-install').rglob('installed.txt'))) == 3
-    print('Native failure, no premature publication, persistent retry, warm retry, upstream reuse and concurrent binary restore passed:', root)
+    project_retry(root, project, spack_source, pin)
+    print('Project publication retry and native failure, no premature publication, persistent retry, warm retry, upstream reuse and concurrent binary restore passed:', root)
 
 
 if __name__ == '__main__':

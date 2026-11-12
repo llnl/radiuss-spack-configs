@@ -13,7 +13,7 @@ from . import logs
 from .runner import expand_command, run_command
 from .spack import (
     _resolve_from_root, _git_checkout, _spack_executable, _prepare_isolation,
-    _prepare_repositories, _run_spack, configure_storage, publish,
+    _prepare_repositories, _run_spack, create_environment, workspace_lock, configure_storage, publish,
 )
 
 
@@ -80,30 +80,19 @@ def run_host_config(
 
 def _render_machine_environment(config: ProjectConfig) -> Path:
     assert config.spack is not None
-    sys_type = os.environ.get("SYS_TYPE", "")
     value = config.spack.environment
-    if "{sys_type}" in value:
-        if not sys_type:
-            raise RadBatError(
-                "SYS_TYPE is required because spack.environment contains {sys_type}"
-            )
-        value = value.replace("{sys_type}", sys_type)
+    for placeholder, variable in (("sys_type", "SYS_TYPE"), ("machine", "LCSCHEDCLUSTER")):
+        token = "{" + placeholder + "}"
+        if token in value:
+            if not os.environ.get(variable):
+                raise RadBatError(variable + " is required; alternatively pass --spack-env")
+            value = value.replace(token, os.environ[variable])
     if "{" in value or "}" in value:
         raise RadBatError("unsupported placeholder in spack.environment: {}".format(value))
     path = _resolve_from_root(config.root, value)
     if not path.is_file():
         raise RadBatError("Spack machine environment does not exist: {}".format(path))
     return path
-
-
-def _reset_environment(template: Path, destination: Path) -> None:
-    if destination.exists():
-        if not (destination / "spack.yaml").is_file():
-            raise RadBatError(
-                "refusing to replace a non-Spack environment: {}".format(destination)
-            )
-        shutil.rmtree(str(destination))
-    shutil.copytree(str(template.parent), str(destination))
 
 
 @contextmanager
@@ -182,11 +171,7 @@ def run_spack(
     managed_root = resolved_work_dir / ".rad-bat"
     checkout = managed_root / "spack"
     isolation = managed_root / "isolation"
-    environment = (
-        _resolve_from_root(config.root, spack_env)
-        if spack_env
-        else managed_root / "spack-env"
-    )
+    environment = managed_root / "spack-env"
     install_tree = (
         _resolve_from_root(config.root, install_tree_path)
         if install_tree_path
@@ -199,63 +184,68 @@ def run_spack(
     )
     install_tree.mkdir(parents=True, exist_ok=True)
     host_configs.mkdir(parents=True, exist_ok=True)
-    project_spec = _project_spec(config, spec)
+    with workspace_lock(managed_root):
+        with logs.sections.section("spack_setup", "Prepare or resume Spack environment"):
+            _git_checkout(config.spack.url, config.spack.commit, checkout)
+            spack = _spack_executable(checkout)
+            _prepare_isolation(checkout, isolation, run=run_command)
+            prepared = managed_root / "prepared"
+            if not prepared.exists():
+                template = (_resolve_from_root(config.root, spack_env) if spack_env
+                            else _render_machine_environment(config))
+                if not template.is_file():
+                    raise RadBatError("Spack machine environment does not exist: {}".format(template))
+                create_environment(spack, template, environment)
+                _prepare_repositories(config, spack, environment, managed_root)
+                configure_storage(
+                    spack, environment, install_tree, buildcache,
+                    buildcache_username_variable, buildcache_password_variable,
+                    upstreams=[_resolve_from_root(config.root, path) for path in upstreams],
+                )
+                _run_spack(spack, ["-e", str(environment), "add", _project_spec(config, spec)])
+                _run_spack(spack, ["-e", str(environment), "develop", "--no-clone", "--path",
+                                  str(config.root), "{}@develop".format(config.package)])
+                with logs.sections.section("concretize", "Concretize project dependencies"):
+                    _run_spack(spack, ["-e", str(environment), "concretize"])
+                    _run_spack(spack, ["-e", str(environment), "python", "-m",
+                                      "rad_bat.spack_helpers", "freeze"])
+                prepared.touch()
+            else:
+                logs.info("Resuming concrete environment: {}. Inputs are not refreshed; "
+                          "use a new workspace for changes.".format(environment))
 
-    with logs.sections.section("spack_setup", "Preparing Spack environment"):
-        _git_checkout(config.spack.url, config.spack.commit, checkout)
-        spack = _spack_executable(checkout)
-        _prepare_isolation(checkout, isolation, config.spack.commit, run=run_command)
-        _reset_environment(_render_machine_environment(config), environment)
-        _prepare_repositories(config, spack, environment, managed_root)
+        # The durable copy, rather than an old file in the source checkout, marks
+        # completion. Artifact collection directories can disappear between CI attempts.
+        completed = managed_root / "host-config"
+        with logs.sections.section("dependencies", "Prepare project host-config", collapsed=False):
+            if completed.exists():
+                retained = Path(completed.read_text().strip())
+                if not retained.is_file():
+                    raise RadBatError("Retained host-config is missing: {}".format(retained))
+            else:
+                before = _snapshot_host_configs(config.root)
+                with _exclusive_install_tree(install_tree):
+                    _run_spack(spack, ["-e", str(environment), "install", "--only-concrete",
+                                      "--until", config.spack.until, "--jobs", str(jobs)],
+                               cwd=config.root)
+                generated = _find_generated_host_config(config.root, before)
+                output_name = host_config_name or generated.name
+                if Path(output_name).name != output_name or not output_name.endswith(".cmake"):
+                    raise RadBatError("--host-config-name must be a .cmake filename without a directory")
+                retained = managed_root / "host-configs" / output_name
+                retained.parent.mkdir(exist_ok=True)
+                shutil.copy2(str(generated), str(retained))
+                pending = completed.with_suffix('.tmp')
+                pending.write_text(str(retained) + "\n")
+                pending.replace(completed)
+            exported = host_configs / retained.name
+            if exported != retained:
+                shutil.copy2(str(retained), str(exported))
+            logs.info("Retained generated host-config: {}".format(retained))
 
-        configure_storage(
-            spack, environment, install_tree, buildcache,
-            buildcache_username_variable, buildcache_password_variable,
-            upstreams=[_resolve_from_root(config.root, path) for path in upstreams],
-        )
-
-    with logs.sections.section(
-        "dependencies", "Concretizing and installing dependencies", collapsed=False
-    ):
-        # RADIUSS CI jobs traditionally provide the variants, compiler, and
-        # dependency constraints only.  Give Spack the project root explicitly;
-        # anonymous specs cannot be added to an environment.
-        _run_spack(spack, ["-e", str(environment), "add", project_spec])
-        _run_spack(
-            spack,
-            [
-                "-e",
-                str(environment),
-                "develop",
-                "--no-clone",
-                "--path",
-                str(config.root),
-                "{}@develop".format(config.package),
-            ],
-        )
-        _run_spack(spack, ["-e", str(environment), "concretize"])
-        before = _snapshot_host_configs(config.root)
-        with _exclusive_install_tree(install_tree):
-            _run_spack(
-                spack,
-                ["-e", str(environment), "install", "--until", "initconfig", "--jobs", str(jobs)],
-                cwd=config.root,
-            )
-            if push_to_buildcache:
-                with logs.sections.section(
-                    "buildcache", "Publishing dependencies to buildcache"
-                ):
-                    publish(spack, environment, only="dependencies")
-        generated = _find_generated_host_config(config.root, before)
-        output_name = host_config_name or generated.name
-        if Path(output_name).name != output_name or not output_name.endswith(".cmake"):
-            raise RadBatError("--host-config-name must be a .cmake filename without a directory")
-        retained = host_configs / output_name
-        shutil.copy2(str(generated), str(retained))
-        logs.info("Retained generated host-config: {}".format(retained))
-
-    with logs.sections.section("project", "Project build and test", collapsed=False):
-        run_command(
-            _project_command(config, command, retained, resolved_work_dir, jobs),
-            cwd=config.root,
-        )
+        if push_to_buildcache:
+            with logs.sections.section("buildcache", "Publish completed dependencies"):
+                publish(spack, environment, only="dependencies")
+        with logs.sections.section("project", "Project build and test", collapsed=False):
+            run_command(_project_command(config, command, exported, resolved_work_dir, jobs),
+                        cwd=config.root)

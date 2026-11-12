@@ -95,6 +95,28 @@ class AdapterTests(unittest.TestCase):
         run.assert_not_called()
         self.assertIn('interrupted', (paths['results'] / 'junit.xml').read_text())
 
+    @unittest.skipUnless(sy, 'Run with spack python for native environment creation')
+    def test_native_creation_preserves_machine_toolchains_and_includes(self):
+        repo = SCRIPT.parents[3]
+        for system in ('toss_4_x86_64_ib', 'toss_4_x86_64_ib_cray'):
+            for packages in (repo / system).glob('*/packages.yaml'):
+                source = packages.with_name('spack.yaml')
+                destination = self.root / packages.parent.name
+                spack_helpers.create(source, destination)
+                with packages.open() as stream:
+                    expected = sy.load_config(stream)
+                with (destination / 'packages.yaml').open() as stream:
+                    actual = sy.load_config(stream)
+                self.assertEqual(actual, expected)
+                self.assertTrue((destination / 'config.yaml').is_file())
+                self.assertFalse((destination / 'packages.yaml').is_symlink())
+        for name in ('shared-ci', 'cached-cmake'):
+            destination = self.root / name
+            with patch.dict(os.environ, {'LCSCHEDCLUSTER': 'dane'}):
+                spack_helpers.create(repo / '.gitlab/spack/envs' / name / 'spack.yaml', destination)
+                self.assertTrue((destination / 'dane/packages.yaml').is_file())
+                self.assertTrue((destination / 'dane/config.yaml').is_file())
+
     @unittest.skipUnless(sy, 'Run with spack python for schema validation')
     def test_pipeline_uses_jacamar_and_defaults_to_one_node(self):
         with (SCRIPT.parent / 'pipeline.yml').open() as stream:
@@ -197,7 +219,8 @@ class AdapterTests(unittest.TestCase):
         (destination / 'spack.yaml').write_text('spack: {repos: {}}\n')
         repo = SimpleNamespace(namespace='builtin', root='/persistent/spack_repo/builtin')
         with patch('spack.environment.active_environment', return_value=SimpleNamespace(path=str(destination))), patch(
-                'spack.repo.PATH', SimpleNamespace(repos=[repo])):
+                'spack.repo.PATH', SimpleNamespace(repos=[repo])), patch(
+                'spack.config.get', return_value={'builtin': repo.root}):
             spack_helpers.freeze()
         with (destination / 'spack.yaml').open() as stream:
             data = sy.load_config(stream)

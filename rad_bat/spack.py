@@ -2,6 +2,8 @@
 
 import json
 import os
+import fcntl
+from contextlib import contextmanager
 from pathlib import Path
 from typing import List, Optional
 
@@ -28,15 +30,16 @@ def _git_checkout(url: str, commit: str, destination: Path, run=None) -> None:
         run(["git", "init", str(destination)])
         run(["git", "-C", str(destination), "remote", "add", "origin", url])
     else:
-        run(["git", "-C", str(destination), "remote", "set-url", "origin", url])
         current = capture_command(["git", "-C", str(destination), "rev-parse", "HEAD"])
         if current.lower() == commit.lower():
             return
+        if current:
+            raise RadBatError("Spack checkout has a different commit; use a new workspace")
     run(
         ["git", "-C", str(destination), "fetch", "--depth", "1", "origin", commit]
     )
     run(
-        ["git", "-C", str(destination), "checkout", "--force", "--detach", "FETCH_HEAD"]
+        ["git", "-C", str(destination), "checkout", "--detach", "FETCH_HEAD"]
     )
 
 
@@ -47,31 +50,55 @@ def _spack_executable(checkout: Path) -> Path:
     return executable
 
 
-def _run_spack(executable: Path, arguments: List[str], cwd: Optional[Path] = None, run=None) -> None:
+def _run_spack(executable: Path, arguments: List[str], cwd: Optional[Path] = None, run=None,
+               initial=False) -> None:
     run = run or run_command
     environment = os.environ.copy()
     # ``spack isolate`` makes its replacement user scope conditional on this
     # variable being absent. Do not let a caller's shell disable that scope.
     environment.pop("SPACK_DISABLE_LOCAL_CONFIG", None)
+    environment.pop("SPACK_ENV", None)
+    environment['PYTHONPATH'] = str(Path(__file__).resolve().parent.parent)
+    environment['SPACK_USER_CACHE_PATH'] = str(executable.parent.parent.parent / 'cache')
+    if initial:
+        environment['SPACK_DISABLE_LOCAL_CONFIG'] = '1'
     run([str(executable)] + arguments, cwd=cwd, env=environment)
 
 
-def _prepare_isolation(checkout: Path, isolation: Path, commit: str, run=None) -> None:
-    state_path = checkout.parent / "isolation-state.json"
-    expected = {"commit": commit, "path": str(isolation)}
-    current = None
-    try:
-        current = json.loads(state_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        pass
-    if current == expected and (checkout / "etc" / "spack" / "isolate").is_dir():
+def _prepare_isolation(checkout: Path, isolation: Path, run=None) -> None:
+    _run_spack(_spack_executable(checkout),
+               ['python', '-m', 'rad_bat.spack_helpers', 'check'], run=run, initial=True)
+    ready = checkout.parent / 'isolated'
+    if ready.is_file():
         return
     _run_spack(
         _spack_executable(checkout),
         ["isolate", "--overwrite", "--path", str(isolation)],
         run=run,
+        initial=True,
     )
-    state_path.write_text(json.dumps(expected, sort_keys=True) + "\n", encoding="utf-8")
+    ready.touch()
+
+
+@contextmanager
+def workspace_lock(work):
+    """One coordinator per scenario; Spack workers use their native prefix locks."""
+    work.mkdir(parents=True, exist_ok=True)
+    with (work / '.rad-bat.lock').open('a') as stream:
+        try:
+            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RadBatError('Workspace is already in use: {}'.format(work))
+        try:
+            yield
+        finally:
+            fcntl.flock(stream, fcntl.LOCK_UN)
+
+
+def create_environment(spack, source, destination, run=None):
+    """Spack owns environment creation, include copying and path relocation."""
+    _run_spack(spack, ['python', '-m', 'rad_bat.spack_helpers', 'create',
+                      str(source), str(destination)], run=run)
 
 
 def _prepare_repositories(
@@ -98,7 +125,7 @@ def _prepare_repositories(
             repositories[name] = entry
     if repositories:
         options = json.dumps({"environment": str(environment), "repos": repositories})
-        _run_spack(spack, ["python", str(Path(__file__).with_name("spack_helpers.py")),
+        _run_spack(spack, ["python", '-m', 'rad_bat.spack_helpers',
                           "repositories", options])
 
 
@@ -123,7 +150,7 @@ def configure_storage(spack, environment, install_tree, buildcache=None,
                           'env:{}'.format(environment), '--type', 'binary', '--unsigned',
                           'rad-bat-read-{}'.format(index), url], run=run)
     _run_spack(spack, ['-e', str(environment), 'python',
-                      str(Path(__file__).with_name('spack_helpers.py')), 'disable-autopush'], run=run)
+                      '-m', 'rad_bat.spack_helpers', 'disable-autopush'], run=run)
 
 
 def publish(spack, environment, only=None, run=None):

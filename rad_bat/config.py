@@ -35,6 +35,7 @@ class SpackConfig:
     environment: str
     repositories: List[RepositoryConfig]
     spec_fragments: List[SpecFragmentConfig]
+    until: str = 'initconfig'
 
 
 @dataclass(frozen=True)
@@ -135,7 +136,7 @@ def _validate_spack(value: Any) -> SpackConfig:
     spack = _object(value, "spack")
     _only_keys(
         spack,
-        {"url", "commit", "environment", "repositories", "spec_fragments"},
+        {"url", "commit", "environment", "repositories", "spec_fragments", "until"},
         "spack",
     )
     url = _string(spack.get("url"), "spack.url")
@@ -157,7 +158,8 @@ def _validate_spack(value: Any) -> SpackConfig:
         _validate_spec_fragment(fragment, index)
         for index, fragment in enumerate(spec_fragments_value)
     ]
-    return SpackConfig(url, commit.lower(), environment, repositories, spec_fragments)
+    return SpackConfig(url, commit.lower(), environment, repositories, spec_fragments,
+                       _string(spack.get('until', 'initconfig'), 'spack.until'))
 
 
 def load_project_config(source: Path) -> ProjectConfig:

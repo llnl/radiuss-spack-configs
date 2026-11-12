@@ -1,1 +1,8 @@
-../spack.yaml
+spack:
+  include:
+    - config.yaml
+    - packages.yaml
+  concretizer:
+    reuse: false
+    unify: false
+  view: false

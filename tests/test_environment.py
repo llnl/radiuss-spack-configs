@@ -5,6 +5,7 @@ import io
 import json
 import os
 import signal
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -49,6 +50,10 @@ class EnvironmentTests(unittest.TestCase):
     def command(self, argv, *args, **kwargs):
         argv = list(map(str, argv))
         self.calls.append(argv)
+        if 'create' in argv:
+            target = Path(argv[-1])
+            target.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(argv[-2], target / 'spack.yaml')
         if 'concretize' in argv:
             (Path(argv[2]) / 'spack.lock').write_text('concrete-identity')
         if 'verify' in argv:
@@ -92,6 +97,8 @@ class EnvironmentTests(unittest.TestCase):
         self.worker_failure = False
         self.assertEqual(self.retry(), 0)
         self.assertFalse(any('concretize' in c for c in self.calls))
+
+        self.assertIn(['workers'], self.calls)
         self.assertTrue(any('push' in c for c in self.calls))
 
     def test_interrupted_workers_never_publish(self):
@@ -108,6 +115,7 @@ class EnvironmentTests(unittest.TestCase):
         self.upload_failure = False
         self.assertEqual(self.retry(), 0)
         self.assertFalse(any('concretize' in c for c in self.calls))
+        self.assertNotIn(['workers'], self.calls)
 
     def test_publication_is_opt_in(self):
         self.args.push_to_buildcache = False
