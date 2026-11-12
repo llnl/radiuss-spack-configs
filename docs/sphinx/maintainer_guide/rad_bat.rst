@@ -10,6 +10,7 @@ standard-library Python package and ``bin/rad-bat`` entry point. Projects can
 run the tool from their pinned submodule without another submodule or package
 installation. RADIUSS Shared CI is not a distribution source for the tool.
 
+The maintained contract and its rationale are in :doc:`design_choices`.
 Keep the generic and project-specific boundaries explicit. ``rad-bat`` owns:
 
 * CLI and ``.rad-bat.json`` validation;
@@ -32,28 +33,29 @@ Native Spack lifecycle
 
 Spack mode never selects an executable from ``PATH``. It checks out the URL and
 full commit recorded by the project, runs ``spack isolate`` in the managed
-checkout, and copies the selected RADIUSS machine environment. It writes the
+checkout, and uses native environment creation with the selected RADIUSS machine configuration. It writes the
 local paths and commit-pinned remote repositories from ``.rad-bat.json`` into
 that intermediate environment in configured precedence order. Spack owns the
 package-repository clones and checkouts, including monorepo subdirectory
-selection. Developers continue to edit their pins in the JSON. It then:
+selection. Developers continue to edit their pins in the JSON. On first preparation it then:
 
 #. adds the explicit ``<package>@develop`` root and project spec fragment;
 #. runs ``spack develop --no-clone`` against the source checkout;
 #. concretizes the environment;
-#. installs through ``initconfig``; and
+#. installs through ``spack.until`` (default ``initconfig``); and
 #. requires exactly one new or changed top-level ``.cmake`` file.
 
-``spack isolate`` modifies its checkout, so the checkout belongs in disposable
-tool-managed work rather than the persistent dependency prefix. Updating a
+``spack isolate`` modifies its checkout, which belongs to the persistent
+scenario workspace. A retry reuses the concrete environment and skips
+installation when the retained host-config already records success. Updating a
 Spack pin must not remove installations still referenced by maintained host
 configurations.
 
 Storage and dependency reuse
 ----------------------------
 
-Consumer projects choose their storage roots. Keep disposable work, durable
-install trees, and generated host-config artifacts distinct. Use immutable
+Consumer projects choose their storage roots. Keep persistent scenario work, durable
+install trees, and exported host-config artifacts distinct. Use immutable
 install-tree generations so committed host configurations retain valid
 absolute paths. Shared refresh jobs serialize writes with
 ``.rad-bat-write.lock`` and use a ``0002`` umask; host-config-mode jobs only
@@ -69,22 +71,20 @@ and reproducers do not expose credentials.
 Shared CI boundary
 ------------------
 
-Do not add a rad-bat-specific GitLab component. Machine components continue to
-treat ``job_cmd`` as opaque. They initialize and load ``MODULE_LIST`` in the
-submitting shell before ``srun`` or ``flux batch`` and print a reproducer with
-the equivalent setup. The project supplies ``bin/rad-bat`` as ``job_cmd``,
-places the submodule root on ``PYTHONPATH`` when required by scheduler spooling,
-and owns specs, resource flags, storage locations, and the project driver.
+Machine components treat ``job_cmd`` as opaque and supply the allocation.
+rad-bat loads the documented ``MODULE_LIST`` before dependencies or the project
+command; all children inherit that environment. A component may also need
+modules before launching its scheduler command, but rad-bat does not depend on
+that for its own module loading. The project owns specs, resource flags,
+storage locations and its driver.
 
 The resulting responsibility split is:
 
 .. code-block:: text
 
-   RADIUSS Shared CI:
-       load modules -> print reproducer -> launch opaque job_cmd
-
-   rad-bat:
-       select workflow -> prepare or reuse dependencies -> invoke project driver
+   CI / Jacamar: allocate resources -> launch job_cmd -> await completion
+   rad-bat: load modules -> prepare/resume dependencies -> invoke project driver
+   project driver: configure -> build -> install -> test
 
 Scheduler descriptors and MPI tests
 -----------------------------------
@@ -131,10 +131,10 @@ resolved by Spack and frozen to shared paths before installation workers start.
 publication. ``rad_bat.allocation`` only launches, waits and signals workers in
 an existing allocation; Jacamar owns the allocation lifecycle. Each worker uses
 Spack's prefix locks and its own POSIX jobserver. The workspace lock protects
-coordinator state and is not an install-tree lock. Project locking and project
-retry policy are unchanged pending their separate review.
+coordinator state and is not an install-tree lock. The project install-tree lock remains pending its separate review. Project
+retries now preserve the concrete environment and retained host-config.
 
-``rad_bat.spack_helpers`` contains the small helpers that require the pinned
-Spack interpreter. ``rad_bat.report`` only reads saved artifacts and is optional;
+``rad_bat.spack_helpers`` runs under the pinned Spack interpreter with
+``spack python -m``, using native environment creation and configuration APIs. ``rad_bat.report`` only reads saved artifacts and is optional;
 keep it independent of installation and publication decisions. The RADIUSS CI
 adapter maps machine/storage variables to the tool and collects artifacts.

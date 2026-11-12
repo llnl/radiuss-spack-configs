@@ -81,6 +81,7 @@ terminating their attach process alone could leave them running.
 Persistence and cache publication
 ---------------------------------
 
+The :doc:`../maintainer_guide/design_choices` page defines the shared contract.
 All initial storage is on the filesystem: Spack, package repositories,
 bootstrap assets, archives, stages, logs and installed packages. Temporary
 socket paths use the shorter ``<storage-root>/tmp/<CI_JOB_ID>/<rank>``.
@@ -91,13 +92,14 @@ socket paths use the shorter ``<storage-root>/tmp/<CI_JOB_ID>/<rank>``.
      install/                     # incomplete and completed installations
      buildcache/                  # publication after environment success
      pipelines/<CI_PIPELINE_ID>/jobs/<CI_JOB_NAME>/
-       spack/<commit>/checkout/
-       spack/<commit>/isolation/
+       spack/
+       isolation/
        sources/
        bootstrap/
        cache/                     # package repository checkouts
        environment/               # prepared manifest and concrete lock
        prepared                   # successful preparation marker
+       installed                  # successful verification, skip workers on retry
        attempts/<CI_JOB_ID>/workers/<rank>/
 
 The job name identifies its workspace within a pipeline. Unsafe characters are
@@ -134,7 +136,7 @@ persistent install tree, stages, bootstrap/cache paths and group permissions.
 Specs, compiler settings, concretizer policy and other configuration includes
 are retained. Source manifests are never modified.
 
-Publication failures fail the job. A retry reuses the completed installation
+Publication failures fail the job. A retry skips installation workers, verifies the retained installations
 and retries publication, skipping complete cache entries. A multi-package push
 can fail partway through; publication is success-gated, not a mirror transaction.
 

@@ -26,7 +26,7 @@ Choose a mode
 
 .. graphviz:: /figures/rad-bat-modes.dot
    :align: center
-   :caption: Both rad-bat modes produce the host configuration consumed by the same project driver.
+   :caption: Both project modes supply the host configuration consumed by the same project driver.
    :alt: Inputs select either an existing host configuration or pinned native Spack. Native Spack generates a host configuration. Both paths invoke the project build and test driver.
 
 ``host-config`` is the fast path. It validates the selected file and runs the
@@ -39,7 +39,7 @@ project command without invoking Spack:
      --work-dir /dev/shm/rad-bat-source-build \
      --jobs 16
 
-``spack`` is the explicit dependency-refresh path. The spec contains the
+``spack`` prepares a new dependency scenario or resumes the existing one. The spec contains the
 project variants, compiler, and dependency constraints without the project
 name; ``rad-bat`` adds the configured project package at ``@develop``:
 
@@ -47,32 +47,38 @@ name; ``rad-bat`` adds the configured project package at ``@develop``:
 
    scripts/radiuss-spack-configs/bin/rad-bat spack \
      --spec "+openmp %gcc@13.3.1" \
-     --work-dir /dev/shm/rad-bat-refresh \
+     --work-dir /usr/workspace/$USER/my-project/scenarios/dane-gcc/work \
      --install-tree /usr/workspace/$USER/my-project/deps/generation-1 \
      --output-dir generated-host-configs \
      --host-config-name dane-gcc.cmake \
      --jobs 16
 
 This mode checks out the recorded Spack and remote package-repository commits,
-copies the selected machine environment, registers repositories, concretizes,
+creates an environment from the selected machine configuration, registers repositories, concretizes,
 and installs through the recipe's ``initconfig`` phase. It retains the one
 newly generated top-level ``.cmake`` file before running the project command.
 
 Manage work and dependencies
 ----------------------------
 
-Treat ``--work-dir`` as disposable. It contains the managed Spack checkout,
-isolation state, and generated environment. ``--install-tree`` is the durable
-dependency prefix; CI should put it in project-owned persistent storage and
-use an immutable generation while committed host configurations still refer to
-it. ``--output-dir`` is a separate artifact directory for generated host
-configurations.
+Keep ``--work-dir`` on persistent storage for Spack mode. It contains the
+managed Spack checkout, isolated configuration, concrete environment and the
+retained host-config. Repeating the command resumes that scenario; it does
+not update inputs or reconcretize. Use a new workspace for configuration changes.
+``--install-tree`` contains dependencies and must remain available while a
+host-config references them. ``--output-dir`` receives artifact copies,
+including before a publication attempt and again on retries.
 
-Multiple refresh jobs may share an install tree. ``rad-bat`` serializes writes
+For CI, name the workspace using the pipeline ID and job name, not the changing
+job ID. See :doc:`../maintainer_guide/design_choices` for concrete examples.
+
+Multiple dependency preparation jobs may share an install tree. ``rad-bat`` serializes writes
 with a filesystem lock and a group-writable umask. Optional ``--upstream`` and
 ``--buildcache`` inputs provide dependency reuse. Reading a buildcache never
 publishes to it; publication requires ``--push-to-buildcache`` and includes
-dependencies only.
+dependencies only. Publication follows successful host-config retention and
+precedes the project command. Failed publication keeps the installations and
+host-config; retrying skips installation and attempts publication again.
 
 Run the project driver
 ----------------------

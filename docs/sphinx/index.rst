@@ -38,6 +38,7 @@ Start with :doc:`developer_workflow/index`. Infrastructure maintainers should us
 
    maintainer_guide/index
    maintainer_guide/rad_bat
+   maintainer_guide/design_choices
    ci_implementation/index
    maintainer_guide/track_spack_packages
    maintainer_guide/baselines

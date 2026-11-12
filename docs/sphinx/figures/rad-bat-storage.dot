@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: MIT
+digraph storage {
+  rankdir=TB;
+  workspace [label="Scenario workspace\nSpack + concrete environment\nretained host-config", shape=folder, fillcolor="#e3edf7"];
+  artifact [label="Attempt artifact\nhost-config copy", shape=parallelogram, fillcolor="#dcf2f4"];
+  installs [label="Persistent installation tree\n+ explicitly configured upstreams", shape=parallelogram, fillcolor="#dcf2f4"];
+  cache [label="Binary cache\ntransferable packages", shape=parallelogram, fillcolor="#dcf2f4"];
+  project [label="Project build / tests", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  workspace -> artifact [label="export before publication"];
+  workspace -> installs [label="Spack installs"];
+  artifact -> project [label="project command input"];
+  project -> installs [label="uses stable paths", style=dashed, arrowhead=empty];
+  installs -> cache [label="publish after success"];
+}

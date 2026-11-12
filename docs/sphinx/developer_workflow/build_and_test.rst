@@ -11,7 +11,7 @@ Build and test
 .. graphviz:: /figures/developer-loop.dot
    :align: center
    :caption: Prepare once for a specification, then repeat the source build and test loop.
-   :alt: rad-bat uses a maintained host configuration or runs Spack to concretize a spec, install dependencies, and generate one. CMake and CTest build and test the project. Source edits repeat builds; recipe, dependency, or toolchain changes require a rad-bat refresh.
+   :alt: rad-bat uses a maintained host configuration or runs Spack to concretize a spec, install dependencies, and generate one. CMake and CTest build and test the project. Source edits repeat builds; recipe, dependency, or toolchain changes require a new dependency scenario.
 
 ``rad-bat`` selects the maintained or newly generated host configuration and
 passes it to the project build/test driver. To run the same steps manually,

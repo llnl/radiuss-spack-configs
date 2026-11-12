@@ -98,13 +98,18 @@ configuration is an error and never triggers Spack implicitly.
 Refresh maintained host configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Start a pipeline explicitly with ``RAD_BAT_MODE=spack`` to refresh the full
+Start a new pipeline explicitly with ``RAD_BAT_MODE=spack`` to regenerate the full
 maintained set. The existing jobs concretize their specs, install dependencies
 into a project-owned immutable generation, and publish generated host
 configurations as GitLab artifacts. Download and review the artifacts, then
 commit them to the project's ``host-configs/`` directory through the normal
 GitHub pull-request workflow. The GitLab mirror is not modified by the
 pipeline, and generated files never overwrite tracked files automatically.
+
+Give each pipeline/job-name pair a persistent workspace. Retries reuse its
+concrete environment and completed dependencies. A new workspace allows new
+inputs, but does not force rebuilding packages available from upstreams or
+binary caches.
 
 ``rad-bat`` does not infer staleness or compare fingerprints. Such a check
 would require concretization merely to decide whether concretization can be
@@ -120,8 +125,9 @@ opaque ``job_cmd``. When executing from the submodule, set ``PYTHONPATH`` to
 the submodule root because Flux may copy the launcher into its spool directory
 while the separate ``rad_bat`` package remains in the project checkout.
 
-The Shared CI machine component initializes and loads ``MODULE_LIST`` before
-launching its Slurm or Flux command, and the reproducer must do the same.
+rad-bat loads ``MODULE_LIST`` before preparing dependencies or invoking the
+project command. A Shared CI component may also load modules needed by its
+scheduler launcher. The reproducer must preserve the variable and allocation.
 Project CI retains ownership of resource flags, specs, storage paths, and the
 project driver. See :doc:`../maintainer_guide/rad_bat` for this boundary and
 scheduler descriptor handling.

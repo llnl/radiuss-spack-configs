@@ -82,6 +82,6 @@ The former ``user_guide`` and ``developer_guide`` directories were renamed to
 not redirected; update links in consuming projects to use the new paths.
 Existing section anchors remain available at the new URLs.
 
-Record design rationale, dated audit evidence, validation results, and
-engineering follow-ups in the pull request description. Keep the published
-guide focused on the maintained workflows and reference material.
+Keep maintained design contracts and their rationale in
+``maintainer_guide/design_choices``. Record dated audit evidence, validation
+results and engineering follow-ups in the pull request description.

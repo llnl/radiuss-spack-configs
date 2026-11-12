@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: MIT
+digraph success {
+  rankdir=TB;
+  deps [label="Project dependency installation", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  hc [label="Validate and retain host-config\nExport attempt artifact", shape=parallelogram, fillcolor="#dcf2f4"];
+  workers [label="Environment installers\nAll workers succeed + verify installs", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  publish [label="Optional Spack buildcache push\nFailure: keep installs and artifact", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  driver [label="Project command\nCMake / tests", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  done [label="Environment job complete", shape=parallelogram, fillcolor="#dcf2f4"];
+  deps -> hc;
+  hc -> publish;
+  workers -> publish;
+  publish -> driver [label="project workflow"];
+  publish -> done [label="environment workflow"];
+}

@@ -28,10 +28,19 @@ it translates environment variables into one of the two project workflows.
 paths in the command and configuration resolve from that root. Arguments after
 ``--`` replace ``project.command`` for that run.
 
+See :doc:`../maintainer_guide/design_choices` for the design contract and
+storage/retry examples. Spack 1.2 or newer is required. Missing machine
+configuration is an error; automatic discovery is outside the build workflow.
+
 The direct ``spack`` command defaults its install tree and output directory
 below the work directory. Environment-driven CI execution requires an explicit
 persistent install tree. ``--host-config-name`` must be a filename ending in
 ``.cmake`` without a directory component.
+
+A project workspace is resumed, never automatically refreshed. Once prepared,
+its concrete environment is reused. A retained host-config lets publication
+retries skip installation and restores any missing artifact copy. Use a new
+workspace for changed inputs; keep installations referenced by host-configs.
 
 Project configuration
 ---------------------
@@ -58,7 +67,7 @@ values; a real configuration records full tested commits.
      "spack": {
        "url": "https://github.com/spack/spack.git",
        "commit": "0123456789abcdef0123456789abcdef01234567",
-       "environment": "scripts/radiuss-spack-configs/{sys_type}/spack.yaml",
+       "environment": "scripts/radiuss-spack-configs/{sys_type}/{machine}/spack.yaml",
        "spec_fragments": [
          {
            "if_env": "DEPENDENCY_REFERENCE",
@@ -92,13 +101,17 @@ values; a real configuration records full tested commits.
    * - ``spack.url`` and ``spack.commit``
      - Managed Spack checkout and full 40-character commit.
    * - ``spack.environment``
-     - Machine environment path. ``{sys_type}`` is replaced with ``SYS_TYPE``.
+     - Source machine environment path. ``{sys_type}`` comes from ``SYS_TYPE``
+       and ``{machine}`` from ``LCSCHEDCLUSTER``. ``--spack-env`` overrides it.
    * - ``spack.repositories``
      - Ordered local repositories, or remote repositories pinned by URL and
        full commit. ``subdirectory`` selects a repository inside a remote
        monorepo. Earlier entries have higher Spack precedence. rad-bat writes
        these entries into the copied Spack environment; Spack performs the
        repository cloning and commit checkout. The JSON remains authoritative.
+   * - ``spack.until``
+     - Stopping phase, default ``initconfig``. A generated host-config is
+       required even when selecting another phase.
    * - ``spack.spec_fragments``
      - Optional environment-controlled dependency constraints.
 
@@ -118,6 +131,9 @@ Environment-driven execution
 
    * - Variable
      - Purpose
+   * - ``MODULE_LIST``
+     - Shell-quoted module names, loaded before Spack or the project command.
+       Workers inherit the resulting environment. A load failure is an error.
    * - ``RAD_BAT_MODE``
      - Optional explicit ``host-config`` or ``spack`` selection.
    * - ``RAD_BAT_SOURCE_DIR``
@@ -126,7 +142,7 @@ Environment-driven execution
    * - ``RAD_BAT_JOBS``
      - Positive build parallelism; defaults to the detected CPU count.
    * - ``RAD_BAT_WORK_DIR``
-     - Disposable work. Required in Spack mode and optional in host-config
+     - Persistent scenario workspace in Spack mode; required there. Optional in host-config
        mode, where the default is ``.rad-bat-work`` below the project root.
    * - ``RAD_BAT_SPEC`` or ``SPEC``
      - Project spec fragment used by Spack mode.
@@ -136,7 +152,7 @@ Environment-driven execution
      - Stable ``.cmake`` filename. Host-config mode combines it with
        ``RAD_BAT_HOST_CONFIG_DIR``; Spack mode uses it for the retained output.
    * - ``RAD_BAT_SPACK_ENV``
-     - Optional generated Spack environment location.
+     - Explicit source machine ``spack.yaml``; overrides the JSON path template.
    * - ``RAD_BAT_INSTALL_TREE``
      - Persistent dependency installation tree required by environment-driven
        Spack mode.
@@ -169,9 +185,10 @@ Whole-environment installation
 
 ``env`` is a third, explicit workflow. It accepts a normal Spack environment;
 it does not read ``.rad-bat.json`` or require a project package/command.
-Keep relative configuration includes inside the supplied environment directory
-(symlinks are copied with their contents), or use absolute include paths.
-Use Spack 1.2.2 for the pilot. A direct one-node invocation is:
+Keep relative configuration includes inside the supplied environment directory,
+or use absolute include paths. Spack copies relative file includes; any external
+paths or directory symlink targets must remain available throughout the scenario.
+Spack 1.2 or newer is required; the pilot is validated with 1.2.2. A direct one-node invocation is:
 
 .. code-block:: bash
 
@@ -183,6 +200,10 @@ Use Spack 1.2.2 for the pilot. A direct one-node invocation is:
      --install-tree /usr/workspace/$USER/rad-bat/pilot/install \
      --output-dir /usr/workspace/$USER/rad-bat/pilot/attempt-1 \
      --temp-dir /usr/workspace/$USER/rad-bat/tmp/attempt-1
+
+``--spack-url`` and ``--spack-commit`` may be omitted when
+``MY_SPACK_REPO`` and ``MY_SPACK_COMMIT`` are set. Explicit arguments take
+precedence. The project JSON is never read in this workflow.
 
 Run this on allocated compute resources with the environment's machine variables
 set. The default ``--scheduler local --nodes 1`` runs on the current node.
