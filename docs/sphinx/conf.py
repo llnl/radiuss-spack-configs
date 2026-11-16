@@ -17,12 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'Radiuss Spack Configs'
-copyright = u'2022-2025, Adrien M. Bernede'
-author = u'Adrien M. Bernede'
+project = 'RADIUSS Spack Configs'
+copyright = '2019-2026, Lawrence Livermore National Security, LLC and RADIUSS Project Developers'
+author = 'RADIUSS Project Developers'
 
 # The full version, including alpha/beta/rc tags
-release = u'1.0'
+# The guide tracks the selected documentation revision, not a fixed release.
+release = ''
 
 
 # -- General configuration ---------------------------------------------------
@@ -31,11 +32,14 @@ release = u'1.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-'sphinx.ext.autosectionlabel'
+'sphinx.ext.autosectionlabel',
+'sphinx.ext.graphviz'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+autosectionlabel_prefix_document = True
+
+templates_path = []
 
 # The suffix(es) of source filenames.
 source_suffix = '.rst'
@@ -81,7 +85,7 @@ else:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -115,7 +119,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'RADIUSS_Spack_Configs.tex', u'RADIUSS Spack Configs Documentation',
-     u'Adrien M. Bernede', 'manual'),
+     author, 'manual'),
 ]
 
 
@@ -136,6 +140,18 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'RADIUSS_Spack_Configs', u'RADIUSS Spack Configs Documentation',
-     author, 'Adrien M. Bernede', 'Rapid Application Development via an Institutional Universal Software Stack',
+     author, 'RADIUSS Spack Configs', 'Rapid Application Development via an Institutional Universal Software Stack',
      'Miscellaneous'),
+]
+
+# Shared rendering style for all standalone DOT sources.
+# Shapes and per-concept fills are documented in docs/README.rst.
+graphviz_output_format = 'svg'
+graphviz_dot_args = [
+    '-Gbgcolor=transparent', '-Gpad=0.15', '-Gnodesep=0.3', '-Granksep=0.4',
+    '-Gfontname=Helvetica', '-Gfontsize=12',
+    '-Nfontname=Helvetica', '-Nfontsize=12', '-Ncolor=#334155',
+    '-Nstyle=filled', '-Nfillcolor=white', '-Nmargin=0.12,0.08',
+    '-Efontname=Helvetica', '-Efontsize=10', '-Ecolor=#475569',
+    '-Earrowsize=0.7',
 ]

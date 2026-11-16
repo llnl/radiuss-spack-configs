@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+digraph components {
+  rankdir=TB;
+  project [label="RAJA\nproject source and tests", shape=folder, fillcolor="#e3edf7"];
+  settings [label=".uberenv_config.json\nselect tools and recipes", shape=tab, fillcolor="#eee8f5"];
+  spack [label="spack/spack\npackage manager", shape=folder, fillcolor="#e3edf7"];
+  recipes [label="spack/spack-packages\nupstream recipes", shape=folder, fillcolor="#e3edf7"];
+  recipe [label="package.py\nversions and build behavior", shape=note, fillcolor="#fff2cf"];
+  configs [label="RADIUSS Spack Configs\nmachines and shared specs", shape=folder, fillcolor="#e3edf7"];
+  machine [label="packages.yaml / spack.yaml\nselected machine configuration", shape=tab, fillcolor="#eee8f5"];
+  uberenv [label="Uberenv\nprepare dependencies", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  host [label="Generated host configuration\n.cmake", shape=parallelogram, fillcolor="#dcf2f4"];
+  project -> settings [style=dashed, arrowhead=empty, label="owns"];
+  settings -> uberenv [style=dashed, arrowhead=empty, label="configures"];
+  recipes -> recipe [style=dashed, arrowhead=empty, label="provides"];
+  configs -> machine [style=dashed, arrowhead=empty, label="provides"];
+  spack -> uberenv [style=dashed, arrowhead=empty, label="concretizes and installs"];
+  recipe -> uberenv [style=dashed, arrowhead=empty, label="recipe input"];
+  machine -> uberenv [style=dashed, arrowhead=empty, label="machine input"];
+  uberenv -> host [label="runs initconfig"];
+}

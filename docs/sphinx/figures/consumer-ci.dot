@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+digraph consumer_ci {
+  rankdir=TB;
+  shared [label="RADIUSS Spack Configs\nshared SPEC jobs", shape=folder, fillcolor="#e3edf7"];
+  project [label="RAJA\nvariables, jobs, build/test driver", shape=folder, fillcolor="#e3edf7"];
+  ci [label="RADIUSS Shared CI\nmachine components", shape=folder, fillcolor="#e3edf7"];
+  pin [label="component revision", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4"];
+  compose [label="Compose child pipeline\nshared jobs then project overrides", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  pipeline [label="Generated child pipeline", shape=parallelogram, fillcolor="#dcf2f4"];
+  execute [label="Execute project driver\nSPEC → prepare → build → test", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
+  shared -> compose [style=dashed, arrowhead=empty, label="shared jobs"];
+  project -> compose [style=dashed, arrowhead=empty, label="project settings"];
+  ci -> pin [style=dashed, arrowhead=empty, label="available versions"];
+  pin -> compose [style=dotted, arrowhead=vee, color="#874e69", label="adopt revision"];
+  compose -> pipeline -> execute;
+}
