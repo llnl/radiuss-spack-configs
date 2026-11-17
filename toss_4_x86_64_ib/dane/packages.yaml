@@ -2,14 +2,6 @@
   all:
     require:
     - 'target=sapphirerapids'
-    - spec: ^blt%intel-oneapi-compilers
-      when: '%intel-oneapi-compilers ^blt'
-    - spec: ^blt%llvm
-      when: '%llvm ^blt'
-    - spec: ^blt%gcc
-      when: '%gcc ^blt'
-    - spec: ^blt%intel-oneapi-compilers-classic
-      when: '%intel-oneapi-compilers-classic ^blt'
     - spec: ^mvapich2
       when: '^mpi'
     providers:
