@@ -486,7 +486,8 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]gcc@13.3.1'
       when: '%fortran'
-    - spec: '%mpi=mvapich2@2.3.7%gcc@=13.3.1'
+    # A second % would bind GCC to the root, not to the MPI dependency.
+    - spec: '%mpi=mvapich2@=2.3.7'
       when: '%mpi'
   sycl-clang-22-gcc-10:
     - spec: '%[virtuals=c]llvm@22.0.0git+clang~flang~lld~lldb'
