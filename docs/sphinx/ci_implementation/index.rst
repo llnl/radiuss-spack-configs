@@ -1,133 +1,136 @@
-
-.. ##
-.. ## Copyright (c) 2022-25, Lawrence Livermore National Security, LLC and
-.. ## other RADIUSS Project Developers. See the top-level COPYRIGHT file for
-.. ## details.
-.. ##
-.. ## SPDX-License-Identifier: (MIT)
-.. ##
+.. Copyright (c) 2026, Lawrence Livermore National Security, LLC and
+.. other RADIUSS Project Developers. See the top-level COPYRIGHT file.
+.. SPDX-License-Identifier: (MIT)
 
 .. _CI Implementation:
 
-#################
-CI Implementation
-#################
+Validation environments and storage
+===================================
 
-In this repository, we configured GitLab CI to generate CI pipelines that can
-build any Spack environment we provide.
+This repository uses `Spack pipelines
+<https://spack.readthedocs.io/en/latest/pipelines.html>`_ to validate Spack
+environments on LC machines. These pipelines are separate from the
+:doc:`consumer build/test workflow <../developer_workflow/ci>`.
 
-We rely on `Spack Pipeline feature <https://spack.readthedocs.io/en/latest/pipelines.html>`_
-to generate the CI pipeline.
+Choose a validation environment
+-------------------------------
 
-Each CI pipeline run corresponds to the build of *one* Spack environment. The
-environment being built is configured by the variable ``MY_ENV_NAME`` in CI
-context. This variable must match a directory in ``.gitlab/spack/envs`` and
-defaults to the value "shared-ci": an environment meant to build several
-RADIUSS projects using the shared Spack specs.
+Each run selects the environment directory under ``.gitlab/spack/envs``
+named by ``MY_ENV_NAME``.
 
-.. note:: The shared Spack specs can be found in each
-   ``gitlab/radiuss-jobs/<machine>.yml`` file. The specs there have been copied
-   to the ``shared-ci/spack.yml`` file. Maintaining coherency between both is
-   important for the quality of our CI.
+.. list-table:: Environment purposes
+   :header-rows: 1
+   :widths: 25 75
 
-The intent of the default configuration is to test that changes in
-radiuss-spack-configs does not affect our projects. However, the CI can be set
-to build other environments, which will allow us to test larger environments on
-a less frequent basis, and to track changes in Spack as well.
+   * - Environment
+     - Purpose
+   * - ``shared-ci``
+     - Validate the RADIUSS shared stack. This is the configured GitLab default.
+   * - ``cached-cmake``
+     - Validate behavior involving CachedCMake packages. The ``cached-cmake``
+       implementation is currently being revised.
+   * - Additional environments
+     - Support other validation goals with their own specifications, recipe
+       revision, Spack version, and machine coverage.
 
-Incidentally, this CI setup will populate a buildcache with pre-built binaries
-of our RADIUSS projects, which could prove useful to developers willing to
-save build time for the selected specs.
+The GitLab project settings define ``MY_ENV_NAME=shared-ci`` by default.
+``.gitlab-ci.yml`` uses ``MY_ENV_NAME`` to select an environment. When the
+variable is empty or unset, the pipeline displays instructions instead of
+building an environment.
 
-Persistent CI storage is written under a ``CACHE_TARGET`` namespace. The
-default branch writes to ``main`` and other branch pipelines write to
-``ref-<commit-ref-slug>``. Each namespace has its own persistent Spack install
-tree and filesystem buildcache under ``SPACK_CI_STORAGE_ROOT``. Non-main
-pipelines also configure the ``main`` install tree as a Spack upstream and the
-``main`` buildcache as a read mirror, so they can reuse existing binaries
-without publishing experimental builds into the default branch namespace.
-A dedicated cleanup job removes stale ``ref-*`` storage targets corresponding
-to branch references already merged into ``main`` or no longer present on the
-remote. The job scans all configured environments under
-``SPACK_CI_STORAGE_ROOT`` and is gated by two explicit variables:
-``MY_ENV_NAME == ""`` and ``RSC_CLEANUP == "ON"``. This makes cleanup opt-in,
-so regular branch pipelines (including ``develop``) do not trigger cleanup by
-default. The intended usage is a scheduled pipeline configured with those
-variables.
+.. important::
 
-By default, ``SPACK_CI_STORAGE_ROOT`` points to the RADIUSS workspace. The
-storage setup configures Spack package permissions with ``read: world``,
-``write: group``, and ``group: SPACK_CI_STORAGE_GROUP`` so install tree
-contents remain writable by the RADIUSS group. It also applies the storage
-group to the persistent cache directories, marks those directories setgid, and
-sets a group-writable umask so buildcache entries and other files written under
-the persistent storage root remain accessible to members of the RADIUSS group.
+   Pushing changes to ``cached-cmake`` still starts the default pipeline.
+   Cancel that pipeline and manually run a pipeline for the same branch or
+   commit with ``MY_ENV_NAME=cached-cmake`` in GitLab's pipeline variables.
+   Confirm the selected environment in the resulting pipeline. Automatic
+   selection based on changed files is a separate engineering follow-up.
 
-The install tree is the fast path used by Spack during installation, while the
-filesystem buildcache gives Spack CI the mirror metadata it needs to prune
-already-built specs during pipeline generation.
+For shared-file changes, validate every affected environment explicitly. The
+``shared-ci`` specifications and ``gitlab/radiuss-jobs/<machine>.yml`` are
+maintained separately; check their consistency when editing either one.
 
-The Spack checkout itself is a third storage layer. It is kept under
-``MY_SPACK_PARENT_DIR`` on ``/dev/shm`` and reused by all jobs for the same
-machine and pipeline, so the CI does not clone Spack separately for every build
-job. In contrast, the Spack user cache is computed at job runtime and includes
-the GitLab job id, so each job gets its own staging, test, and misc cache
-locations under ``/dev/shm``. This keeps parallel Spack jobs isolated while the
-checkout and persistent binary/install storage remain shared where useful.
+.. _ci-file-structure:
+.. _main-ci-pipeline:
+.. _machine-pipelines:
+.. _scripts:
+.. _spack-pipeline-feature:
 
-
-=================
 CI file structure
-=================
+-----------------
 
-Main CI pipeline
-================
+``.gitlab-ci.yml`` defines stages, storage namespace selection, and conditional
+includes. Each environment supplies:
 
-The root file for CI implementation with GitLab is ``.gitlab-ci.yml``. In this
-file, we only define general variables and the list of stages. Then we include
-the files that will actually describe our pipelines.
+* ``spack.yaml`` with specifications, configuration includes, and the
+  ``spack.repos.builtin.commit`` recipe pin.
+* ``pipeline.yml`` with ``MY_SPACK_REPO``, ``MY_SPACK_BRANCH`` or
+  ``MY_SPACK_COMMIT``, and includes for the machines to validate.
 
-The additional CI files are found under the ``.gitlab`` directory. There, the
-``variables.yml`` file sets variable for the different LC machines we run CI on,
-namely ``corona``, ``dane``, ``matrix``, ``tioga`` and ``tuolumne``. The
-pipelines for each machine is described in the corresponding ``<machine>.yml``
-file.
+``.gitlab/variables.yml`` provides machine variables. Machine pipeline files
+allocate resources, generate a Spack pipeline, and trigger its build jobs.
+``.gitlab/spack/ci.yaml`` configures generation. General scripts live in
+``.gitlab/scripts``; Spack-specific scripts live in ``.gitlab/spack``.
 
-``spack/envs/<MY_ENV_NAME>/pipeline.yml`` must be defined for each environment
-and provide the Spack repo and commit to fetch (``MY_SPACK_REPO``,
-``MY_SPACK_COMMIT``), and include the pipeline files for each machine to run
-on. I.e., for each environment, we can chose a specific Spack version and the
-list of machines.
+When adding an environment, review its configuration links, generation scripts,
+and artifacts as well as its YAML. The current generation script still copies
+some configuration inputs from ``shared-ci``; do not assume a new environment
+is fully independent simply because it has a new directory.
 
-Machine pipelines
-=================
+Storage lifetimes and reuse
+---------------------------
 
-In each ``<machine>.yml`` file, we describe a pipeline that will allocate
-resource for the CI on the machine, and then generate and trigger a CI pipeline
-to build each required spec as a separate job.
+.. graphviz:: /figures/repository-storage.dot
+   :align: center
+   :caption: Repository CI separates temporary work from persistent installations and buildcaches.
+   :alt: The selected environment uses a checkout shared per machine and pipeline and a cache isolated per job. Default-branch jobs write main storage; branch jobs write their own namespace and can read main binaries.
 
-Pipeline generation is handle by spack (see `Spack documentation`_ for more
-about the CI feature) and is configured in ``.gitlab/spack/ci.yaml`` and
-other files in that directory.
+Persistent storage is rooted at:
 
-Scripts
-=======
+.. code-block:: text
 
-Scripts used by the main CI configuration are located in ``.gitlab/scripts``
-while scripts used for Spack specific operations (typically occurring when
-generating the sub-pipelines or while running them) are located in
-``.gitlab/spack``.
+   ${SPACK_CI_STORAGE_ROOT}/
+     ${MY_ENV_NAME}/
+       ${LCSCHEDCLUSTER}/
+         ${SPACK_TARGET}/
+           ${CACHE_TARGET}/
+             install/
+             buildcache/
 
-.. note:: We ensure to separate the scripts files from the CI configuration.
-   This helps with testing, keeping the CI files readable, and reproducing the
-   CI process outside of CI context.
+``SPACK_CI_STORAGE_ROOT`` defaults to ``/usr/workspace/radiuss/rsc-ci``.
+The default branch uses ``CACHE_TARGET=main``; other branch pipelines normally
+use ``ref-${CI_COMMIT_REF_SLUG}``. An explicit ``CACHE_TARGET`` overrides that
+selection, and the fallback for other contexts is ``manual``.
 
-Spack Pipeline Feature
-======================
+Spack can reuse packages already present in the install tree. The filesystem
+buildcache provides binaries and mirror metadata that Spack CI uses to prune
+already-built specifications during pipeline generation. A non-main pipeline
+writes to the selected storage namespace and reads the ``main`` buildcache.
+The pipeline also uses the ``main`` install tree as an upstream when the tree
+contains a Spack database.
+Experimental binaries therefore stay in the branch namespace under the normal
+selection rules.
 
-To learn more about the Spack Pipeline feature used in this CI configuration,
-it is a good idea to first read the dedicated `Spack documentation`_.
+Two temporary layers have shorter lifetimes:
 
+* The Spack checkout under ``MY_SPACK_PARENT_DIR`` on ``/dev/shm`` is shared by
+  jobs for the same machine and pipeline, avoiding per-job clones.
+* ``SPACK_USER_CACHE_PATH`` is computed at job runtime as
+  ``/dev/shm/llnl-stack-${CI_PIPELINE_ID}-${CI_JOB_ID}/spack-cache``. Staging,
+  test, and miscellaneous caches are isolated per job.
 
+The storage setup uses ``SPACK_CI_STORAGE_GROUP`` (default ``radiuss``),
+world-readable/group-writable package permissions, setgid directories, and a
+normally ``0002`` umask. Keep these settings consistent so service jobs and
+maintainers can share the persistent data.
 
-.. _Spack documentation: https://spack.readthedocs.io/en/latest/pipelines.html
+Cleanup
+-------
+
+The cleanup job scans all environments under the persistent storage root and
+removes stale ``ref-*`` targets associated with branches already merged into
+``main`` or no longer present remotely. Cleanup is opt-in: both ``MY_ENV_NAME=""``
+and ``RSC_CLEANUP="ON"`` are required, normally on a scheduled pipeline.
+Regular branch pipelines, including ``develop``, do not request cleanup by
+default. Before scheduling a cleanup job, review the cleanup script and
+selected storage root: cleanup deletes persistent build data.

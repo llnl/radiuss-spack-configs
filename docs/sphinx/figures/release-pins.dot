@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: MIT
+digraph release_pins {
+  rankdir=TB;
+
+  recipes [label="spack/spack-packages", shape=folder, fillcolor="#e3edf7", group=recipes];
+  project [label="RAJA", shape=folder, fillcolor="#e3edf7", group=project];
+  { rank=same; recipes; project; }
+
+  merge [label="1. Merge tested recipe behavior", shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=recipes];
+  r1 [label="recipe revision R1", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4", group=recipes];
+  adopt [label="2. Set spack_packages_commit = R1\nand test RAJA", shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=project];
+  tag [label="3. Tag the tested RAJA source", shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=project];
+  source [label="source commit S\nrelease still records R1", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4", group=project];
+  metadata [label="4. Add version(..., commit=S)\nand merge upstream", shape=box, style="rounded,filled", fillcolor="#e1f2e8", group=recipes];
+  r2 [label="later recipe revision R2\nrecords source commit S", shape=box, fontsize=10, margin="0.08,0.04", fillcolor="#f7e4e4", group=recipes];
+
+  recipes -> merge [style=invis];
+  project -> adopt [style=invis];
+  merge -> r1;
+  r1 -> adopt [style=dotted, arrowhead=vee, color="#874e69", label="adopt merged revision"];
+  adopt -> tag -> source [weight=100];
+  source -> metadata [label="publish final source identity", constraint=false];
+  metadata -> r2;
+
+  { rank=same; r1; adopt; }
+  { rank=same; metadata; source; }
+  metadata -> source [style=invis, weight=100];
+  r1 -> metadata [style=invis, weight=100];
+}

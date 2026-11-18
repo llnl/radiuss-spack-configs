@@ -1,1 +1,5 @@
 *.pyc
+
+# Local documentation builds
+.venv-docs/
+docs/_build/
