@@ -274,16 +274,17 @@
     - spec: cuda@10.1.168+allow-unsupported-compilers
       prefix: /usr/tce/packages/cuda/cuda-10.1.168
   # Special case (module / wrapper)
+  # Compiler suffixes distinguish prebuilt MPI installations for toolchains.
   mvapich2:
     buildable: false
     externals:
-    - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
+    - spec: mvapich2@2.3.7.intel_classic_2021 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
         file_systems=lustre,nfs,ufs process_managers=slurm %intel-oneapi-compilers-classic@=2021.6.0
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0
-    - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
+    - spec: mvapich2@2.3.7.intel_2025 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
         file_systems=lustre,nfs,ufs process_managers=slurm %intel-oneapi-compilers@=2025.2.0
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-2025.2.0
-    - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
+    - spec: mvapich2@2.3.7.clang_14 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
         file_systems=lustre,nfs,ufs process_managers=slurm %llvm@=14.0.6
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-clang-14.0.6
     - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
@@ -295,7 +296,7 @@
     - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
         file_systems=lustre,nfs,ufs process_managers=slurm %gcc@=12.1.1
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-gcc-12.1.1
-    - spec: mvapich2@2.3.7 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
+    - spec: mvapich2@2.3.7.gcc_13 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32
         file_systems=lustre,nfs,ufs process_managers=slurm %gcc@=13.3.1
       prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-gcc-13.3.1
 
@@ -486,8 +487,8 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]gcc@13.3.1'
       when: '%fortran'
-    # A second % would bind GCC to the root, not to the MPI dependency.
-    - spec: '%mpi=mvapich2@=2.3.7'
+    # No ROCm MVAPICH2 external; select the GCC 13 installation.
+    - spec: '%mpi=mvapich2@=2.3.7.gcc_13'
       when: '%mpi'
   sycl-clang-22-gcc-10:
     - spec: '%[virtuals=c]llvm@22.0.0git+clang~flang~lld~lldb'
@@ -506,6 +507,8 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]intel-oneapi-compilers-classic@2021.6.0'
       when: '%fortran'
+    - spec: '%mpi=mvapich2@=2.3.7.intel_classic_2021'
+      when: '%mpi'
   oneapi-2025-gcc-10:
     - spec: cflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-10.3.1'
     - spec: cxxflags='--gcc-toolchain=/usr/tce/packages/gcc/gcc-10.3.1'
@@ -516,3 +519,5 @@
       when: '%cxx'
     - spec: '%[virtuals=fortran]intel-oneapi-compilers@2025.2.0'
       when: '%fortran'
+    - spec: '%mpi=mvapich2@=2.3.7.intel_2025'
+      when: '%mpi'
