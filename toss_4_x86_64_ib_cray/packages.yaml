@@ -478,6 +478,9 @@
     externals:
     - spec: bzip2@1.0.6
       prefix: /usr
+  # Copied from Spack defaults, avoid using for lapack
+  cray-libsci:
+    buildable: false
   curl:
     buildable: false
     externals:
