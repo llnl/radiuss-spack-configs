@@ -27,12 +27,13 @@ Joint release process
 #. Test candidate commits from project feature or release-staging branches.
    Validate development, intended release, and affected previous-release
    behavior across participants.
-#. Merge recipes upstream and update each project's ``spack_packages_commit``
-   to the **actual merged revision** before releases begin.
+#. Merge recipes upstream and update the ``spack-packages`` remote repository
+   ``commit`` in each project's ``.rad-bat.json`` to the **actual merged
+   revision** before releases begin.
 #. Add final ``version(...)`` entries with tags, commit hashes, or archive
    checksums as source releases become available. Coordinate any necessary
-   recipe-pin updates among remaining participants and validate the updated
-   builds.
+   recipe-repository pin updates among remaining participants and validate the
+   updated builds.
 #. Close the release round by updating participating development branches to
    the same tested ``spack-packages`` revision, including final version metadata.
 
@@ -41,14 +42,14 @@ revisions. Published tags retain their tested pins; do not retag a source
 release simply to adopt a later recipe revision.
 
 A source release cannot record a recipe revision that already contains the
-release's final commit hash: updating ``spack_packages_commit`` changes the
-source commit hash. Prepare recipe behavior first, then publish the final
-source identity in the upstream recipe afterward.
+release's final commit hash: updating ``.rad-bat.json`` changes the source
+commit hash. Prepare recipe behavior first, then publish the final source
+identity in the upstream recipe afterward.
 
 .. graphviz:: /figures/release-pins.dot
    :align: center
    :caption: The RAJA release records recipe revision R1. Only the later recipe revision R2 can record RAJA's final source commit S; the published RAJA tag keeps R1.
-   :alt: First merge recipe behavior as R1. Record R1 in RAJA's spack_packages_commit, test RAJA, and tag source commit S. Then add S to the upstream recipe's version metadata and merge as R2. R1, R2, and S are symbolic commit labels.
+   :alt: First merge recipe behavior as R1. Record R1 in RAJA's .rad-bat.json, test RAJA, and tag source commit S. Then add S to the upstream recipe's version metadata and merge as R2. R1, R2, and S are symbolic commit labels.
 
 .. _future-version-conditions:
 
@@ -123,11 +124,11 @@ the unavailable source will fail.
 Test development and release versions
 -------------------------------------
 
-In RAJA's ``.uberenv_config.json``, ``package_version: develop`` selects the
-recipe conditions for development builds. Also test the release-staging source
-with ``package_version`` set to the planned RAJA version, so Spack applies
-RAJA's release conditions. Use local source until the RAJA release is published, then
-check that Spack fetches and builds the released source using the final
+``rad-bat spack`` develops the project checkout as ``<package>@develop`` and
+therefore validates the recipe's development conditions. Validate the planned
+release conditions separately with a root spec selecting the intended numeric
+version. Use local source while release staging requires it; after publication,
+check that Spack fetches and builds the released source through its final
 ``version(...)`` entry.
 
 For each affected package, check that the candidate recipe permits compatible

@@ -1,21 +1,83 @@
 // SPDX-License-Identifier: MIT
 digraph components {
   rankdir=TB;
-  project [label="RAJA\nproject source and tests", shape=folder, fillcolor="#e3edf7"];
-  settings [label=".uberenv_config.json\nselect tools and recipes", shape=tab, fillcolor="#eee8f5"];
-  spack [label="spack/spack\npackage manager", shape=folder, fillcolor="#e3edf7"];
-  recipes [label="spack/spack-packages\nupstream recipes", shape=folder, fillcolor="#e3edf7"];
-  recipe [label="package.py\nversions and build behavior", shape=note, fillcolor="#fff2cf"];
-  configs [label="RADIUSS Spack Configs\nmachines and shared specs", shape=folder, fillcolor="#e3edf7"];
-  machine [label="packages.yaml / spack.yaml\nselected machine configuration", shape=tab, fillcolor="#eee8f5"];
-  uberenv [label="Uberenv\nprepare dependencies", shape=box, style="rounded,filled", fillcolor="#e1f2e8"];
-  host [label="Generated host configuration\n.cmake", shape=parallelogram, fillcolor="#dcf2f4"];
+  project [
+    label=<RAJA<BR/><FONT POINT-SIZE="10"><I>project source and tests</I></FONT>>,
+    shape=folder,
+    fillcolor="#e3edf7",
+    group=project
+  ];
+  settings [
+    label=<.rad-bat.json<BR/><FONT POINT-SIZE="10"><I>select tools and recipes</I></FONT>>,
+    shape=tab,
+    fillcolor="#eee8f5",
+    group=project
+  ];
+  spack [
+    label=<spack/spack<BR/><FONT POINT-SIZE="10"><I>package manager</I></FONT>>,
+    shape=folder,
+    fillcolor="#e3edf7",
+    group=spack
+  ];
+  recipes [
+    label=<spack/spack-packages<BR/><FONT POINT-SIZE="10"><I>upstream recipes</I></FONT>>,
+    shape=folder,
+    fillcolor="#e3edf7",
+    group=recipes
+  ];
+  recipe [
+    label=<package.py<BR/><FONT POINT-SIZE="10"><I>versions and build behavior</I></FONT>>,
+    shape=note,
+    fillcolor="#fff2cf",
+    group=recipes
+  ];
+  configs [
+    label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>shared configuration and tools</I></FONT>>,
+    shape=folder,
+    fillcolor="#e3edf7"
+  ];
+  machine [
+    label=<packages.yaml / spack.yaml<BR/><FONT POINT-SIZE="10"><I>selected machine configuration</I></FONT>>,
+    shape=tab,
+    fillcolor="#eee8f5",
+    group=machine
+  ];
+  radbat [
+    label=<rad-bat<BR/><FONT POINT-SIZE="10"><I>select or prepare dependencies</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8",
+    group=workflow
+  ];
+  host [
+    label=<Host configuration<BR/><FONT POINT-SIZE="10"><I>maintained or generated .cmake</I></FONT>>,
+    shape=parallelogram,
+    fillcolor="#dcf2f4",
+    group=workflow
+  ];
+  driver [
+    label=<Run project build/test driver<BR/><FONT POINT-SIZE="10"><I>project-local Python script</I></FONT>>,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#e1f2e8",
+    group=workflow
+  ];
+  { rank=same; project; configs; recipes; }
+  { rank=same; settings; machine; recipe; }
+  { rank=same; radbat; spack; }
+  project -> configs -> recipes [style=invis, weight=100];
+  settings -> machine -> recipe [style=invis, weight=100];
   project -> settings [style=dashed, arrowhead=empty, label="owns"];
-  settings -> uberenv [style=dashed, arrowhead=empty, label="configures"];
-  recipes -> recipe [style=dashed, arrowhead=empty, label="provides"];
-  configs -> machine [style=dashed, arrowhead=empty, label="provides"];
-  spack -> uberenv [style=dashed, arrowhead=empty, label="concretizes and installs"];
-  recipe -> uberenv [style=dashed, arrowhead=empty, label="recipe input"];
-  machine -> uberenv [style=dashed, arrowhead=empty, label="machine input"];
-  uberenv -> host [label="runs initconfig"];
+  project -> driver [style=dashed, arrowhead=empty, label="owns"];
+  settings -> radbat [style=dashed, arrowhead=empty, label="configures"];
+  recipes -> recipe [style=dashed, arrowhead=empty, label="provides", weight=100];
+  configs -> machine [style=dashed, arrowhead=empty, label="provides", weight=10];
+  configs -> radbat [style=dashed, arrowhead=empty, label="provides", weight=10];
+  recipe -> spack [style=dashed, arrowhead=empty, label="recipe input"];
+  machine -> spack [style=dashed, arrowhead=empty, label="machine input"];
+  radbat -> spack [label="spack mode"];
+  radbat -> host [label="host-config mode"];
+  spack -> host [label="generates through initconfig"];
+  radbat -> driver [label="invokes"];
+  host -> driver [style=dashed, arrowhead=empty, label="host-config input"];
 }
