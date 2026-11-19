@@ -68,7 +68,7 @@ File responsibilities
    * - ``config.yaml`` and ``modules.yaml``
      - Spack storage/general settings and module generation settings
    * - ``gitlab/radiuss-jobs/<machine>.yml``
-     - Shared consumer jobs and ``SPEC`` variable hooks
+     - Shared consumer job specifications and project-variable hooks
    * - Project ``.rad-bat.json``
      - Project command, package name, Spack and recipe pins, machine-environment
        path, conditional spec fragments, and repository precedence

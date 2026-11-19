@@ -26,7 +26,7 @@ Choose a mode
 
 .. graphviz:: /figures/rad-bat-modes.dot
    :align: center
-   :caption: Both rad-bat modes produce the host configuration consumed by the same project driver.
+   :caption: Both rad-bat modes rely on a host configuration consumed by the same project driver.
    :alt: Inputs select either an existing host configuration or pinned native Spack. Native Spack generates a host configuration. Both paths invoke the project build and test driver.
 
 ``host-config`` is the fast path. It validates the selected file and runs the

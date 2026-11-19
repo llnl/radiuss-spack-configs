@@ -51,7 +51,8 @@ the command as an argument array in ``.rad-bat.json``; see :doc:`rad_bat`.
 Each project maintains its driver and documents its options and required
 compute resources. It should exit on failure and require a filename if several
 host configurations are present. See :doc:`ci` for how shared jobs pass
-``SPEC`` and an optional maintained host-config selection.
+``RAD_BAT_SPEC`` and an optional maintained host-config selection. The legacy
+``SPEC`` spelling remains accepted for shared and older jobs.
 
 .. _debugging:
 

@@ -135,7 +135,8 @@ def _select_environment_mode(
     if mode_is_set:
         raise RadBatError("RAD_BAT_MODE must be host-config or spack")
     raise RadBatError(
-        "cannot infer a mode: set SPEC, HOST_CONFIG, or RAD_BAT_HOST_CONFIG_NAME"
+        "cannot infer a mode: set RAD_BAT_SPEC (or SPEC), "
+        "RAD_BAT_HOST_CONFIG (or HOST_CONFIG), or RAD_BAT_HOST_CONFIG_NAME"
     )
 
 

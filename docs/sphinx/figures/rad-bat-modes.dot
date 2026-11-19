@@ -2,7 +2,7 @@
 digraph rad_bat_modes {
   rankdir=TB;
   inputs [
-    label=<Job or command inputs<BR/><FONT POINT-SIZE="10"><I>SPEC / host-config selector</I></FONT>>,
+    label=<Job or command inputs<BR/><FONT POINT-SIZE="10"><I>spec / host-config selector</I></FONT>>,
     shape=tab,
     fillcolor="#eee8f5"
   ];

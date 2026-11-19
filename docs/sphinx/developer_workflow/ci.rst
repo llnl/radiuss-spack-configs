@@ -6,15 +6,15 @@ Use CI
 ======
 
 A project's CI runs the developer workflow against its source checkout. RADIUSS
-Spack Configs supplies shared ``SPEC`` jobs, the project supplies its build/test
-command and custom jobs, and `RADIUSS Shared CI
+Spack Configs supplies shared specification jobs, the project supplies its
+build/test command and custom jobs, and `RADIUSS Shared CI
 <https://radiuss-shared-ci.readthedocs.io/en/latest/>`_ supplies versioned GitLab
 components for machine execution, allocations, and reporting.
 
 .. graphviz:: /figures/consumer-ci.dot
    :align: center
    :caption: Consumer CI combines shared specifications, project settings, and a selected CI component.
-   :alt: Shared jobs and project settings feed pipeline composition. The selected Shared CI component revision provides execution. The generated child pipeline runs the project preparation, build, and test driver with SPEC.
+   :alt: Shared jobs and project settings feed pipeline composition. The selected Shared CI component revision provides execution. The generated child pipeline runs the project preparation, build, and test driver with RAD_BAT_SPEC.
 
 RADIUSS Spack Configs also has its own CI to :doc:`validate Spack environments
 <../ci_implementation/index>`.
@@ -35,10 +35,12 @@ Follow the integration instructions for the selected Shared CI component
 version, including its required stages and inputs. Older ``project/ref/file``
 template examples are not interchangeable with the component interface.
 
-Shared jobs set ``SPEC`` and extend the machine job template. For example,
-the Dane GCC job uses ``PROJECT_DANE_VARIANTS`` and ``PROJECT_DANE_DEPS`` to
-let each project add applicable variants and dependencies. Set these in the
-project CI variables; do not impose a project-only option on all consumers.
+The shared catalog retains the ``SPEC`` variable because it also serves legacy
+consumers. Project-local rad-bat jobs should set ``RAD_BAT_SPEC`` and extend the
+machine job template. For example, the Dane GCC job uses
+``PROJECT_DANE_VARIANTS`` and ``PROJECT_DANE_DEPS`` to let each project add
+applicable variants and dependencies. Set these in the project CI variables;
+do not impose a project-only option on all consumers.
 
 Overrides and merged configuration
 ----------------------------------
@@ -60,7 +62,7 @@ Use maintained host configurations with rad-bat
 ------------------------------------------------
 
 A project using :doc:`rad_bat` can keep one job definition for both ordinary
-CI and dependency refresh. Each maintained job stores its ``SPEC`` beside a
+CI and dependency refresh. Each maintained job stores its ``RAD_BAT_SPEC`` beside a
 stable ``RAD_BAT_HOST_CONFIG_NAME``. With ``RAD_BAT_MODE`` unset, the inputs
 select the workflow:
 
@@ -68,7 +70,7 @@ select the workflow:
    :header-rows: 1
    :widths: 25 30 45
 
-   * - ``SPEC``
+   * - ``RAD_BAT_SPEC``
      - Host-config selector
      - Selected mode
    * - Set
@@ -92,7 +94,7 @@ inputs. Each job logs which inputs are set and the selected mode without
 printing their values.
 
 This convention gives maintained jobs a fast ordinary path while preserving
-Spack behavior for a new ``SPEC``-only job. A missing selected host
+Spack behavior for a new ``RAD_BAT_SPEC``-only job. A missing selected host
 configuration is an error and never triggers Spack implicitly.
 
 Refresh maintained host configurations
@@ -131,7 +133,7 @@ Reproduce a CI failure
 
 When reporting a failure, include the project commit,
 ``git submodule status --recursive`` output, ``.rad-bat.json``, machine,
-selected mode, expanded ``SPEC``, host-config name,
+selected mode, expanded ``RAD_BAT_SPEC``, host-config name,
 and failing command. This information identifies the
 source, tools, and settings needed to reproduce the failure. In a compute allocation, run the
 :ref:`project build/test script <write-ci-script>` or the failing rad-bat,

@@ -107,6 +107,15 @@ value appends nothing. Declaring a variable without this configuration entry
 does not change the spec. The array permits independent dependency overrides
 without project-specific behavior in ``rad-bat``.
 
+Fragments are expanded by ``rad-bat`` only in Spack mode; the project driver
+does not read them. The configuration records how an environment variable maps
+to a dependency constraint, while the caller still supplies the selected
+reference in that variable. This replaces dependency-specific handling in a
+project's legacy build script and gives CI and local ``rad-bat`` invocations
+the same mapping. For example, a project may map ``CAMP_REFERENCE`` to
+``^camp@git.{CAMP_REFERENCE}=main``. Setting ``CAMP_REFERENCE`` in CI or in a
+local shell remains supported; leaving it unset lets Spack choose CAMP.
+
 Environment-driven execution
 ----------------------------
 
@@ -126,9 +135,10 @@ Environment-driven execution
    * - ``RAD_BAT_WORK_DIR``
      - Disposable work. Required in Spack mode and optional in host-config
        mode, where the default is ``.rad-bat-work`` below the project root.
-   * - ``RAD_BAT_SPEC`` or ``SPEC``
-     - Project spec fragment used by Spack mode.
-   * - ``RAD_BAT_HOST_CONFIG`` or ``HOST_CONFIG``
+   * - ``RAD_BAT_SPEC`` or legacy ``SPEC``
+     - Project spec fragment used by Spack mode. New rad-bat integrations
+       should use ``RAD_BAT_SPEC``.
+   * - ``RAD_BAT_HOST_CONFIG`` or legacy ``HOST_CONFIG``
      - Direct host-configuration path.
    * - ``RAD_BAT_HOST_CONFIG_NAME``
      - Stable ``.cmake`` filename. Host-config mode combines it with

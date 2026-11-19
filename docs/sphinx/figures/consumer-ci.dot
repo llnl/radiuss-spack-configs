@@ -2,7 +2,7 @@
 digraph consumer_ci {
   rankdir=TB;
   shared [
-    label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>shared SPEC jobs</I></FONT>>,
+    label=<RADIUSS Spack Configs<BR/><FONT POINT-SIZE="10"><I>shared spec jobs</I></FONT>>,
     shape=folder,
     fillcolor="#e3edf7"
   ];
@@ -25,7 +25,7 @@ digraph consumer_ci {
   ];
   pipeline [label="Generated child pipeline", shape=parallelogram, fillcolor="#dcf2f4"];
   execute [
-    label=<Execute project driver<BR/><FONT POINT-SIZE="10"><I>SPEC → prepare → build → test</I></FONT>>,
+    label=<Execute project driver<BR/><FONT POINT-SIZE="10"><I>spec → prepare → build → test</I></FONT>>,
     shape=box,
     style="rounded,filled",
     fillcolor="#e1f2e8"
