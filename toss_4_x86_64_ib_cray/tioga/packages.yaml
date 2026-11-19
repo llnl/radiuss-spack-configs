@@ -322,6 +322,11 @@
       prefix: /opt/rocm-6.4.3
     - spec: rocprim@7.2.1%llvm-amdgpu@7.2.1
       prefix: /opt/rocm-7.2.1
+    # Match hipCUB's explicit target; keep entries defaulting to amdgpu_target=auto.
+    - spec: rocprim@6.4.3 amdgpu_target=gfx90a %llvm-amdgpu@6.4.3
+      prefix: /opt/rocm-6.4.3
+    - spec: rocprim@7.2.1 amdgpu_target=gfx90a %llvm-amdgpu@7.2.1
+      prefix: /opt/rocm-7.2.1
   rocprofiler-sdk:
     version: [6.2.4, 6.3.1, 6.4.3]
     buildable: false
