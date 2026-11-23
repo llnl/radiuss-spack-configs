@@ -80,12 +80,14 @@ spack:
     - "raja-perf ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
     - chai
     - care
-  # Recursive compiler preferences must not reduce Caliper's MPI coverage.
+  # Preserve Caliper's Linux defaults despite %% penalties on unbound externals.
+  # Temporary workaround: https://github.com/llnl/radiuss-spack-configs/issues/219
+  # Keep the MPI variant on the root only.
   - radiuss-projects:
-    - "caliper +mpi"
+    - "caliper +mpi +libdw +libunwind +papi"
     when: env.get("LCSCHEDCLUSTER", "") in ("dane", "matrix")
   - radiuss-projects:
-    - "caliper ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
+    - "caliper +libdw +libunwind +papi ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
     when: env.get("LCSCHEDCLUSTER", "") not in ("dane", "matrix")
   - dependencies: []
   #[--definitions]
