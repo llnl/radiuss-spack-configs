@@ -11,12 +11,13 @@ rocmcc_6_4_3_hip:
     SPEC: "${PROJECT_TUOLUMNE_VARIANTS} +rocm amdgpu_target=gfx942 %%rocm-6-4-3-gcc-13 ^hip@6.4.3 ${PROJECT_TUOLUMNE_DEPS}"
   extends: .job_on_tuolumne
 
+# Propagate compiler choices to compiled dependencies.
 rocmcc_7_2_1_hip:
   variables:
-    SPEC: "${PROJECT_TUOLUMNE_VARIANTS} +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.1 ^hip@7.2.1 ${PROJECT_TUOLUMNE_DEPS}"
+    SPEC: "${PROJECT_TUOLUMNE_VARIANTS} +rocm amdgpu_target=gfx942 %%llvm-amdgpu@=7.2.1 ^hip@7.2.1 ${PROJECT_TUOLUMNE_DEPS}"
   extends: .job_on_tuolumne
 
 cce_21_0_0:
   variables:
-    SPEC: "${PROJECT_TUOLUMNE_VARIANTS} %cce@=21.0.0 ${PROJECT_TUOLUMNE_DEPS}"
+    SPEC: "${PROJECT_TUOLUMNE_VARIANTS} %%cce@=21.0.0 ${PROJECT_TUOLUMNE_DEPS}"
   extends: .job_on_tuolumne
