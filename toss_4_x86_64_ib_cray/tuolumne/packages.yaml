@@ -323,7 +323,7 @@
     - spec: rocprim@7.2.1%llvm-amdgpu@7.2.1
       prefix: /opt/rocm-7.2.1
   rocprofiler-sdk:
-    version: [6.2.4, 6.3.1, 6.4.3]
+    version: [6.2.4, 6.3.1, 6.4.3, 7.2.1]
     buildable: false
     externals:
     - spec: rocprofiler-sdk@6.2.4%llvm-amdgpu@6.2.4
@@ -332,6 +332,8 @@
       prefix: /opt/rocm-6.3.1
     - spec: rocprofiler-sdk@6.4.3%llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3
+    - spec: rocprofiler-sdk@7.2.1%llvm-amdgpu@7.2.1
+      prefix: /opt/rocm-7.2.1
   rocthrust:
     version: [5.7.1, 6.1.2, 6.2.4, 6.3.1, 6.4.3, 7.2.1]
     buildable: false
