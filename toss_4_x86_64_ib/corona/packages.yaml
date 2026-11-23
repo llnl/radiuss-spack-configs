@@ -2,6 +2,13 @@
   all:
     require:
     - 'target=zen'
+    # Retain MVAPICH2 as an extra provider safety net for reliable stack coherence.
+    # Toolchains select the MPI external; this requirement alone does not ensure
+    # compiler coherence. No other MPI provider is currently needed.
+    # This could be replaced by checking that all MPI dependencies in the
+    # concretized DAG match the external selected by the toolchain.
+    - spec: ^mvapich2
+      when: '^mpi'
     providers:
       blas: [openblas]
       lapack: [netlib-lapack]
@@ -480,7 +487,7 @@
       prefix: /usr
 
 'toolchains:':
-  rocm_6_4_3_gcc_13:
+  rocm-6-4-3-gcc-13:
     - spec: '%[virtuals=c]llvm-amdgpu@=6.4.3'
       when: '%c'
     - spec: '%[virtuals=cxx]llvm-amdgpu@=6.4.3'

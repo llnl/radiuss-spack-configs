@@ -601,3 +601,14 @@
     externals:
     - spec: zlib@1.2.11
       prefix: /usr
+
+'toolchains:':
+  rocm-6-4-3-gcc-13:
+    - spec: '%[virtuals=c]llvm-amdgpu@=6.4.3'
+      when: '%c'
+    - spec: '%[virtuals=cxx]llvm-amdgpu@=6.4.3'
+      when: '%cxx'
+    - spec: '%[virtuals=fortran]gcc@=13.3.1'
+      when: '%fortran'
+    - spec: '%mpi=cray-mpich'
+      when: '%mpi'
