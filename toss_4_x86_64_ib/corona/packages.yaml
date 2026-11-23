@@ -2,11 +2,9 @@
   all:
     require:
     - 'target=zen'
-    # Retain MVAPICH2 as an extra provider safety net for reliable stack coherence.
-    # Toolchains select the MPI external; this requirement alone does not ensure
-    # compiler coherence. No other MPI provider is currently needed.
-    # This could be replaced by checking that all MPI dependencies in the
-    # concretized DAG match the external selected by the toolchain.
+    # Toolchains select the MPI external; this requirement alone does not
+    # ensure compiler coherence but acts as extra safety net since no other MPI
+    # provider is currently needed.
     - spec: ^mvapich2
       when: '^mpi'
     providers:
