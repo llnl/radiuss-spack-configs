@@ -1,6 +1,7 @@
 spack:
   include:
     - config.yaml
+    - concretizer.yaml
     - packages.yaml
   concretizer:
     reuse: false

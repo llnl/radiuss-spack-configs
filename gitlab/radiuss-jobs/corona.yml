@@ -8,6 +8,6 @@
 # ROCm 6.4.3 provides C/C++; use GCC for required Fortran.
 rocmcc_6_4_3_hip:
   variables:
-    SPEC: "${PROJECT_CORONA_VARIANTS} +rocm amdgpu_target=gfx906 %%rocm-6-4-3-gcc-13 ^hip@6.4.3 ${PROJECT_CORONA_DEPS}"
+    SPEC: "${PROJECT_CORONA_VARIANTS} +rocm amdgpu_target=gfx906 %rocm-6-4-3-gcc-13 ^hip@6.4.3 ${PROJECT_CORONA_DEPS}"
     MODULE_LIST: "rocm/6.4.3"
   extends: .job_on_corona

@@ -17,6 +17,7 @@ spack:
   include:
   - $LCSCHEDCLUSTER/config.yaml
   - $LCSCHEDCLUSTER/packages.yaml
+  - $LCSCHEDCLUSTER/concretizer.yaml
   - ci.yaml
   concretizer:
     reuse: false
@@ -43,33 +44,33 @@ spack:
   # ROCm 6.4.3 provides C/C++ in Spack; use GCC for required Fortran.
   definitions:
   - compilers:
-    - +rocm amdgpu_target=gfx906 %%rocm-6-4-3-gcc-13 ^hip@6.4.3
+    - +rocm amdgpu_target=gfx906 %rocm-6-4-3-gcc-13 ^hip@6.4.3
     when: env.get("LCSCHEDCLUSTER", "") == "corona"
   - compilers:
     - '%oneapi-2025-gcc-10'
-    # Propagate Clang C/C++ and GCC Fortran to compiled dependencies.
-    - '%%clang-19-gcc-13'
+    # Select Clang C/C++ and GCC Fortran; the concretizer enforces consistency.
+    - '%clang-19-gcc-13'
     - '%gcc@=13.3.1'
     # matrix spec
-    - +cuda cuda_arch=90 %%clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
+    - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
     #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
     when: env.get("LCSCHEDCLUSTER", "") == "dane"
   - compilers:
-    - +cuda cuda_arch=90 %%clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
+    - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
     #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
     when: env.get("LCSCHEDCLUSTER", "") == "matrix"
-  # Propagate ROCm and CCE compiler choices to compiled dependencies.
+  # Select ROCm and CCE; the concretizer enforces compiler consistency.
   - compilers:
-    - +rocm amdgpu_target=gfx90a %%rocm-6-4-3-gcc-13 ^hip@6.4.3
-    - +rocm amdgpu_target=gfx90a %%llvm-amdgpu@=7.2.1 ^hip@7.2.1
-    - '%%cce@=20.0.0'
-    - '%%cce@=21.0.0'
+    - +rocm amdgpu_target=gfx90a %rocm-6-4-3-gcc-13 ^hip@6.4.3
+    - +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1
+    - '%cce@=20.0.0'
+    - '%cce@=21.0.0'
     when: env.get("LCSCHEDCLUSTER", "") == "tioga"
   - compilers:
-    - +rocm amdgpu_target=gfx942 %%rocm-6-4-3-gcc-13 ^hip@6.4.3
-    - +rocm amdgpu_target=gfx942 %%llvm-amdgpu@=7.2.1 ^hip@7.2.1
-    - '%%cce@=20.0.0'
-    - '%%cce@=21.0.0'
+    - +rocm amdgpu_target=gfx942 %rocm-6-4-3-gcc-13 ^hip@6.4.3
+    - +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.1 ^hip@7.2.1
+    - '%cce@=20.0.0'
+    - '%cce@=21.0.0'
     when: env.get("LCSCHEDCLUSTER", "") == "tuolumne"
 
   - radiuss-projects:
@@ -80,14 +81,13 @@ spack:
     - "raja-perf ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
     - chai
     - care
-  # Preserve Caliper's Linux defaults despite %% penalties on unbound externals.
-  # Temporary workaround: https://github.com/llnl/radiuss-spack-configs/issues/219
+  # Preserve Caliper's feature defaults with compiler consistency constraints.
   # Keep the MPI variant on the root only.
   - radiuss-projects:
-    - "caliper +mpi +libdw +libunwind +papi"
+    - "caliper +mpi"
     when: env.get("LCSCHEDCLUSTER", "") in ("dane", "matrix")
   - radiuss-projects:
-    - "caliper +libdw +libunwind +papi ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
+    - "caliper ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
     when: env.get("LCSCHEDCLUSTER", "") not in ("dane", "matrix")
   - dependencies: []
   #[--definitions]
@@ -98,5 +98,5 @@ spack:
     - [$compilers]
     exclude:
     # in spack package, raja-perf@2025.03 asks for c++14, but rocprim 7.2.1 requires c++17.
-    - 'raja-perf +rocm amdgpu_target=gfx90a %%llvm-amdgpu@=7.2.1 ^hip@7.2.1'
-    - 'raja-perf +rocm amdgpu_target=gfx942 %%llvm-amdgpu@=7.2.1 ^hip@7.2.1'
+    - 'raja-perf +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1'
+    - 'raja-perf +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.1 ^hip@7.2.1'

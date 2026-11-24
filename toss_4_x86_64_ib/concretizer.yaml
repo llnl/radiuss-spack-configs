@@ -1,0 +1,3 @@
+concretizer:
+  # Allow accepted prebuilt MPI compiler exceptions; constrain other link/run nodes.
+  compiler_mixing: [mvapich2]

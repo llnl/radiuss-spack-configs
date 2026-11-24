@@ -1,0 +1,3 @@
+concretizer:
+  # Require one compiler per language across root and link/run dependencies.
+  compiler_mixing: false
