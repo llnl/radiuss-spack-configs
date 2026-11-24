@@ -2,6 +2,7 @@ spack:
   include:
     - config.yaml
     - concretizer.yaml
+    - fortran.yaml
     - packages.yaml
   concretizer:
     reuse: false

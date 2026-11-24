@@ -16,6 +16,7 @@ spack:
       commit: 4b6b842d494ab86ebef5304e6bfe766aa421a66b
   include:
   - $LCSCHEDCLUSTER/config.yaml
+  - $LCSCHEDCLUSTER/fortran.yaml
   - $LCSCHEDCLUSTER/packages.yaml
   - $LCSCHEDCLUSTER/concretizer.yaml
   - ci.yaml
