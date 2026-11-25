@@ -62,7 +62,7 @@ File responsibilities
    * - Platform/machine ``spack.yaml``
      - Environment settings and configuration includes
    * - Platform/machine ``packages.yaml``
-     - Generic externals, machine targets and provider safety requirements on TOSS/Cray;
+     - Generic externals, full CUDA catalog, machine targets and provider safety requirements on TOSS/Cray;
        existing compiler configuration on other platforms
    * - TOSS/Cray ``stacks/<name>.yaml``
      - Complete language/MPI selection, compiler flags, runtimes and stack-specific externals

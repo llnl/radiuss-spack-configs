@@ -98,10 +98,14 @@ select a complete compiler stack before running Uberenv, for example:
 
 .. code-block:: bash
 
-   export RADIUSS_SPACK_STACK=rocm-6.4.3-gcc-13
+   # Corona: ROCm C/C++, GCC Fortran/runtime, and the GCC MVAPICH2 external.
+   export RADIUSS_SPACK_STACK=rocm-6.4.3-gcc-13.3.1-mvapich2-2.3.7.gcc_13
 
 The ``stacks/<name>.yaml`` file owns language/MPI requirements and compiler,
-runtime and accelerator externals. Keep project variants and dependencies in
+runtime and accelerator externals. Names include exact compiler and MPI
+versions; CUDA builds select a stack ending in ``-cuda-<version>`` that exposes
+only that toolkit. The full available CUDA catalog remains in shared
+``packages.yaml``. Keep project variants and dependencies in
 ``SPEC``; compiler selection comes from the stack. Shared CI jobs set this
 variable, while custom jobs must set it explicitly. Other platforms retain their
 existing compiler configuration. See

@@ -26,7 +26,13 @@ compiler externals with executable paths and pairing flags in
 ``extra_attributes``, runtime requirements, and stack-specific MPI/GPU externals.
 Compiler definitions may repeat between independent stacks. This lets the same
 Clang version pair with different GCC versions in separate environments.
-Machine directories link identical stack files and own files that differ.
+Stack names identify exact compiler versions, GCC pairing where needed, and
+the MPI provider/version, including its compiler-labelled external suffix.
+CUDA stacks append ``-cuda-<version>``. For example,
+``clang-18.1.8-gcc-13.3.1-mvapich2-2.3.7.gcc_13-cuda-12.6.0`` identifies
+the complete CUDA build stack. ``mvapich2-unavailable`` explicitly marks a
+stack without a verified MPI installation. Do not add shorter alias names.
+Machine directories link identical full names and own files that differ.
 Do not add a legacy ``compilers.yaml`` to this setup.
 
 RADIUSS Spack Configs CI loads one stack file per environment group using
@@ -51,8 +57,12 @@ needs build/runtime validation. Stacks without a matching installed MPI disable
 building that provider and fail if MPI is requested. Generic externals with
 unknown compiler provenance are accepted without claiming binary coherence.
 
-CPU stacks retain the installed CUDA catalog for optional project CUDA specs.
-The dedicated CUDA CI stack exposes and pins its selected CUDA version. ROCm
+The full installed CUDA catalog lives in shared ``packages.yaml``; it is not
+a declaration that every toolkit is compatible with every compiler. A CUDA
+stack replaces that catalog with a ``cuda::`` package override containing one
+external, ``buildable: false`` and an exact version requirement. CPU stack files
+contain no CUDA catalog. Select a separately named, verified CUDA stack for a
+CUDA build rather than relying on the shared catalog to infer compatibility. ROCm
 stacks expose only their ROCm version; absent components remain non-buildable.
 Use configuration syntax supported by the tested Spack and recipe revisions.
 
@@ -73,7 +83,8 @@ For a machine or toolchain update:
 
 The generation job runs ``spack python utilities/check-stack-coherence.py``
 after concretization. It checks every recorded language/MPI edge, pairing flags
-and pinned runtimes and rejects an empty concrete environment. It reports
+and pinned runtimes, verifies CUDA stack overrides expose one pinned toolkit,
+and rejects an empty concrete environment. It reports
 externals with absent bindings separately; it does not test binary compatibility.
 
 The ``darwin`` configuration is a development starting point, outside LC
