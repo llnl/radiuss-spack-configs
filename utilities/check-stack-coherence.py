@@ -9,7 +9,7 @@ import shlex
 
 import spack.config
 import spack.environment as ev
-from spack.spec import Spec
+from spack.spec import Spec, parse_with_version_concrete
 from spack.traverse import traverse_nodes
 
 
@@ -33,8 +33,29 @@ def main():
                     errors.append(f"{group}: expected one explicit {virtual} provider requirement")
                     continue
                 providers[virtual] = Spec(requirements[0])
+            # CUDA-enabled stacks must replace the shared catalog with one toolkit.
+            cuda = packages.get("cuda", {})
+            cuda_requirements = cuda.get("require", [])
+            selected_cuda = None
+            if cuda_requirements:
+                if cuda.get("buildable") is not False:
+                    errors.append(f"{group}: CUDA stack must use its selected external toolkit")
+                if len(cuda_requirements) != 1 or not isinstance(cuda_requirements[0], str):
+                    errors.append(f"{group}: expected one explicit CUDA version requirement")
+                else:
+                    selected_cuda = Spec("cuda " + cuda_requirements[0])
+                    externals = cuda.get("externals", [])
+                    if not selected_cuda.versions.concrete or len(externals) != 1:
+                        errors.append(f"{group}: CUDA stack must expose one pinned toolkit external")
+                    elif not parse_with_version_concrete(externals[0]["spec"]).satisfies(selected_cuda):
+                        errors.append(f"{group}: CUDA external does not match {selected_cuda}")
             bindings, unknown = 0, set()
             for node in traverse_nodes(roots):
+                if node.name == "cuda":
+                    if selected_cuda is None:
+                        errors.append(f"{group}: CUDA consumer requires a stack with one pinned toolkit")
+                    elif not node.satisfies(selected_cuda):
+                        errors.append(f"{group}: {node} violates CUDA requirement {selected_cuda}")
                 recorded = False
                 for edge in node.edges_to_dependencies():
                     for virtual in edge.virtuals:

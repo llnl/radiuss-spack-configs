@@ -181,3 +181,13 @@ packages:
     externals:
     - spec: zlib@1.2.11
       prefix: /usr
+
+  # Installed CUDA catalog; CUDA stacks override it with one verified version.
+  cuda:
+    version: [12.2.0, 11.8.0]
+    buildable: false
+    externals:
+    - spec: cuda@12.2.0
+      prefix: /usr/tce/packages/cuda/cuda-12.2.0
+    - spec: cuda@11.8.0
+      prefix: /usr/tce/packages/cuda/cuda-11.8.0

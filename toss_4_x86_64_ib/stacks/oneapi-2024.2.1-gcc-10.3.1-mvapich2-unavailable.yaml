@@ -1,0 +1,50 @@
+# Complete compiler stack; shared packages.yaml retains generic externals.
+# No matching installed MPI is configured. MPI-enabled specs must fail
+# until a compatible external is verified and added to this stack.
+packages:
+  c:
+    require:
+    - intel-oneapi-compilers@=2024.2.1
+  cxx:
+    require:
+    - intel-oneapi-compilers@=2024.2.1
+  fortran:
+    require:
+    - intel-oneapi-compilers@=2024.2.1
+  intel-oneapi-compilers:
+    buildable: false
+    externals:
+    - spec: intel-oneapi-compilers@2024.2.1
+      prefix: /usr/tce/packages/intel/intel-2024.2.1
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/intel/intel-2024.2.1/compiler/2024.2/bin/icx
+          cxx: /usr/tce/packages/intel/intel-2024.2.1/compiler/2024.2/bin/icpx
+          fortran: /usr/tce/packages/intel/intel-2024.2.1/compiler/2024.2/bin/ifx
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+  gcc:
+    buildable: false
+    externals:
+    - spec: gcc@10.3.1 languages='c,c++,fortran'
+      prefix: /usr/tce/packages/gcc/gcc-10.3.1
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/gcc/gcc-10.3.1/bin/gcc
+          cxx: /usr/tce/packages/gcc/gcc-10.3.1/bin/g++
+          fortran: /usr/tce/packages/gcc/gcc-10.3.1/bin/gfortran
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+  gcc-runtime:
+    require:
+    - '@=10.3.1 %gcc@=10.3.1'
+  intel-oneapi-runtime:
+    require:
+    - '@=2024.2.1 %intel-oneapi-compilers@=2024.2.1'
+  mpi:
+    require:
+    - mvapich2
+  mvapich2:
+    buildable: false

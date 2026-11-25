@@ -7,11 +7,6 @@
 
 clang_18_1_8_gcc_13_cuda_12_6_0:
   variables:
-    RADIUSS_SPACK_STACK: "cuda-12.6-clang-18-gcc-13"
+    RADIUSS_SPACK_STACK: "clang-18.1.8-gcc-13.3.1-mvapich2-2.3.7.gcc_13-cuda-12.6.0"
     SPEC: "${PROJECT_MATRIX_VARIANTS} ${PROJECT_MATRIX_DEPS}"
   extends: .job_on_matrix
-
-#clang_19_1_3_gcc_13_cuda_13_1_1:
-#  variables:
-#    SPEC: "${PROJECT_MATRIX_VARIANTS} %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers ${PROJECT_MATRIX_DEPS}"
-#  extends: .job_on_matrix
