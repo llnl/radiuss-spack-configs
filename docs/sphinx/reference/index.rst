@@ -62,10 +62,11 @@ File responsibilities
    * - Platform/machine ``spack.yaml``
      - Environment settings and configuration includes
    * - Platform/machine ``packages.yaml``
-     - Generic externals, full CUDA catalog, machine targets and provider safety requirements on TOSS/Cray;
+     - Generic externals, full CUDA catalog, CPU targets and provider safety requirements on TOSS/Cray;
        existing compiler configuration on other platforms
    * - TOSS/Cray ``stacks/<name>.yaml``
-     - Complete language/MPI selection, compiler flags, runtimes and stack-specific externals
+     - Complete language/MPI selection, compiler flags, runtimes, stack-specific externals
+       and GPU targets conditional on ``+rocm`` or ``+cuda``
    * - ``config.yaml`` and ``modules.yaml``
      - Spack storage/general settings and module generation settings
    * - ``gitlab/radiuss-jobs/<machine>.yml``
@@ -100,6 +101,10 @@ Essential precedence rules
   ``.uberenv_config.json`` does not configure these pipelines.
 * Consumer CI combines shared jobs with project settings. Inspect the final
   merged GitLab configuration when names collide; see :doc:`../developer_workflow/ci`.
+* Stack GPU targets use ``packages:all:require`` conditional on GPU support.
+  They do not enable ``+rocm`` or ``+cuda``. In Spack 1.2.2, a package-specific
+  ``require`` replaces these fallback requirements. RSC CI audits the concrete
+  GPU targets to catch missing enforcement when environment settings change.
 
 See the `Uberenv guide <https://uberenv.readthedocs.io/en/latest/>`_ for setup
 options and their mechanics. For release selection, use

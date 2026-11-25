@@ -4,6 +4,8 @@
 Requirements on language/MPI virtuals are checked against every recorded edge,
 including build dependencies. Externals without compiler edges have unknown
 provenance and are counted separately. This is a selection check, not an ABI test.
+Conditional GPU target requirements are checked on GPU-enabled packages that
+expose the corresponding variant, including packages with their own require.
 """
 import shlex
 
@@ -49,8 +51,25 @@ def main():
                         errors.append(f"{group}: CUDA stack must expose one pinned toolkit external")
                     elif not parse_with_version_concrete(externals[0]["spec"]).satisfies(selected_cuda):
                         errors.append(f"{group}: CUDA external does not match {selected_cuda}")
-            bindings, unknown = 0, set()
+            gpu_targets = {}
+            for requirement in packages.get("all", {}).get("require", []):
+                if not isinstance(requirement, dict) or "spec" not in requirement:
+                    continue
+                constraint = Spec(requirement["spec"])
+                for feature, target in (("rocm", "amdgpu_target"), ("cuda", "cuda_arch")):
+                    if requirement.get("when") == "+" + feature and target in constraint.variants:
+                        gpu_targets[feature] = constraint
+            bindings, target_checks, unknown = 0, 0, set()
             for node in traverse_nodes(roots):
+                for feature, target in (("rocm", "amdgpu_target"), ("cuda", "cuda_arch")):
+                    if not node.satisfies(Spec("+" + feature)) or target not in node.variants:
+                        continue
+                    target_checks += 1
+                    requirement = gpu_targets.get(feature)
+                    if requirement is None:
+                        errors.append(f"{group}: {node.name} needs a conditional {target} stack requirement")
+                    elif not node.satisfies(requirement):
+                        errors.append(f"{group}: {node.name} has {node.variants[target]}, expected {requirement}")
                 if node.name == "cuda":
                     if selected_cuda is None:
                         errors.append(f"{group}: CUDA consumer requires a stack with one pinned toolkit")
@@ -84,6 +103,8 @@ def main():
                             errors.append(f"{group}: {node} violates runtime requirement {requirement}")
             selected = ", ".join(f"{v}={s}" for v, s in providers.items())
             print(f"Stack {group}: {len(roots)} roots, {bindings} checked bindings; {selected}")
+            print(f"  GPU targets: {target_checks} checked packages; "
+                  + (", ".join(f"+{feature}: {target}" for feature, target in gpu_targets.items()) or "none"))
             print(f"  Externals without recorded language/MPI bindings: {', '.join(sorted(unknown)) or 'none'}")
     if not root_count:
         errors.append("No concrete roots found; concretize the environment before checking it.")

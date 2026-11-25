@@ -9,14 +9,14 @@
 rocmcc_6_4_3_hip:
   variables:
     RADIUSS_SPACK_STACK: "rocm-6.4.3-gcc-13.3.1-cray-mpich-9.0.1"
-    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a ${PROJECT_TIOGA_DEPS}"
+    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm ${PROJECT_TIOGA_DEPS}"
   extends: .job_on_tioga
 
 # The selected stack fixes language providers throughout the dependency graph.
 rocmcc_7_2_1_hip:
   variables:
     RADIUSS_SPACK_STACK: "rocm-7.2.1-cray-mpich-9.1.0"
-    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a ${PROJECT_TIOGA_DEPS}"
+    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm ${PROJECT_TIOGA_DEPS}"
   extends: .job_on_tioga
 
 cce_21_0_0:

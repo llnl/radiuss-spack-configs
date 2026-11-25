@@ -3,6 +3,12 @@
 # MPI compatibility exception: prebuilt with gcc@=13.3.1.
 # Its compiler binding is deliberately omitted; the prefix retains provenance.
 packages:
+  all:
+    # GPU support is selected by roots; the stack supplies its hardware target.
+    # Package-specific require can bypass this fallback; CI audits the DAG.
+    require:
+    - spec: amdgpu_target=gfx906
+      when: '+rocm'
   c:
     require:
     - llvm-amdgpu@=6.4.3

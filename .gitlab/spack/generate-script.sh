@@ -22,6 +22,7 @@ spack ${MY_SPACK_DEBUG} config blame mirrors
 spack ${MY_SPACK_DEBUG} config blame upstreams
 spack ${MY_SPACK_DEBUG} config blame config
 spack ${MY_SPACK_DEBUG} concretize --fresh || spack ${MY_SPACK_DEBUG} concretize --fresh
+# Reject incoherent compiler/MPI or GPU-target selections before creating build jobs.
 spack ${MY_SPACK_DEBUG} python utilities/check-stack-coherence.py
 spack ${MY_SPACK_DEBUG} --color=always ci generate --check-index-only --artifacts-root "${CI_PROJECT_DIR}/jobs_scratch_dir" --output-file "${CI_PROJECT_DIR}/jobs_scratch_dir/pipeline.yml"
 cp -rL .gitlab/spack/envs/shared-ci/${LCSCHEDCLUSTER} ${CI_PROJECT_DIR}/jobs_scratch_dir/concrete_environment/${LCSCHEDCLUSTER}

@@ -60,16 +60,12 @@ spack:
   - cray: [$radiuss-projects]
     when: env.get("LCSCHEDCLUSTER", "") in ("tioga", "tuolumne")
 
-  - cuda-arch: []
-  - cuda-arch: ['+cuda cuda_arch=90']
+  - cuda-support: []
+  - cuda-support: ['+cuda']
     when: env.get("LCSCHEDCLUSTER", "") in ("dane", "matrix")
-  - amdgpu-arch: []
-  - amdgpu-arch: ['+rocm amdgpu_target=gfx906']
-    when: env.get("LCSCHEDCLUSTER", "") == "corona"
-  - amdgpu-arch: ['+rocm amdgpu_target=gfx90a']
-    when: env.get("LCSCHEDCLUSTER", "") == "tioga"
-  - amdgpu-arch: ['+rocm amdgpu_target=gfx942']
-    when: env.get("LCSCHEDCLUSTER", "") == "tuolumne"
+  - rocm-support: []
+  - rocm-support: ['+rocm']
+    when: env.get("LCSCHEDCLUSTER", "") in ("corona", "tioga", "tuolumne")
   #[--definitions]
 
   specs:
@@ -99,7 +95,7 @@ spack:
   - group: clang-18.1.8-gcc-13.3.1-mvapich2-2.3.7.gcc_13-cuda-12.6.0
     matrix:
     - [$radiuss-projects]
-    - [$cuda-arch]
+    - [$cuda-support]
     override:
       include:
       - path: $env/$LCSCHEDCLUSTER/stacks/clang-18.1.8-gcc-13.3.1-mvapich2-2.3.7.gcc_13-cuda-12.6.0.yaml
@@ -109,7 +105,7 @@ spack:
   - group: rocm-6.4.3-gcc-13.3.1-mvapich2-2.3.7.gcc_13
     matrix:
     - [$corona]
-    - [$amdgpu-arch]
+    - [$rocm-support]
     override:
       include:
       - path: $env/$LCSCHEDCLUSTER/stacks/rocm-6.4.3-gcc-13.3.1-mvapich2-2.3.7.gcc_13.yaml
@@ -118,7 +114,7 @@ spack:
   - group: rocm-6.4.3-gcc-13.3.1-cray-mpich-9.0.1
     matrix:
     - [$cray]
-    - [$amdgpu-arch]
+    - [$rocm-support]
     override:
       include:
       - path: $env/$LCSCHEDCLUSTER/stacks/rocm-6.4.3-gcc-13.3.1-cray-mpich-9.0.1.yaml
@@ -127,7 +123,7 @@ spack:
   - group: rocm-7.2.1-cray-mpich-9.1.0
     matrix:
     - [$cray]
-    - [$amdgpu-arch]
+    - [$rocm-support]
     # raja-perf@2025.03 requests C++14; rocprim 7.2.1 requires C++17.
     exclude: [raja-perf]
     override:

@@ -1,5 +1,11 @@
 # Complete compiler stack; shared packages.yaml retains generic externals.
 packages:
+  all:
+    # GPU support is selected by roots; the stack supplies its hardware target.
+    # Package-specific require can bypass this fallback; CI audits the DAG.
+    require:
+    - spec: amdgpu_target=gfx942
+      when: '+rocm'
   c:
     require:
     - llvm-amdgpu@=7.2.1
