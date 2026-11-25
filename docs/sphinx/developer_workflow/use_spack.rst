@@ -93,8 +93,18 @@ Uberenv selects configuration files for the platform and machine, using LC's
 ``SYS_TYPE`` as part of its detection. Check the paths printed by Uberenv.
 
 RADIUSS Spack Configs provides ``spack.yaml``, ``config.yaml``, and
-``packages.yaml`` files for supported platforms and machines. Compiler
-externals and named toolchains are defined in ``packages.yaml``. See
+``packages.yaml`` files for supported platforms and machines. On TOSS/Cray,
+select a complete compiler stack before running Uberenv, for example:
+
+.. code-block:: bash
+
+   export RADIUSS_SPACK_STACK=rocm-6.4.3-gcc-13
+
+The ``stacks/<name>.yaml`` file owns language/MPI requirements and compiler,
+runtime and accelerator externals. Keep project variants and dependencies in
+``SPEC``; compiler selection comes from the stack. Shared CI jobs set this
+variable, while custom jobs must set it explicitly. Other platforms retain their
+existing compiler configuration. See
 :doc:`../maintainer_guide/index` for maintenance and :doc:`../reference/index`
 for file responsibilities.
 

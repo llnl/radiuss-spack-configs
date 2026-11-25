@@ -99,4 +99,3 @@ packages:
     externals:
     - spec: rocprofiler-sdk@6.4.3%llvm-amdgpu@6.4.3
       prefix: /opt/rocm-6.4.3
-

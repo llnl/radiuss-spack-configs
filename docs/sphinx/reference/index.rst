@@ -62,12 +62,14 @@ File responsibilities
    * - Platform/machine ``spack.yaml``
      - Environment settings and configuration includes
    * - Platform/machine ``packages.yaml``
-     - Externals, compiler executables, package requirements, providers,
-       and named toolchains
+     - Generic externals, machine targets and provider safety requirements on TOSS/Cray;
+       existing compiler configuration on other platforms
+   * - TOSS/Cray ``stacks/<name>.yaml``
+     - Complete language/MPI selection, compiler flags, runtimes and stack-specific externals
    * - ``config.yaml`` and ``modules.yaml``
      - Spack storage/general settings and module generation settings
    * - ``gitlab/radiuss-jobs/<machine>.yml``
-     - Shared consumer jobs and ``SPEC`` variable hooks
+     - Shared consumer jobs, ``RADIUSS_SPACK_STACK`` selection and ``SPEC`` variable hooks
    * - ``.gitlab/spack/envs/<environment>/spack.yaml``
      - Repository validation specs and ``spack.repos.builtin.commit`` recipe pin
    * - ``.gitlab/spack/envs/<environment>/pipeline.yml``
