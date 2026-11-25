@@ -1,0 +1,96 @@
+# Complete compiler stack; shared packages.yaml retains generic externals.
+# Spack declares ROCm Fortran only from version 7; use the selected GCC.
+# MPI compatibility exception: prebuilt with gcc@=13.3.1.
+# Its compiler binding is deliberately omitted; the prefix retains provenance.
+packages:
+  c:
+    require:
+    - llvm-amdgpu@=6.0.2
+  cxx:
+    require:
+    - llvm-amdgpu@=6.0.2
+  fortran:
+    require:
+    - gcc@=13.3.1
+  llvm-amdgpu:
+    buildable: false
+    externals:
+    - spec: llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2
+      extra_attributes:
+        compilers:
+          c: /opt/rocm-6.0.2/llvm/bin/amdclang
+          cxx: /opt/rocm-6.0.2/llvm/bin/amdclang++
+        flags: {}
+        environment: {}
+        extra_rpaths: [/opt/rocm-6.0.2/lib, /opt/rocm-6.0.2/llvm/lib]
+  gcc:
+    buildable: false
+    externals:
+    - spec: gcc@13.3.1 languages='c,c++,fortran'
+      prefix: /usr/tce/packages/gcc/gcc-13.3.1
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/gcc/gcc-13.3.1/bin/gcc
+          cxx: /usr/tce/packages/gcc/gcc-13.3.1/bin/g++
+          fortran: /usr/tce/packages/gcc/gcc-13.3.1/bin/gfortran
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+  gcc-runtime:
+    require:
+    - '@=13.3.1 %gcc@=13.3.1'
+  mpi:
+    require:
+    - mvapich2@=2.3.7.gcc_13
+  mvapich2:
+    buildable: false
+    externals:
+    - spec: mvapich2@2.3.7.gcc_13 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32 file_systems=lustre,nfs,ufs process_managers=slurm
+      prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-gcc-13.3.1
+
+  # System packages (use dnf)
+  hip:
+    require:
+    - '@=6.0.2'
+    buildable: false
+    externals:
+    - spec: hip@6.0.2%llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2
+  hipsparse:
+    require:
+    - '@=6.0.2'
+    buildable: false
+    externals:
+    - spec: hipsparse@6.0.2%llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2
+  hsa-rocr-dev:
+    require:
+    - '@=6.0.2'
+    buildable: false
+    externals:
+    - spec: hsa-rocr-dev@6.0.2%llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2
+  rocminfo:
+    require:
+    - '@=6.0.2'
+    buildable: false
+    externals:
+    - spec: rocminfo@6.0.2%llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2
+  rocm-device-libs:
+    require:
+    - '@=6.0.2'
+    buildable: false
+    externals:
+    - spec: rocm-device-libs@6.0.2%llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2/
+  rocprim:
+    require:
+    - '@=6.0.2'
+    buildable: false
+    externals:
+    - spec: rocprim@6.0.2%llvm-amdgpu@6.0.2
+      prefix: /opt/rocm-6.0.2/
+  rocprofiler-sdk:
+    buildable: false

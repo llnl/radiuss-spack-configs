@@ -1,0 +1,40 @@
+# Complete compiler stack; shared packages.yaml retains generic externals.
+packages:
+  c:
+    require:
+    - cce@=18.0.1
+  cxx:
+    require:
+    - cce@=18.0.1
+  fortran:
+    require:
+    - cce@=18.0.1
+  cce:
+    buildable: false
+    externals:
+    - spec: cce@18.0.1
+      prefix: /usr/tce/packages/cce-tce/cce-18.0.1
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/cce-tce/cce-18.0.1/bin/craycc
+          cxx: /usr/tce/packages/cce-tce/cce-18.0.1/bin/crayCC
+          fortran: /usr/tce/packages/cce-tce/cce-18.0.1/bin/crayftn
+        flags: {}
+        environment: {}
+        extra_rpaths: [/opt/cray/pe/mpich/9.0.1/gtl/lib]
+  mpi:
+    require:
+    - cray-mpich@=9.0.1
+  cray-mpich:
+    buildable: false
+    externals:
+    - spec: cray-mpich@9.0.1%cce@18.0.1
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-cce-18.0.1-magic
+  cuda:
+    version: [12.2.0, 11.8.0]
+    buildable: false
+    externals:
+    - spec: cuda@12.2.0
+      prefix: /usr/tce/packages/cuda/cuda-12.2.0
+    - spec: cuda@11.8.0
+      prefix: /usr/tce/packages/cuda/cuda-11.8.0

@@ -1,3 +1,3 @@
 concretizer:
-  # Allow accepted prebuilt MPI compiler exceptions; constrain other link/run nodes.
-  compiler_mixing: [mvapich2]
+  # Each selected stack supplies the language and MPI providers throughout its DAG.
+  compiler_mixing: false

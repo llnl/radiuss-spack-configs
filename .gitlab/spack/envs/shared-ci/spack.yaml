@@ -6,23 +6,22 @@
 # SPDX-License-Identifier: MIT
 ##############################################################################
 
+# Each group owns one complete compiler stack, unified independently.
 spack:
   #[general--]
   repos:
-    ## Use for temporary testing purpose, comment out before merging to main branch:
-    #llnl_radiuss: ./spack_repo/llnl_radiuss/
     builtin:
       git: https://github.com/spack/spack-packages.git
       commit: b5e5419fa6113981f1a0aebc18165589a975102b
   include:
   - $LCSCHEDCLUSTER/config.yaml
-  - $LCSCHEDCLUSTER/fortran.yaml
   - $LCSCHEDCLUSTER/packages.yaml
-  - $LCSCHEDCLUSTER/concretizer.yaml
   - ci.yaml
   concretizer:
     reuse: false
-    unify: false
+    # Unification applies independently within each compiler-stack group.
+    unify: true
+    compiler_mixing: false
   view: false
   #[--general]
 
@@ -42,62 +41,102 @@ spack:
   #[--config-override]
 
   #[definitions--]
-  # ROCm 6.4.3 provides C/C++ in Spack; use GCC for required Fortran.
   definitions:
-  - compilers:
-    - +rocm amdgpu_target=gfx906 %rocm-6-4-3-gcc-13 ^hip@6.4.3
-    when: env.get("LCSCHEDCLUSTER", "") == "corona"
-  - compilers:
-    - '%oneapi-2025-gcc-10'
-    # Select Clang C/C++ and GCC Fortran; the concretizer enforces consistency.
-    - '%clang-19-gcc-13'
-    - '%gcc@=13.3.1'
-    # matrix spec
-    - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
-    #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
-    when: env.get("LCSCHEDCLUSTER", "") == "dane"
-  - compilers:
-    - +cuda cuda_arch=90 %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers
-    #- +cuda cuda_arch=90 %clang-19-gcc-13 ^cuda@13.1.1+allow-unsupported-compilers
-    when: env.get("LCSCHEDCLUSTER", "") == "matrix"
-  # Select ROCm and CCE; the concretizer enforces compiler consistency.
-  - compilers:
-    - +rocm amdgpu_target=gfx90a %rocm-6-4-3-gcc-13 ^hip@6.4.3
-    - +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1
-    - '%cce@=20.0.0'
-    - '%cce@=21.0.0'
-    when: env.get("LCSCHEDCLUSTER", "") == "tioga"
-  - compilers:
-    - +rocm amdgpu_target=gfx942 %rocm-6-4-3-gcc-13 ^hip@6.4.3
-    - +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.1 ^hip@7.2.1
-    - '%cce@=20.0.0'
-    - '%cce@=21.0.0'
-    when: env.get("LCSCHEDCLUSTER", "") == "tuolumne"
-
-  - radiuss-projects:
-    - camp
-    - umpire
-    - raja
-    # CI roots explicitly bind Adiak's Fortran compiler for ROCm 6.4.3.
-    - "raja-perf ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
-    - chai
-    - care
-  # Preserve Caliper's feature defaults with compiler consistency constraints.
-  # Keep the MPI variant on the root only.
-  - radiuss-projects:
-    - "caliper +mpi"
+  - radiuss-projects: [camp, umpire, raja, raja-perf, chai, care]
+  # MPI is requested on the Caliper root; it is not propagated as a variant.
+  - radiuss-projects: ['caliper +mpi']
     when: env.get("LCSCHEDCLUSTER", "") in ("dane", "matrix")
-  - radiuss-projects:
-    - "caliper ^[when='%c=llvm-amdgpu@=6.4.3 ^adiak']adiak %fortran=gcc@=13.3.1"
+  - radiuss-projects: [caliper]
     when: env.get("LCSCHEDCLUSTER", "") not in ("dane", "matrix")
-  - dependencies: []
+
+  # Empty lists keep groups inactive outside their machine families.
+  - dane: []
+  - dane: [$radiuss-projects]
+    when: env.get("LCSCHEDCLUSTER", "") == "dane"
+  - amd: []
+  - amd: [$radiuss-projects]
+    when: env.get("LCSCHEDCLUSTER", "") in ("corona", "tioga", "tuolumne")
+  - cray: []
+  - cray: [$radiuss-projects]
+    when: env.get("LCSCHEDCLUSTER", "") in ("tioga", "tuolumne")
+
+  - cuda-arch: []
+  - cuda-arch: ['+cuda cuda_arch=90']
+    when: env.get("LCSCHEDCLUSTER", "") in ("dane", "matrix")
+  - amdgpu-arch: []
+  - amdgpu-arch: ['+rocm amdgpu_target=gfx906']
+    when: env.get("LCSCHEDCLUSTER", "") == "corona"
+  - amdgpu-arch: ['+rocm amdgpu_target=gfx90a']
+    when: env.get("LCSCHEDCLUSTER", "") == "tioga"
+  - amdgpu-arch: ['+rocm amdgpu_target=gfx942']
+    when: env.get("LCSCHEDCLUSTER", "") == "tuolumne"
   #[--definitions]
 
   specs:
-  - matrix:
+  # Dane CPU stacks.
+  - group: gcc-13.3.1
+    specs: [$dane]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/gcc-13.3.1.yaml
+        when: env.get("LCSCHEDCLUSTER", "") == "dane"
+
+  - group: clang-19-gcc-13
+    specs: [$dane]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/clang-19-gcc-13.yaml
+        when: env.get("LCSCHEDCLUSTER", "") == "dane"
+
+  - group: oneapi-2025-gcc-10
+    specs: [$dane]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/oneapi-2025-gcc-10.yaml
+        when: env.get("LCSCHEDCLUSTER", "") == "dane"
+
+  # Dane/Matrix CUDA coverage is retained, including Clang 18.
+  - group: cuda-12.6-clang-18-gcc-13
+    matrix:
     - [$radiuss-projects]
-    - [$compilers]
-    exclude:
-    # in spack package, raja-perf@2025.03 asks for c++14, but rocprim 7.2.1 requires c++17.
-    - 'raja-perf +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1'
-    - 'raja-perf +rocm amdgpu_target=gfx942 %llvm-amdgpu@=7.2.1 ^hip@7.2.1'
+    - [$cuda-arch]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/cuda-12.6-clang-18-gcc-13.yaml
+        when: env.get("LCSCHEDCLUSTER", "") in ("dane", "matrix")
+
+  # The machine-local stack file selects MVAPICH2 on Corona,
+  # or Cray MPICH on Tioga/Tuolumne, with explicit GCC Fortran.
+  - group: rocm-6.4.3-gcc-13
+    matrix:
+    - [$amd]
+    - [$amdgpu-arch]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/rocm-6.4.3-gcc-13.yaml
+        when: env.get("LCSCHEDCLUSTER", "") in ("corona", "tioga", "tuolumne")
+
+  - group: rocm-7.2.1
+    matrix:
+    - [$cray]
+    - [$amdgpu-arch]
+    # raja-perf@2025.03 requests C++14; rocprim 7.2.1 requires C++17.
+    exclude: [raja-perf]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/rocm-7.2.1.yaml
+        when: env.get("LCSCHEDCLUSTER", "") in ("tioga", "tuolumne")
+
+  - group: cce-20.0.0
+    specs: [$cray]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/cce-20.0.0.yaml
+        when: env.get("LCSCHEDCLUSTER", "") in ("tioga", "tuolumne")
+
+  - group: cce-21.0.0
+    specs: [$cray]
+    override:
+      include:
+      - path: $env/$LCSCHEDCLUSTER/stacks/cce-21.0.0.yaml
+        when: env.get("LCSCHEDCLUSTER", "") in ("tioga", "tuolumne")

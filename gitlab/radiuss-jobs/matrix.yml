@@ -7,7 +7,8 @@
 
 clang_18_1_8_gcc_13_cuda_12_6_0:
   variables:
-    SPEC: "${PROJECT_MATRIX_VARIANTS} %clang-18-gcc-13 ^cuda@12.6.0+allow-unsupported-compilers ${PROJECT_MATRIX_DEPS}"
+    RADIUSS_SPACK_STACK: "cuda-12.6-clang-18-gcc-13"
+    SPEC: "${PROJECT_MATRIX_VARIANTS} ${PROJECT_MATRIX_DEPS}"
   extends: .job_on_matrix
 
 #clang_19_1_3_gcc_13_cuda_13_1_1:

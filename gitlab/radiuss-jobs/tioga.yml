@@ -8,16 +8,19 @@
 # ROCm 6.4.3 provides C/C++; use GCC for required Fortran.
 rocmcc_6_4_3_hip:
   variables:
-    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a %rocm-6-4-3-gcc-13 ^hip@6.4.3 ${PROJECT_TIOGA_DEPS}"
+    RADIUSS_SPACK_STACK: "rocm-6.4.3-gcc-13"
+    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a ${PROJECT_TIOGA_DEPS}"
   extends: .job_on_tioga
 
-# The concretizer enforces compiler consistency across link/run dependencies.
+# The selected stack fixes language providers throughout the dependency graph.
 rocmcc_7_2_1_hip:
   variables:
-    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a %llvm-amdgpu@=7.2.1 ^hip@7.2.1 ${PROJECT_TIOGA_DEPS}"
+    RADIUSS_SPACK_STACK: "rocm-7.2.1"
+    SPEC: "${PROJECT_TIOGA_VARIANTS} +rocm amdgpu_target=gfx90a ${PROJECT_TIOGA_DEPS}"
   extends: .job_on_tioga
 
 cce_21_0_0:
   variables:
-    SPEC: "${PROJECT_TIOGA_VARIANTS} %cce@=21.0.0 ${PROJECT_TIOGA_DEPS}"
+    RADIUSS_SPACK_STACK: "cce-21.0.0"
+    SPEC: "${PROJECT_TIOGA_VARIANTS} ${PROJECT_TIOGA_DEPS}"
   extends: .job_on_tioga

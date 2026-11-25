@@ -1,10 +1,15 @@
 spack:
   include:
+    # Uberenv creates one environment per CI job. Select the complete stack.
+    # Relative paths are resolved against this source environment at env creation.
+    - path: stacks/$RADIUSS_SPACK_STACK.yaml
+      when: env.get("RADIUSS_SPACK_STACK", "") != "" and env.get("LCSCHEDCLUSTER", "") not in ("corona", "dane", "matrix", "tioga", "tuolumne")
+    - path: $LCSCHEDCLUSTER/stacks/$RADIUSS_SPACK_STACK.yaml
+      when: env.get("RADIUSS_SPACK_STACK", "") != "" and env.get("LCSCHEDCLUSTER", "") in ("corona", "dane", "matrix", "tioga", "tuolumne")
     - config.yaml
     - concretizer.yaml
-    - fortran.yaml
     - packages.yaml
   concretizer:
     reuse: false
-    unify: false
+    unify: true
   view: false
