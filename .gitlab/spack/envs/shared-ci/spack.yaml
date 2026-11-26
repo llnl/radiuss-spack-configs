@@ -19,8 +19,8 @@ spack:
   - ci.yaml
   concretizer:
     reuse: false
-    # Unification applies independently within each compiler-stack group.
-    unify: true
+    # Each root tests the stack independently, with its own dependency choices.
+    unify: false
     compiler_mixing: false
   view: false
   #[--general]

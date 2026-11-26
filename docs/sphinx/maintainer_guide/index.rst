@@ -37,11 +37,12 @@ Do not add a legacy ``compilers.yaml`` to this setup.
 
 RADIUSS Spack Configs CI loads one stack file per environment group using
 ``$env/$LCSCHEDCLUSTER/stacks/<name>.yaml`` in the group's ``override.include``.
-Each group unifies its roots independently. Project CI instead selects one stack
-for its whole environment using ``RADIUSS_SPACK_STACK=<name>`` before Uberenv
-creates the environment. The platform manifest copies the selected include into
-the new environment. An unknown stack fails while loading its include. Without
-a stack selection, these platform files supply only generic settings.
+Each group applies its stack to independently concretized roots. Project CI
+selects one stack for its whole environment using ``RADIUSS_SPACK_STACK=<name>``
+before Uberenv creates the environment. The platform manifest copies the selected
+include into the new environment. An unknown stack fails while loading its
+include. Without a stack selection, these platform files supply only generic
+settings.
 
 The language requirements select compilers for every consumer, including build
 tools and dependencies whose root does not use Fortran or MPI. They do not
