@@ -2,11 +2,6 @@ packages:
   all:
     require:
     - 'target=zen'
-    # Toolchains select the MPI external; this requirement alone does not
-    # ensure compiler coherence but acts as extra safety net since no other MPI
-    # provider is currently needed.
-    - spec: ^mvapich2
-      when: '^mpi'
     providers:
       blas: [openblas]
       lapack: [netlib-lapack]

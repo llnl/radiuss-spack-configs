@@ -47,6 +47,11 @@ settings.
 The language requirements select compilers for every consumer, including build
 tools and dependencies whose root does not use Fortran or MPI. They do not
 activate root variants. Keep root-only MPI coverage in project/root specs.
+
+Stacks require the MPI provider and version through the ``mpi`` virtual; the
+DAG audit checks every recorded MPI edge against that selection. Shared
+``providers: mpi`` lists supply preferences. No MPI dependency requirement in
+``all.require`` is needed, including when only a dependency uses MPI.
 Retain ``compiler_mixing: false`` and ``reuse: false``; avoid recursive ``%%``
 preferences, which can supersede applicable variant defaults for generic
 externals with absent compiler metadata.

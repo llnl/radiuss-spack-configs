@@ -2,8 +2,6 @@ packages:
   all:
     require:
     - 'target=sapphirerapids'
-    - spec: ^mvapich2
-      when: '^mpi'
     providers:
       blas: [openblas]
       lapack: [netlib-lapack]

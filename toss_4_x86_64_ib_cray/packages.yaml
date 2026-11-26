@@ -1,9 +1,8 @@
 packages:
   all:
     target: [zen2]
-    require:
-    - spec: ^cray-mpich
-      when: '^mpi'
+    # Stacks require their MPI provider/version through the mpi virtual.
+    # The DAG audit checks every recorded MPI edge against that selection.
     providers:
       blas: [netlib-lapack]
       lapack: [netlib-lapack]

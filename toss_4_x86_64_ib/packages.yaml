@@ -3,14 +3,8 @@ packages:
     # This defaults us to machine specific flags of ivybridge which allows
     # us to run on broadwell, cascadelake and sapphirerapids as well
     target: [ivybridge]
-    # Retain MVAPICH2 as an extra provider safety net for reliable stack coherence.
-    # Stacks select the MPI external; this requirement alone does not ensure
-    # compiler coherence. No other MPI provider is currently needed.
-    # This could be replaced by checking that all MPI dependencies in the
-    # concretized DAG match the external selected by the stack.
-    require:
-    - spec: ^mvapich2
-      when: '^mpi'
+    # Stacks require their MPI provider/version through the mpi virtual.
+    # The DAG audit checks every recorded MPI edge against that selection.
     providers:
       blas: [openblas]
       lapack: [netlib-lapack]
