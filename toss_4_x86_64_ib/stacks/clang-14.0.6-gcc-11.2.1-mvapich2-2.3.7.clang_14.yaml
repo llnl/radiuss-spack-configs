@@ -1,0 +1,49 @@
+# Complete compiler stack; shared packages.yaml retains generic externals.
+packages:
+  c:
+    require:
+    - llvm@=14.0.6
+  cxx:
+    require:
+    - llvm@=14.0.6
+  fortran:
+    require:
+    - gcc@=11.2.1
+  llvm:
+    buildable: false
+    externals:
+    - spec: llvm@14.0.6+clang~flang~lld~lldb
+      prefix: /usr/tce/packages/clang/clang-14.0.6
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/clang/clang-14.0.6/bin/clang
+          cxx: /usr/tce/packages/clang/clang-14.0.6/bin/clang++
+        flags:
+          cflags: --gcc-toolchain=/usr/tce/packages/gcc/gcc-11.2.1
+          cxxflags: --gcc-toolchain=/usr/tce/packages/gcc/gcc-11.2.1
+        environment: {}
+        extra_rpaths: []
+  gcc:
+    buildable: false
+    externals:
+    - spec: gcc@11.2.1 languages='c,c++,fortran'
+      prefix: /usr/tce/packages/gcc/gcc-11.2.1
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/gcc/gcc-11.2.1/bin/gcc
+          cxx: /usr/tce/packages/gcc/gcc-11.2.1/bin/g++
+          fortran: /usr/tce/packages/gcc/gcc-11.2.1/bin/gfortran
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+  gcc-runtime:
+    require:
+    - '@=11.2.1 %gcc@=11.2.1'
+  mpi:
+    require:
+    - mvapich2@=2.3.7.clang_14
+  mvapich2:
+    buildable: false
+    externals:
+    - spec: mvapich2@2.3.7.clang_14 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32 file_systems=lustre,nfs,ufs process_managers=slurm %llvm@=14.0.6
+      prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-clang-14.0.6

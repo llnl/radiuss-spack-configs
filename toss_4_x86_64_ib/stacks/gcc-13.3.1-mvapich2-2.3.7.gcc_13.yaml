@@ -1,0 +1,37 @@
+# Complete compiler stack; shared packages.yaml retains generic externals.
+packages:
+  c:
+    require:
+    - gcc@=13.3.1
+  cxx:
+    require:
+    - gcc@=13.3.1
+  fortran:
+    require:
+    - gcc@=13.3.1
+  gcc:
+    buildable: false
+    externals:
+    - spec: gcc@13.3.1 languages='c,c++,fortran'
+      prefix: /usr/tce/packages/gcc/gcc-13.3.1
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/gcc/gcc-13.3.1/bin/gcc
+          cxx: /usr/tce/packages/gcc/gcc-13.3.1/bin/g++
+          fortran: /usr/tce/packages/gcc/gcc-13.3.1/bin/gfortran
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+  gcc-runtime:
+    require:
+    - '@=13.3.1 %gcc@=13.3.1'
+  mpi:
+    require:
+    - mvapich2@=2.3.7.gcc_13
+  mvapich2:
+    buildable: false
+    externals:
+    - spec: mvapich2@2.3.7.gcc_13 ~cuda~debug~regcache~wrapperrpath ch3_rank_bits=32 file_systems=lustre,nfs,ufs process_managers=slurm %gcc@=13.3.1
+      prefix: /usr/tce/packages/mvapich2/mvapich2-2.3.7-gcc-13.3.1
+
+  # System packages (use dnf)

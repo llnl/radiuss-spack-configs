@@ -72,6 +72,14 @@ allocate resources, generate a Spack pipeline, and trigger its build jobs.
 ``.gitlab/spack/ci.yaml`` configures generation. General scripts live in
 ``.gitlab/scripts``; Spack-specific scripts live in ``.gitlab/spack``.
 
+Each machine's generation job runs ``utilities/check-stack-coherence.py``
+after fresh concretization and before ``spack ci generate``. It validates
+language/MPI bindings, compiler pairing flags, runtime pins, the selected CUDA
+toolkit and conditional GPU targets in each active group. A failed audit stops
+generation before build jobs are created. Its results appear in the generation
+job log; it checks the concrete specifications, not binary ABI compatibility.
+Consuming project CI does not invoke this audit automatically.
+
 When adding an environment, review its configuration links, generation scripts,
 and artifacts as well as its YAML. The current generation script still copies
 some configuration inputs from ``shared-ci``; do not assume a new environment

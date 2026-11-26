@@ -1,0 +1,161 @@
+# Complete compiler stack; shared packages.yaml retains generic externals.
+# Spack declares ROCm Fortran only from version 7; use the selected GCC.
+packages:
+  all:
+    # GPU support is selected by roots; the stack supplies its hardware target.
+    # Package-specific require can bypass this fallback; CI audits the DAG.
+    require:
+    - spec: amdgpu_target=gfx90a
+      when: '+rocm'
+  c:
+    require:
+    - llvm-amdgpu@=6.2.4
+  cxx:
+    require:
+    - llvm-amdgpu@=6.2.4
+  fortran:
+    require:
+    - gcc@=13.3.1
+  llvm-amdgpu:
+    buildable: false
+    externals:
+    - spec: llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+      extra_attributes:
+        compilers:
+          c: /opt/rocm-6.2.4/llvm/bin/amdclang
+          cxx: /opt/rocm-6.2.4/llvm/bin/amdclang++
+        flags: {}
+        environment: {}
+        extra_rpaths: [/opt/rocm-6.2.4/lib, /opt/rocm-6.2.4/llvm/lib, /opt/cray/pe/mpich/9.0.1/gtl/lib]
+  gcc:
+    buildable: false
+    externals:
+    - spec: gcc@13.3.1 languages='c,c++,fortran'
+      prefix: /usr/tce/packages/gcc/gcc-13.3.1-magic
+      extra_attributes:
+        compilers:
+          c: /usr/tce/packages/gcc/gcc-13.3.1-magic/bin/gcc
+          cxx: /usr/tce/packages/gcc/gcc-13.3.1-magic/bin/g++
+          fortran: /usr/tce/packages/gcc/gcc-13.3.1-magic/bin/gfortran
+        flags: {}
+        environment: {}
+        extra_rpaths: []
+  gcc-runtime:
+    require:
+    - '@=13.3.1 %gcc@=13.3.1'
+  mpi:
+    require:
+    - cray-mpich@=9.0.1
+  cray-mpich:
+    buildable: false
+    externals:
+    - spec: cray-mpich@9.0.1%llvm-amdgpu@6.2.4
+      prefix: /usr/tce/packages/cray-mpich/cray-mpich-9.0.1-rocmcc-6.2.4-magic
+  hip:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: hip@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  hipsparse:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: hipsparse@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  hipblas:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: hipblas@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  hipsolver:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: hipsolver@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  hsa-rocr-dev:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: hsa-rocr-dev@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocminfo:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocminfo@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocm-device-libs:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocm-device-libs@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocprim:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocprim@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocprofiler-sdk:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocprofiler-sdk@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocthrust:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocthrust@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocsparse:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocsparse@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocrand:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocrand@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocblas:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocblas@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocsolver:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocsolver@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  rocm-core:
+    require:
+    - '@=6.2.4'
+    buildable: false
+    externals:
+    - spec: rocm-core@6.2.4%llvm-amdgpu@6.2.4
+      prefix: /opt/rocm-6.2.4
+  hipblas-common:
+    buildable: false
